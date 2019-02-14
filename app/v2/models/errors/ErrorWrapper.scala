@@ -18,7 +18,7 @@ package v2.models.errors
 
 import play.api.libs.json.{JsValue, Json, Writes}
 
-case class ErrorWrapper(error: MtdError, errors: Option[Seq[MtdError]])
+case class ErrorWrapper(error: Error, errors: Option[Seq[Error]])
 
 object ErrorWrapper {
   implicit val writes: Writes[ErrorWrapper] = new Writes[ErrorWrapper] {
