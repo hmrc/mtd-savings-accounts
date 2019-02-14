@@ -16,25 +16,18 @@
 
 package v2.models.domain
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
 import play.api.libs.json.Writes._
+import play.api.libs.json._
 
-case class SavingsAccounts(id: Option[String], accountName: Option[String])
+case class SavingsAccounts(accountName: String)
 
 object SavingsAccounts {
   implicit val reads: Reads[SavingsAccounts] = Json.reads[SavingsAccounts]
 
-  implicit val desWrites = new Writes[SavingsAccounts] {
-    override def writes(s: SavingsAccounts): JsObject = {
-      val obj = if(s.accountName.isDefined) Json.obj("incomeSourceName" -> s.accountName.get) else Json.obj()
-      Json.obj("incomeSourceType" -> "interest-from-uk-banks") ++ obj
-    }
+  implicit val writes: Writes[SavingsAccounts] = new Writes[SavingsAccounts] {
+    override def writes(o: SavingsAccounts): JsValue = Json.obj(
+      "incomeSourceType" -> "interest-from-uk-banks",
+      "incomeSourceName" -> o.accountName
+    )
   }
-
-  val desReads: Reads[SavingsAccounts] = (
-    (__ \ "incomeSourceId").readNullable[String] and
-      (__ \ "incomeSourceName").readNullable[String]
-    )(SavingsAccounts.apply _)
-
 }

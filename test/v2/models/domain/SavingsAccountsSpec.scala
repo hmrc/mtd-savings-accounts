@@ -16,23 +16,22 @@
 
 package v2.models.domain
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 import support.UnitSpec
 import v2.models.utils.JsonErrorValidators
 
-class SavingsAccountsSpec extends UnitSpec with JsonErrorValidators{
+class SavingsAccountsSpec extends UnitSpec with JsonErrorValidators {
 
-  val mtdFormatJson = Json.parse(
+  val mtdFormatJson: JsValue = Json.parse(
     """
       |{
-      |    "id": "SAVKB2UVwUTBQGJ",
       |    "accountName": "Main account name"
       |}
     """.stripMargin)
 
-  "reads" should {
-    "return a valid SavingsAccounts object" when {
-      "passed valid JSON" in {
+  "reads" when {
+    "passed valid JSON" should {
+      "return a valid SavingsAccounts object" in {
         val json =
           """
             |{
@@ -40,39 +39,24 @@ class SavingsAccountsSpec extends UnitSpec with JsonErrorValidators{
             |}
           """.stripMargin
 
-        val model = SavingsAccounts(id = None, accountName = Some("Main account name"))
+        val model = SavingsAccounts(accountName = "Main account name")
 
         Json.parse(json).as[SavingsAccounts] shouldBe model
       }
     }
 
-    "return empty savings object" when {
-      "passed an empty SavingsAccounts object" in {
-        val json =
-          """
-            |{}
-          """.stripMargin
-
-        Json.parse(json).as[SavingsAccounts] shouldBe SavingsAccounts(None, None)
-      }
-    }
+    testMandatoryProperty[SavingsAccounts](mtdFormatJson)("/accountName")
 
     testPropertyType[SavingsAccounts](mtdFormatJson)(
       path = "/accountName",
       replacement = 12344.toJson,
       expectedError = JsonError.STRING_FORMAT_EXCEPTION
     )
-
-    testPropertyType[SavingsAccounts](mtdFormatJson)(
-      path = "/id",
-      replacement = 123.toJson,
-      expectedError = JsonError.STRING_FORMAT_EXCEPTION
-    )
   }
 
-  "desWrites" should {
-    "return valid des formatted JSON" when {
-      "passed a valid MTD SavingsAccounts object" in {
+  "writes" when {
+    "passed a valid MTD SavingsAccounts object" should {
+      "return valid des formatted JSON" in {
         val json =
           """
             |{
@@ -81,41 +65,9 @@ class SavingsAccountsSpec extends UnitSpec with JsonErrorValidators{
             |}
           """.stripMargin
 
-        val model = SavingsAccounts(None, accountName = Some("Main account name"))
+        val model = SavingsAccounts(accountName = "Main account name")
 
-        Json.parse(json) shouldBe SavingsAccounts.desWrites.writes(model)
-      }
-    }
-
-    "return JSON with only incomeSourceType" when {
-      "passed a MTD SavingsAccounts object with no accountName" in {
-        val json =
-          """
-            |{
-            |    "incomeSourceType": "interest-from-uk-banks"
-            |}
-          """.stripMargin
-
-        val model = SavingsAccounts(None, None)
-
-        SavingsAccounts.desWrites.writes(model) shouldBe Json.parse(json)
-      }
-    }
-  }
-
-  "desReads" should {
-    "return a valid MTD SavingsAccounts object" when {
-      "passed valid des JSON" in {
-        val json =
-          """
-            |{
-            |    "incomeSourceId": "SAVKB2UVwUTBQGJ"
-            |}
-          """.stripMargin
-
-        val model = SavingsAccounts(id = Some("SAVKB2UVwUTBQGJ"), None)
-
-        Json.parse(json).as[SavingsAccounts](SavingsAccounts.desReads) shouldBe model
+        Json.parse(json) shouldBe SavingsAccounts.writes.writes(model)
       }
     }
   }
