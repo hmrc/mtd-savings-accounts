@@ -20,7 +20,7 @@ import play.api.libs.json._
 import support.UnitSpec
 import v2.models.utils.JsonErrorValidators
 
-class SavingsAccountsSpec extends UnitSpec with JsonErrorValidators {
+class SavingsAccountSpec extends UnitSpec with JsonErrorValidators {
 
   val mtdFormatJson: JsValue = Json.parse(
     """
@@ -39,15 +39,15 @@ class SavingsAccountsSpec extends UnitSpec with JsonErrorValidators {
             |}
           """.stripMargin
 
-        val model = SavingsAccounts(accountName = "Main account name")
+        val model = SavingsAccount(accountName = "Main account name")
 
-        Json.parse(json).as[SavingsAccounts] shouldBe model
+        Json.parse(json).as[SavingsAccount] shouldBe model
       }
     }
 
-    testMandatoryProperty[SavingsAccounts](mtdFormatJson)("/accountName")
+    testMandatoryProperty[SavingsAccount](mtdFormatJson)("/accountName")
 
-    testPropertyType[SavingsAccounts](mtdFormatJson)(
+    testPropertyType[SavingsAccount](mtdFormatJson)(
       path = "/accountName",
       replacement = 12344.toJson,
       expectedError = JsonError.STRING_FORMAT_EXCEPTION
@@ -65,9 +65,9 @@ class SavingsAccountsSpec extends UnitSpec with JsonErrorValidators {
             |}
           """.stripMargin
 
-        val model = SavingsAccounts(accountName = "Main account name")
+        val model = SavingsAccount(accountName = "Main account name")
 
-        Json.parse(json) shouldBe SavingsAccounts.writes.writes(model)
+        Json.parse(json) shouldBe SavingsAccount.writes.writes(model)
       }
     }
   }

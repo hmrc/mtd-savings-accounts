@@ -19,13 +19,13 @@ package v2.models.domain
 import play.api.libs.json.Writes._
 import play.api.libs.json._
 
-case class SavingsAccounts(accountName: String)
+case class SavingsAccount(accountName: String)
 
-object SavingsAccounts {
-  implicit val reads: Reads[SavingsAccounts] = Json.reads[SavingsAccounts]
+object SavingsAccount {
+  implicit val reads: Reads[SavingsAccount] = Json.reads[SavingsAccount]
 
-  implicit val writes: Writes[SavingsAccounts] = new Writes[SavingsAccounts] {
-    override def writes(o: SavingsAccounts): JsValue = Json.obj(
+  implicit val writes: Writes[SavingsAccount] = new Writes[SavingsAccount] {
+    override def writes(o: SavingsAccount): JsValue = Json.obj(
       "incomeSourceType" -> "interest-from-uk-banks",
       "incomeSourceName" -> o.accountName
     )
