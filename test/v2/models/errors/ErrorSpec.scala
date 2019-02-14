@@ -14,14 +14,27 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.errors
 
-import v2.models.auth.UserDetails
-import v2.models.errors.Error
+import play.api.libs.json.Json
+import support.UnitSpec
 
-package object outcomes {
+class ErrorSpec extends UnitSpec{
 
-  type AuthOutcome = Either[Error, UserDetails]
-  type MtdIdLookupOutcome = Either[Error, String]
+  "reads" should {
+    val error = Error("FORMAT_NINO", "The provided NINO is invalid")
 
+    val json = Json.parse(
+      """
+        |{
+        |   "code": "FORMAT_NINO",
+        |   "reason": "The provided NINO is invalid"
+        |}
+      """.stripMargin
+    )
+
+    "generate the correct JSON" in {
+      json.as[Error] shouldBe error
+    }
+  }
 }

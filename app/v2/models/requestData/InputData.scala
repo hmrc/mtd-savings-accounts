@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.requestData
 
-import v2.models.auth.UserDetails
-import v2.models.errors.Error
-
-package object outcomes {
-
-  type AuthOutcome = Either[Error, UserDetails]
-  type MtdIdLookupOutcome = Either[Error, String]
-
-}
+trait InputData

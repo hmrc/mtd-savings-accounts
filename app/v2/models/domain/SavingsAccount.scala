@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.domain
 
-import v2.models.auth.UserDetails
-import v2.models.errors.Error
+import play.api.libs.json.Writes._
+import play.api.libs.json._
 
-package object outcomes {
+case class SavingsAccount(accountName: String)
 
-  type AuthOutcome = Either[Error, UserDetails]
-  type MtdIdLookupOutcome = Either[Error, String]
+object SavingsAccount {
+  implicit val reads: Reads[SavingsAccount] = Json.reads[SavingsAccount]
 
+  implicit val writes: Writes[SavingsAccount] = new Writes[SavingsAccount] {
+    override def writes(o: SavingsAccount): JsValue = Json.obj(
+      "incomeSourceType" -> "interest-from-uk-banks",
+      "incomeSourceName" -> o.accountName
+    )
+  }
 }
