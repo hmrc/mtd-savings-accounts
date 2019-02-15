@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.controllers.requestParsers.validators
 
-import play.api.libs.json.{JsValue, Json, Writes}
+import v2.models.errors.Error
+import v2.models.requestData.InputData
 
-case class ErrorWrapper(correlationId: Option[String], error: Error, errors: Option[Seq[Error]])
+trait Validator[A <: InputData] {
 
-object ErrorWrapper {
-  implicit val writes: Writes[ErrorWrapper] = new Writes[ErrorWrapper] {
-    override def writes(errorResponse: ErrorWrapper): JsValue = {
 
-      val json = Json.obj(
-        "code" -> errorResponse.error.code,
-        "message" -> errorResponse.error.message
-      )
+  type ValidationLevel[T] = T => List[Error]
 
-      errorResponse.errors match {
-        case Some(errors) if errors.nonEmpty => json + ("errors" -> Json.toJson(errors))
-        case _ => json
+  def validate(data: A): List[Error]
+
+  def run(validationSet: List[A => List[List[Error]]], data: A): List[Error] = {
+
+    validationSet match {
+      case Nil => List()
+      case thisLevel :: remainingLevels => thisLevel(data).flatten match {
+        case x if x.isEmpty => run(remainingLevels, data)
+        case x if x.nonEmpty => x
       }
-
     }
   }
 }

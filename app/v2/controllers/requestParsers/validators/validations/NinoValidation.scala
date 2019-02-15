@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators.validations
 
 import uk.gov.hmrc.domain.Nino
-import v2.models.domain.SavingsAccount
+import v2.models.errors.{Error, NinoFormatError}
 
-case class CreateSavingsAccountsRequestData(nino: Nino, savingsAccounts: SavingsAccount)
+object NinoValidation {
+
+  def validate(nino: String): List[Error] = {
+    if (!Nino.isValid(nino)) List(NinoFormatError) else NoValidationErrors
+  }
+
+}

@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.controllers.requestParsers.validators.validations
 
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json._
+import play.api.mvc.AnyContentAsJson
+import v2.models.errors.{BadRequestError, Error}
 
-case class ErrorWrapper(correlationId: Option[String], error: Error, errors: Option[Seq[Error]])
+object JsonFormatValidation {
 
-object ErrorWrapper {
-  implicit val writes: Writes[ErrorWrapper] = new Writes[ErrorWrapper] {
-    override def writes(errorResponse: ErrorWrapper): JsValue = {
+  def validate[A](data: AnyContentAsJson)(implicit reads: Reads[A]): List[Error] = {
 
-      val json = Json.obj(
-        "code" -> errorResponse.error.code,
-        "message" -> errorResponse.error.message
-      )
-
-      errorResponse.errors match {
-        case Some(errors) if errors.nonEmpty => json + ("errors" -> Json.toJson(errors))
-        case _ => json
-      }
-
+    data.json.validate[A] match {
+      case JsSuccess(_, _) => NoValidationErrors
+      case _ => List(BadRequestError)
     }
+
   }
+
 }
