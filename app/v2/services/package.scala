@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package v2.mocks
+package v2
 
-import v2.config.AppConfig
-import org.scalamock.handlers.CallHandler
-import org.scalamock.scalatest.MockFactory
+import v2.models.auth.UserDetails
+import v2.models.domain.SavingsAccount
+import v2.models.errors.{Error, ErrorWrapper}
+import v2.models.outcomes.DesResponse
 
-trait MockAppConfig extends MockFactory {
+package object services {
 
-  val mockAppConfig: AppConfig = mock[AppConfig]
+  type AuthOutcome = Either[Error, UserDetails]
 
-  object MockedAppConfig {
-    def desBaseUrl: CallHandler[String] = (mockAppConfig.desBaseUrl _: () => String).expects()
-    def desToken: CallHandler[String] = (mockAppConfig.desToken _).expects()
-    def desEnvironment: CallHandler[String] = (mockAppConfig.desEnv _).expects()
-    def mtdIdBaseUrl: CallHandler[String] = (mockAppConfig.mtdIdBaseUrl _: () => String).expects()
-  }
+  type CreateSavingsAccountOutcome = Either[ErrorWrapper, DesResponse[String]]
+
 }

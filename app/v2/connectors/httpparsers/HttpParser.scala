@@ -17,8 +17,9 @@
 package v2.connectors.httpparsers
 
 import play.api.Logger
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Reads}
+import play.api.libs.json._
 import uk.gov.hmrc.http.HttpResponse
+import v2.models.errors.{DesError, DownstreamError, Error, MultipleErrors, OutboundError, SingleError}
 
 import scala.util.{Success, Try}
 
@@ -42,6 +43,21 @@ trait HttpParser {
         Logger.warn(s"[KnownJsonResponse][validateJson] Unable to parse JSON: $error")
         None
     }
+  }
+
+  def retrieveCorrelationId(response: HttpResponse): String = response.header("CorrelationId").getOrElse("")
+
+  private val multipleErrorReads: Reads[Seq[Error]] = (__ \ "failures").read[Seq[Error]]
+
+  def parseErrors(response: HttpResponse): DesError = {
+    val singleError = response.validateJson[Error].map(SingleError)
+    lazy val multipleErrors = response.validateJson(multipleErrorReads).map(MultipleErrors)
+    lazy val unableToParseJsonError = {
+      Logger.warn(s"unable to parse errors from response: ${response.body}")
+      OutboundError(DownstreamError)
+    }
+
+    singleError orElse multipleErrors getOrElse unableToParseJsonError
   }
 
 }

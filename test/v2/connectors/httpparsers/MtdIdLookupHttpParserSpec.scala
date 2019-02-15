@@ -23,7 +23,7 @@ import support.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
 import v2.connectors.httpparsers.MtdIdLookupHttpParser.mtdIdLookupHttpReads
 import v2.models.errors.{DownstreamError, NinoFormatError}
-import v2.models.outcomes.MtdIdLookupOutcome
+import v2.connectors.MtdIdLookupOutcome
 
 class MtdIdLookupHttpParserSpec extends UnitSpec {
 

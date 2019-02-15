@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2
 
-import uk.gov.hmrc.domain.Nino
-import v2.models.domain.SavingsAccount
+import v2.models.errors.{DesError, Error}
+import v2.models.outcomes.DesResponse
 
-case class CreateSavingsAccountsRequestData(nino: Nino, savingsAccounts: SavingsAccount)
+package object connectors {
+
+  type MtdIdLookupOutcome = Either[Error, String]
+
+  type CreateSavingsAccountConnectorOutcome = Either[DesResponse[DesError], DesResponse[String]]
+
+
+}

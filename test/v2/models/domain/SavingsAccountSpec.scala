@@ -31,7 +31,7 @@ class SavingsAccountSpec extends UnitSpec with JsonErrorValidators {
 
   "reads" when {
     "passed valid JSON" should {
-      "return a valid SavingsAccounts object" in {
+      "return a valid SavingsAccount object" in {
         val json =
           """
             |{
@@ -55,7 +55,7 @@ class SavingsAccountSpec extends UnitSpec with JsonErrorValidators {
   }
 
   "writes" when {
-    "passed a valid MTD SavingsAccounts object" should {
+    "passed a valid MTD SavingsAccount object" should {
       "return valid des formatted JSON" in {
         val json =
           """
