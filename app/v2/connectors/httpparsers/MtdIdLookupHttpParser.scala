@@ -20,7 +20,7 @@ import play.api.http.Status.{FORBIDDEN, OK}
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.models.errors.{DownstreamError, NinoFormatError}
-import v2.models.outcomes.MtdIdLookupOutcome
+import v2.connectors.MtdIdLookupOutcome
 
 object MtdIdLookupHttpParser extends HttpParser {
 
