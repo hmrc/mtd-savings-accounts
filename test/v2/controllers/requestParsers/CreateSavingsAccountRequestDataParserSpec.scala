@@ -23,7 +23,7 @@ import uk.gov.hmrc.domain.Nino
 import v2.mocks.validators.MockCreateSavingsAccountValidator
 import v2.models.domain.SavingsAccount
 import v2.models.errors.{AccountNameDuplicateError, BadRequestError, ErrorWrapper, NinoFormatError}
-import v2.models.requestData.{CreateSavingsAccountRawData, CreateSavingsAccountRequest}
+import v2.models.requestData.CreateSavingsAccountRawData
 
 class CreateSavingsAccountRequestDataParserSpec extends UnitSpec {
 

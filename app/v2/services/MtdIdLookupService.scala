@@ -21,7 +21,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.MtdIdLookupConnector
 import v2.models.errors.NinoFormatError
-import v2.models.outcomes.MtdIdLookupOutcome
+import v2.connectors.MtdIdLookupOutcome
 
 import scala.concurrent.{ExecutionContext, Future}
 

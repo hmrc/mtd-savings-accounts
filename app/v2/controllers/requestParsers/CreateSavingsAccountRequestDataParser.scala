@@ -21,15 +21,15 @@ import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.CreateSavingsAccountValidator
 import v2.models.domain.SavingsAccount
 import v2.models.errors.{BadRequestError, ErrorWrapper}
-import v2.models.requestData.{CreateSavingsAccountRawData, CreateSavingsAccountRequest}
+import v2.models.requestData.{CreateSavingsAccountRawData, CreateSavingsAccountRequestData}
 
 class CreateSavingsAccountRequestDataParser @Inject()(validator: CreateSavingsAccountValidator) {
 
-  def parseRequest(data: CreateSavingsAccountRawData): Either[ErrorWrapper, CreateSavingsAccountRequest] = {
+  def parseRequest(data: CreateSavingsAccountRawData): Either[ErrorWrapper, CreateSavingsAccountRequestData] = {
     validator.validate(data) match {
       case List() =>
         //Validation passed.  Request data is ok to transform.
-        Right(CreateSavingsAccountRequest(Nino(data.nino), data.body.json.as[SavingsAccount]))
+        Right(CreateSavingsAccountRequestData(Nino(data.nino), data.body.json.as[SavingsAccount]))
       case err :: Nil => Left(ErrorWrapper(None, err, None))
       case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }

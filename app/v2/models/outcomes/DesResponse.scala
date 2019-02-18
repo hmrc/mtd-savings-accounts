@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.models.outcomes
 
-sealed trait DesError
-
-case class SingleError(error: Error) extends DesError
-case class MultipleErrors(errors: Seq[Error]) extends DesError
-case class OutboundError(error: Error) extends DesError
-case class BvrErrors(errors: Seq[Error]) extends DesError
-case class GenericError(error: Error) extends DesError
+case class DesResponse[+T](correlationId: String, responseData: T)
