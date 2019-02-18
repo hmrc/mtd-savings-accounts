@@ -23,7 +23,7 @@ import uk.gov.hmrc.domain.Nino
 import v2.mocks.validators.MockCreateSavingsAccountValidator
 import v2.models.domain.SavingsAccount
 import v2.models.errors.{AccountNameDuplicateError, BadRequestError, ErrorWrapper, NinoFormatError}
-import v2.models.requestData.CreateSavingsAccountRawData
+import v2.models.requestData.{CreateSavingsAccountRawData, CreateSavingsAccountRequestData}
 
 class CreateSavingsAccountRequestDataParserSpec extends UnitSpec {
 
@@ -53,7 +53,7 @@ class CreateSavingsAccountRequestDataParserSpec extends UnitSpec {
           CreateSavingsAccountRawData(validNino, validJsonBody)
 
         val createSavingsAccountRequest =
-          CreateSavingsAccountRequest(Nino(validNino), model)
+          CreateSavingsAccountRequestData(Nino(validNino), model)
 
         MockedCreateSavingsAccountValidator.validate(createSavingsAccountRequestData)
           .returns(List())
