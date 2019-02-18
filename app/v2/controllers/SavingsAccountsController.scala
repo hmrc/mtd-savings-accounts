@@ -17,17 +17,21 @@
 package v2.controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.Logger
+import play.api.libs.json.JsValue
+import play.api.mvc.{Action, ControllerComponents}
 import v2.services.{EnrolmentsAuthService, MtdIdLookupService}
 
-import scala.concurrent.Future
-
 @Singleton
-class SampleController @Inject()(val authService: EnrolmentsAuthService,
-                                 val lookupService: MtdIdLookupService,
-                                 cc: ControllerComponents) extends AuthorisedController(cc) {
+class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService,
+                                          val lookupService: MtdIdLookupService,
+                                          val cc: ControllerComponents
+                                         ) extends AuthorisedController(cc) {
 
-  def doSomething(nino: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
-    Future.successful(Ok(request.userDetails.mtdId))
+  val logger: Logger = Logger(this.getClass)
+
+  def create(nino: String): Action[JsValue] = authorisedAction(nino).async(parse.json) { implicit request =>
+    ???
   }
+
 }
