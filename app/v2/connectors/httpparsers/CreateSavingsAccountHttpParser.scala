@@ -45,7 +45,7 @@ object CreateSavingsAccountHttpParser extends HttpParser {
           logger.info("[CreateSavingsAccountHttpParser][read] - " +
             s"Success response received from DES with correlationId: $correlationId when calling $url")
           parseResponse(correlationId, response)
-        case BAD_REQUEST | FORBIDDEN => Left(DesResponse(correlationId, parseErrors(response)))
+        case BAD_REQUEST | FORBIDDEN | CONFLICT => Left(DesResponse(correlationId, parseErrors(response)))
         case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
         case _ => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
       }

@@ -54,7 +54,7 @@ class CreateSavingsAccountHttpParserSpec extends UnitSpec {
       }
     }
 
-    List(BAD_REQUEST, FORBIDDEN).foreach {
+    List(BAD_REQUEST, FORBIDDEN, CONFLICT).foreach {
       response =>
         s"the HTTP response is $response" should {
 
