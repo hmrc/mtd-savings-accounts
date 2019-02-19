@@ -17,7 +17,9 @@
 package v2.models.domain
 
 import play.api.libs.json._
+import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
+import v2.controllers.requestParsers.validators.validations.JsonFormatValidation
 import v2.models.utils.JsonErrorValidators
 
 class SavingsAccountSpec extends UnitSpec with JsonErrorValidators {
@@ -32,16 +34,10 @@ class SavingsAccountSpec extends UnitSpec with JsonErrorValidators {
   "reads" when {
     "passed valid JSON" should {
       "return a valid SavingsAccount object" in {
-        val json =
-          """
-            |{
-            |    "accountName": "Main account name"
-            |}
-          """.stripMargin
 
         val model = SavingsAccount(accountName = "Main account name")
 
-        Json.parse(json).as[SavingsAccount] shouldBe model
+        mtdFormatJson.as[SavingsAccount] shouldBe model
       }
     }
 
