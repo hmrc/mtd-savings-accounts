@@ -115,6 +115,16 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
       internalServerErrorErrors.foreach(errorsFromServiceTester(_, INTERNAL_SERVER_ERROR))
 
     }
+
+    "return a 404 Not Found Error" when {
+
+      val notFoundErrors = List(
+        NotFoundError
+      )
+
+      notFoundErrors.foreach(errorsFromServiceTester(_, NOT_FOUND))
+
+    }
   }
 
   def errorsFromParserTester(error: Error, expectedStatus: Int): Unit = {
