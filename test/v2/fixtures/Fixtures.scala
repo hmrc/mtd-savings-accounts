@@ -17,6 +17,7 @@
 package v2.fixtures
 
 import play.api.libs.json.{JsValue, Json}
+import v2.models.domain.SavingsAccount
 import v2.models.errors._
 
 object Fixtures {
@@ -43,6 +44,8 @@ object Fixtures {
       Json.toJson(ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(AccountNameDuplicateError, MaximumSavingsAccountsLimitError))))
     )
     val downstreamErrorJson: JsValue = Json.toJson(DownstreamError)
+
+    val createSavingsAccountRequestModel = SavingsAccount("Main account name")
   }
 
 }

@@ -26,7 +26,7 @@ import v2.models.requestData.CreateSavingsAccountRequestData
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CreateSavingsAccountService @Inject()(connector: DesConnector) {
+class SavingsAccountsService @Inject()(connector: DesConnector) {
 
   val logger: Logger = Logger(this.getClass)
 
@@ -37,7 +37,7 @@ class CreateSavingsAccountService @Inject()(connector: DesConnector) {
       case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
         val mtdErrors = errors.map(error => desErrorToMtdError(error.code))
         if(mtdErrors.contains(DownstreamError)) {
-          logger.info(s"[CreateSavingsAccountService] [create] [CorrelationId - $correlationId]" +
+          logger.info(s"[SavingsAccountsService] [create] [CorrelationId - $correlationId]" +
             s" - downstream returned INVALID_IDTYPE, SERVER_ERROR or SERVICE_UNAVAILABLE. Revert to ISE")
           Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
         } else {

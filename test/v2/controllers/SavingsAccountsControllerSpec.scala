@@ -16,25 +16,33 @@
 
 package v2.controllers
 
-import play.api.libs.json.Json
-import play.api.mvc.Result
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{AnyContentAsJson, Result}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService}
 import v2.fixtures.Fixtures._
+import v2.mocks.requestParsers.MockCreateSavingsAccountRequestDataParser
+import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountsService}
 import v2.models.errors._
+import v2.models.outcomes.DesResponse
+import v2.models.requestData.{CreateSavingsAccountRawData, CreateSavingsAccountRequestData}
 
 import scala.concurrent.Future
 
 class SavingsAccountsControllerSpec extends ControllerBaseSpec {
 
   trait Test extends MockEnrolmentsAuthService
-    with MockMtdIdLookupService {
+    with MockMtdIdLookupService
+    with MockCreateSavingsAccountRequestDataParser
+    with MockSavingsAccountsService {
 
     val hc = HeaderCarrier()
 
     val controller = new SavingsAccountsController(
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService,
+      createSavingsAccountRequestDataParser = mockCreateSavingsAccountRequestDataParser,
+      savingsAccountService = mockSavingsAccountService,
       cc = cc
     )
 
@@ -47,60 +55,102 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
   val id = "SAVKB2UVwUTBQGJ"
   val location = s"/self-assessment/ni/$nino/savings-accounts/$id"
 
+  val createSavingsAccountRequest: CreateSavingsAccountRequestData =
+    CreateSavingsAccountRequestData(Nino(nino), SavingsAccountsFixture.createSavingsAccountRequestModel)
+
   "create" when {
     "passed a valid request" should {
       "return a successful response with header X-CorrelationId" in new Test {
+        MockCreateSavingsAccountRequestDataParser.parse(
+          CreateSavingsAccountRawData(nino, AnyContentAsJson(SavingsAccountsFixture.createJson)))
+          .returns(Right(createSavingsAccountRequest))
+
+        MockSavingsAccountService.create(createSavingsAccountRequest)
+          .returns(Future.successful(Right(DesResponse(correlationId, id))))
+
         val result = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
         status(result) shouldBe CREATED
         contentAsJson(result) shouldBe SavingsAccountsFixture.createJsonResponse(id)
         header("X-CorrelationId", result) shouldBe Some(correlationId)
-        header("Location", result) shouldBe Some(correlationId)
       }
     }
 
-    "passed an invalid request" should {
-      List(
-        NinoFormatError,
-        AccountNameFormatError,
-        AccountNameMissingError
-      ).foreach (
-        error =>
-          s"return a single error when receiving a ${error.code} error from the parser" in new Test {
-            val result: Future[Result] = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
-            status(result) shouldBe BAD_REQUEST
-            contentAsJson(result) shouldBe Json.toJson(error)
-            header("X-CorrelationId", result) shouldBe Some(correlationId)
-          }
+    "return single error response with status 400" when {
+      "the request received failed the validation" in new Test() {
+
+        MockCreateSavingsAccountRequestDataParser.parse(
+          CreateSavingsAccountRawData(nino, AnyContentAsJson(SavingsAccountsFixture.createJson)))
+          .returns(Left(ErrorWrapper(None, BadRequestError, None)))
+
+        val result: Future[Result] = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
+        status(result) shouldBe BAD_REQUEST
+        header("X-CorrelationId", result) nonEmpty
+      }
+    }
+
+    "return a 400 Bad Request with a single error" when {
+
+      val badRequestErrorsFromParser = List(
+        BadRequestError,
+        NinoFormatError
       )
 
-      "return an InternalServerError when receiving a DownstreamError from the parser" in new Test {
-        val result: Future[Result] = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
-        status(result) shouldBe BAD_REQUEST
-        contentAsJson(result) shouldBe SavingsAccountsFixture.downstreamErrorJson
-        header("X-CorrelationId", result) shouldBe Some(correlationId)
-      }
+      val badRequestErrorsFromService = List(
+        NinoFormatError,
+        BadRequestError
+      )
 
-      "return an InternalServerError when receiving a DownstreamError from the service" in new Test {
-        val result: Future[Result] = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
-        status(result) shouldBe INTERNAL_SERVER_ERROR
-        contentAsJson(result) shouldBe SavingsAccountsFixture.downstreamErrorJson
-        header("X-CorrelationId", result) shouldBe Some(correlationId)
-      }
+      badRequestErrorsFromParser.foreach(errorsFromParserTester(_, BAD_REQUEST))
+      badRequestErrorsFromService.foreach(errorsFromServiceTester(_, BAD_REQUEST))
 
-      "return multiple errors when receiving multiple errors from the parser" in new Test {
-        val result: Future[Result] = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
-        status(result) shouldBe BAD_REQUEST
-        contentAsJson(result) shouldBe SavingsAccountsFixture.multipleErrorsFromParserJson(correlationId)
-        header("X-CorrelationId", result) shouldBe Some(correlationId)
-      }
+    }
 
-      "return multiple errors when receiving multiple errors from the service" in new Test {
-        val result: Future[Result] = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
-        status(result) shouldBe FORBIDDEN
-        contentAsJson(result) shouldBe SavingsAccountsFixture.multipleErrorsFromServerJson(correlationId)
-        header("X-CorrelationId", result) shouldBe Some(correlationId)
-      }
+    "return a 500 Internal Server Error with a single error" when {
+
+      val internalServerErrorErrors = List(
+        DownstreamError
+      )
+
+      internalServerErrorErrors.foreach(errorsFromParserTester(_, INTERNAL_SERVER_ERROR))
+      internalServerErrorErrors.foreach(errorsFromServiceTester(_, INTERNAL_SERVER_ERROR))
+
     }
   }
 
+  def errorsFromParserTester(error: Error, expectedStatus: Int): Unit = {
+    s"a ${error.code} error is returned from the parser" in new Test {
+
+      val createSavingsAccountRawData =
+        CreateSavingsAccountRawData(nino, AnyContentAsJson(SavingsAccountsFixture.createJson))
+
+      MockCreateSavingsAccountRequestDataParser.parse(createSavingsAccountRawData)
+        .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
+
+      val response: Future[Result] = controller.create(nino)(fakePostRequest[JsValue](SavingsAccountsFixture.createJson))
+
+      status(response) shouldBe expectedStatus
+      contentAsJson(response) shouldBe Json.toJson(error)
+      header("X-CorrelationId", response) shouldBe Some(correlationId)
+    }
+  }
+
+  def errorsFromServiceTester(error: Error, expectedStatus: Int): Unit = {
+    s"a ${error.code} error is returned from the service" in new Test {
+
+      val createSavingsAccountRawData =
+        CreateSavingsAccountRawData(nino, AnyContentAsJson(SavingsAccountsFixture.createJson))
+
+      MockCreateSavingsAccountRequestDataParser.parse(createSavingsAccountRawData)
+        .returns(Right(createSavingsAccountRequest))
+
+      MockSavingsAccountService.create(createSavingsAccountRequest)
+        .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+
+      val response: Future[Result] = controller.create(nino)(fakePostRequest[JsValue](SavingsAccountsFixture.createJson))
+
+      status(response) shouldBe expectedStatus
+      contentAsJson(response) shouldBe Json.toJson(error)
+      header("X-CorrelationId", response) shouldBe Some(correlationId)
+    }
+  }
 }
