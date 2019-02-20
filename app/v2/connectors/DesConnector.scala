@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
-import v2.models.requestData.CreateSavingsAccountRequestData
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveSavingsAccountRequest}
 import v2.models.domain.CreateSavingsAccount
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -50,6 +50,18 @@ class DesConnector @Inject()(http: HttpClient,
     http.POST[CreateSavingsAccount, CreateSavingsAccountConnectorOutcome](url, createSavingsAccountRequestData.createSavingsAccount)(writes, createHttpReads,
       desHeaderCarrier, implicitly)
 
+  }
+
+  def retrieveAll(retrieveSavingsAccountRequest: RetrieveSavingsAccountRequest)
+                 (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveAllSavingsAccountsConnectorOutcome] = {
+
+    import v2.connectors.httpparsers.RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads
+
+    val nino = retrieveSavingsAccountRequest.nino.nino
+
+    val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks"
+
+    http.GET[RetrieveAllSavingsAccountsConnectorOutcome](url)(retrieveHttpReads, desHeaderCarrier, implicitly)
   }
 
 }
