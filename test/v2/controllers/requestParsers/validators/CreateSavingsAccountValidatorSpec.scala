@@ -66,7 +66,7 @@ class CreateSavingsAccountValidatorSpec extends UnitSpec {
     "return bad request error" when {
       "empty body is supplied" in {
         val nino = "AA123456A"
-        val expectedData = List(BadRequestError)
+        val expectedData = List(AccountNameMissingError)
         val emptyJson ="""
             |{
             |}

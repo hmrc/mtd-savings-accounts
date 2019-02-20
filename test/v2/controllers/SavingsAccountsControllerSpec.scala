@@ -92,7 +92,9 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
 
       val badRequestErrorsFromParser = List(
         BadRequestError,
-        NinoFormatError
+        NinoFormatError,
+        AccountNameFormatError,
+        AccountNameMissingError
       )
 
       val badRequestErrorsFromService = List(

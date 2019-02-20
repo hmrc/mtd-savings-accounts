@@ -18,7 +18,7 @@ package v2.controllers.requestParsers.validators.validations
 
 import play.api.libs.json._
 import play.api.mvc.AnyContentAsJson
-import v2.models.errors.{BadRequestError, Error}
+import v2.models.errors.{AccountNameMissingError, Error}
 
 object JsonFormatValidation {
 
@@ -26,7 +26,7 @@ object JsonFormatValidation {
 
     data.json.validate[A] match {
       case JsSuccess(_, _) => NoValidationErrors
-      case _ => List(BadRequestError)
+      case _ => List(AccountNameMissingError)
     }
 
   }

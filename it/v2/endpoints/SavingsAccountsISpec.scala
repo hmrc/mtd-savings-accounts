@@ -114,7 +114,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       }
     }
 
-      s"incorrect body is supplied" in new Test {
+    s"incorrect body is supplied" in new Test {
         val requestBody:JsValue = Json.parse(
           s"""{
              | "accountName": "1*"
@@ -132,8 +132,28 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
         val response: WSResponse = await(request().post(requestBody))
         response.status shouldBe Status.BAD_REQUEST
         response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameFormatError, None))
-      }
     }
+
+    s"empty body is supplied" in new Test {
+      val requestBody:JsValue = Json.parse(
+        s"""{
+           |
+           |}""".stripMargin
+      )
+
+      override val nino: String = "AA123456A"
+
+      override def setupStubs(): StubMapping = {
+        AuditStub.audit()
+        AuthStub.authorised()
+        MtdIdLookupStub.ninoFound(nino)
+      }
+
+      val response: WSResponse = await(request().post(requestBody))
+      response.status shouldBe Status.BAD_REQUEST
+      response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameMissingError, None))
+    }
+  }
 
 
   def errorBody(code: String): String =

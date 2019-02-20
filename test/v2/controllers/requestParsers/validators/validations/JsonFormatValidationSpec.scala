@@ -19,7 +19,7 @@ package v2.controllers.requestParsers.validators.validations
 import play.api.libs.json.{Json, Reads}
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
-import v2.models.errors.BadRequestError
+import v2.models.errors.{AccountNameFormatError, AccountNameMissingError, BadRequestError}
 import v2.models.utils.JsonErrorValidators
 
 class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
@@ -48,7 +48,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
         val validationResult = JsonFormatValidation.validate[TestDataObject](json)
         validationResult.isEmpty shouldBe false
-        validationResult.head shouldBe BadRequestError
+        validationResult.head shouldBe AccountNameMissingError
 
       }
 
