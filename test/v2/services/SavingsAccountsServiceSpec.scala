@@ -25,7 +25,7 @@ import v2.models.requestData.CreateSavingsAccountRequestData
 
 import scala.concurrent.Future
 
-class CreateSavingsAccountServiceSpec extends ServiceSpec {
+class SavingsAccountsServiceSpec extends ServiceSpec {
 
   val incomeSourceId = "ZZIS12345678901"
   val correlationId = "X-123"
@@ -41,7 +41,7 @@ class CreateSavingsAccountServiceSpec extends ServiceSpec {
   val serviceUnavailableError = Error("SERVICE_UNAVAILABLE", "doesn't matter")
 
   trait Test extends MockDesConnector {
-    lazy val service = new CreateSavingsAccountService(connector)
+    lazy val service = new SavingsAccountsService(connector)
   }
 
   "create" when {

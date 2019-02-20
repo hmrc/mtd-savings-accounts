@@ -1,1 +1,3 @@
-GET        /sample/:nino        v2.controllers.SampleController.doSomething(nino:String)
+GET             /sample/:nino                               v2.controllers.SampleController.doSomething(nino:String)
+
+POST            /ni/:nino/savings-accounts                  v2.controllers.SavingsAccountsController.create(nino: String)
