@@ -16,6 +16,7 @@
 
 package v2
 
+import v2.models.domain.RetrieveSavingsAccount
 import v2.models.errors.{DesError, Error}
 import v2.models.outcomes.DesResponse
 
@@ -24,6 +25,8 @@ package object connectors {
   type MtdIdLookupOutcome = Either[Error, String]
 
   type CreateSavingsAccountConnectorOutcome = Either[DesResponse[DesError], DesResponse[String]]
+
+  type RetrieveAllSavingsAccountsConnectorOutcome = Either[DesResponse[DesError], DesResponse[List[RetrieveSavingsAccount]]]
 
 
 }
