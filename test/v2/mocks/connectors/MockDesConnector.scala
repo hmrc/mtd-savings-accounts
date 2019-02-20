@@ -19,8 +19,8 @@ package v2.mocks.connectors
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.connectors.{CreateSavingsAccountConnectorOutcome, DesConnector}
-import v2.models.requestData.CreateSavingsAccountRequestData
+import v2.connectors.{CreateSavingsAccountConnectorOutcome, DesConnector, RetrieveAllSavingsAccountsConnectorOutcome}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveSavingsAccountRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,6 +32,11 @@ trait MockDesConnector extends MockFactory {
     def create(createSavingsAccountRequestData: CreateSavingsAccountRequestData): CallHandler[Future[CreateSavingsAccountConnectorOutcome]] = {
       (connector.create(_: CreateSavingsAccountRequestData)(_: HeaderCarrier, _: ExecutionContext))
         .expects(createSavingsAccountRequestData, *, *)
+    }
+
+    def retrieveAll(retrieveSavingsAccountRequest: RetrieveSavingsAccountRequest): CallHandler[Future[RetrieveAllSavingsAccountsConnectorOutcome]] = {
+      (connector.retrieveAll(_: RetrieveSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(retrieveSavingsAccountRequest, *, *)
     }
   }
 
