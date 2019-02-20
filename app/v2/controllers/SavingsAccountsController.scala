@@ -45,7 +45,8 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
       case Right(createSavingsAccountRequest) => savingsAccountService.create(createSavingsAccountRequest).map{
         case Right(desResponse) =>
           logger.info(s"[SavingsAccountsController][create] - Success response received with CorrelationId: ${desResponse.correlationId}")
-          Created(toJson(desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId)
+          Created(toJson(desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId,
+            "Location" -> s"/self-assessment/ni/$nino/savings-accounts/${desResponse.responseData}")
         case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
       case Left(errorWrapper) => Future.successful {
