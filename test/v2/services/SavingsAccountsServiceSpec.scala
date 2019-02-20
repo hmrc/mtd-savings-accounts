@@ -66,7 +66,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       }
     }
 
-    "DES returns an outbound error" should {
+    "the connector returns an outbound error" should {
       "return that outbound error as-is" in new Test {
         val fakeError = Error("doesn't matter", "really doesn't matter")
         val desResponse = DesResponse(correlationId, OutboundError(fakeError))
@@ -132,7 +132,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       }
     }
 
-    "DES returns an outbound error" should {
+    "the connector returns an outbound error" should {
       "return that outbound error as-is" in new Test {
         val fakeError = Error("doesn't matter", "really doesn't matter")
         val desResponse = DesResponse(correlationId, OutboundError(fakeError))
