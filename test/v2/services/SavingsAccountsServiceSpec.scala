@@ -18,7 +18,7 @@ package v2.services
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
-import v2.models.domain.SavingsAccount
+import v2.models.domain.CreateSavingsAccount
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.CreateSavingsAccountRequestData
@@ -33,8 +33,8 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
   val accountName = "Main account name"
   val duplicateAccountName = "Main account name dupe"
 
-  val validRequest = CreateSavingsAccountRequestData(Nino(nino), SavingsAccount(accountName))
-  val invalidRequest = CreateSavingsAccountRequestData(Nino(nino), SavingsAccount(duplicateAccountName))
+  val validRequest = CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccount(accountName))
+  val invalidRequest = CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccount(duplicateAccountName))
 
   val maxAccountsReachedError = Error("MAX_ACCOUNTS_REACHED", "doesn't matter")
   val alreadyExistsError = Error("ALREADY_EXISTS", "doesn't matter")
@@ -96,7 +96,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       case(k, v) =>
         s"DES returns a $k error" should {
           s"return a ${v.code} error" in new Test {
-            val input = CreateSavingsAccountRequestData(Nino(nino), SavingsAccount("doesn't matter"))
+            val input = CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccount("doesn't matter"))
             val desResponse = DesResponse(correlationId, SingleError(Error(k, "doesn't matter")))
             val expected = ErrorWrapper(Some(correlationId), v, None)
             MockedDesConnector.create(input).returns(Future.successful(Left(desResponse)))

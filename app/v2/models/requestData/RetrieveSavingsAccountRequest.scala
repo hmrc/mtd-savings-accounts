@@ -17,6 +17,6 @@
 package v2.models.requestData
 
 import uk.gov.hmrc.domain.Nino
-import v2.models.domain.CreateSavingsAccount
+import v2.models.domain.RetrieveSavingsAccount
 
-case class CreateSavingsAccountRequestData(nino: Nino, createSavingsAccount: CreateSavingsAccount)
+class RetrieveSavingsAccountRequest(nino: Nino)

@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
 import v2.models.requestData.CreateSavingsAccountRequestData
-import v2.models.domain.SavingsAccount
+import v2.models.domain.CreateSavingsAccount
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,13 +41,13 @@ class DesConnector @Inject()(http: HttpClient,
             (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CreateSavingsAccountConnectorOutcome] = {
 
     import v2.connectors.httpparsers.CreateSavingsAccountHttpParser.createHttpReads
-    import SavingsAccount.writes
+    import CreateSavingsAccount.writes
 
     val nino = createSavingsAccountRequestData.nino.nino
 
     val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino"
 
-    http.POST[SavingsAccount, CreateSavingsAccountConnectorOutcome](url, createSavingsAccountRequestData.savingsAccount)(writes, createHttpReads,
+    http.POST[CreateSavingsAccount, CreateSavingsAccountConnectorOutcome](url, createSavingsAccountRequestData.createSavingsAccount)(writes, createHttpReads,
       desHeaderCarrier, implicitly)
 
   }

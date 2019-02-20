@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.models.domain
 
-import uk.gov.hmrc.domain.Nino
-import v2.models.domain.CreateSavingsAccount
+import play.api.libs.json.Writes._
+import play.api.libs.json._
 
-case class CreateSavingsAccountRequestData(nino: Nino, createSavingsAccount: CreateSavingsAccount)
+case class CreateSavingsAccount(accountName: String)
+
+object CreateSavingsAccount {
+  implicit val reads: Reads[CreateSavingsAccount] = Json.reads[CreateSavingsAccount]
+
+  implicit val writes: Writes[CreateSavingsAccount] = new Writes[CreateSavingsAccount] {
+    override def writes(o: CreateSavingsAccount): JsValue = Json.obj(
+      "incomeSourceType" -> "interest-from-uk-banks",
+      "incomeSourceName" -> o.accountName
+    )
+  }
+}
