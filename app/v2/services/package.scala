@@ -17,7 +17,6 @@
 package v2
 
 import v2.models.auth.UserDetails
-import v2.models.domain.SavingsAccount
 import v2.models.errors.{Error, ErrorWrapper}
 import v2.models.outcomes.DesResponse
 

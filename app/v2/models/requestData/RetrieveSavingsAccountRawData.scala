@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package v2.models.domain
+package v2.models.requestData
 
-import play.api.libs.json.Writes._
-import play.api.libs.json._
+import play.api.mvc.AnyContentAsJson
 
-case class SavingsAccount(accountName: String)
-
-object SavingsAccount {
-  implicit val reads: Reads[SavingsAccount] = Json.reads[SavingsAccount]
-
-  implicit val writes: Writes[SavingsAccount] = new Writes[SavingsAccount] {
-    override def writes(o: SavingsAccount): JsValue = Json.obj(
-      "incomeSourceType" -> "interest-from-uk-banks",
-      "incomeSourceName" -> o.accountName
-    )
-  }
-}
+case class RetrieveSavingsAccountRawData(nino: String, body: AnyContentAsJson) extends InputData

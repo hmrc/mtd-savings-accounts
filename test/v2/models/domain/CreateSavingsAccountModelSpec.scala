@@ -22,7 +22,7 @@ import support.UnitSpec
 import v2.controllers.requestParsers.validators.validations.JsonFormatValidation
 import v2.models.utils.JsonErrorValidators
 
-class SavingsAccountSpec extends UnitSpec with JsonErrorValidators {
+class CreateSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators {
 
   val mtdFormatJson: JsValue = Json.parse(
     """
@@ -35,15 +35,15 @@ class SavingsAccountSpec extends UnitSpec with JsonErrorValidators {
     "passed valid JSON" should {
       "return a valid SavingsAccount object" in {
 
-        val model = SavingsAccount(accountName = "Main account name")
+        val model = CreateSavingsAccount(accountName = "Main account name")
 
-        mtdFormatJson.as[SavingsAccount] shouldBe model
+        mtdFormatJson.as[CreateSavingsAccount] shouldBe model
       }
     }
 
-    testMandatoryProperty[SavingsAccount](mtdFormatJson)("/accountName")
+    testMandatoryProperty[CreateSavingsAccount](mtdFormatJson)("/accountName")
 
-    testPropertyType[SavingsAccount](mtdFormatJson)(
+    testPropertyType[CreateSavingsAccount](mtdFormatJson)(
       path = "/accountName",
       replacement = 12344.toJson,
       expectedError = JsonError.STRING_FORMAT_EXCEPTION
@@ -61,9 +61,9 @@ class SavingsAccountSpec extends UnitSpec with JsonErrorValidators {
             |}
           """.stripMargin
 
-        val model = SavingsAccount(accountName = "Main account name")
+        val model = CreateSavingsAccount(accountName = "Main account name")
 
-        Json.parse(json) shouldBe SavingsAccount.writes.writes(model)
+        Json.parse(json) shouldBe CreateSavingsAccount.writes.writes(model)
       }
     }
   }

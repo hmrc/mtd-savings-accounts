@@ -18,7 +18,7 @@ package v2.connectors
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.{MockAppConfig, MockHttpClient}
-import v2.models.domain.SavingsAccount
+import v2.models.domain.CreateSavingsAccount
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.CreateSavingsAccountRequestData
@@ -51,13 +51,13 @@ class DesConnectorSpec extends ConnectorSpec {
 
         val expectedDesResponse = DesResponse(correlationId, incomeSourceId)
 
-        MockedHttpClient.post[SavingsAccount, CreateSavingsAccountConnectorOutcome](
+        MockedHttpClient.post[CreateSavingsAccount, CreateSavingsAccountConnectorOutcome](
         s"$baseUrl" + s"/income-tax/income-sources/nino/$nino",
-        SavingsAccount(accountName)
+        CreateSavingsAccount(accountName)
         ).returns(Future.successful(Right(expectedDesResponse)))
 
         val result: CreateSavingsAccountConnectorOutcome =
-          await(connector.create(CreateSavingsAccountRequestData(Nino(nino), SavingsAccount(accountName))))
+          await(connector.create(CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccount(accountName))))
 
         result shouldBe Right(expectedDesResponse)
       }
@@ -68,13 +68,13 @@ class DesConnectorSpec extends ConnectorSpec {
 
         val expectedDesResponse = DesResponse(correlationId, SingleError(AccountNameDuplicateError))
 
-        MockedHttpClient.post[SavingsAccount, CreateSavingsAccountConnectorOutcome](
+        MockedHttpClient.post[CreateSavingsAccount, CreateSavingsAccountConnectorOutcome](
           s"$baseUrl" + s"/income-tax/income-sources/nino/$nino",
-          SavingsAccount(duplicateAccountName)
+          CreateSavingsAccount(duplicateAccountName)
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: CreateSavingsAccountConnectorOutcome =
-          await(connector.create(CreateSavingsAccountRequestData(Nino(nino), SavingsAccount(duplicateAccountName))))
+          await(connector.create(CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccount(duplicateAccountName))))
 
         result shouldBe Left(expectedDesResponse)
       }
@@ -85,13 +85,13 @@ class DesConnectorSpec extends ConnectorSpec {
 
         val expectedDesResponse = DesResponse(correlationId, MultipleErrors(Seq(AccountNameDuplicateError, MaximumSavingsAccountsLimitError)))
 
-        MockedHttpClient.post[SavingsAccount, CreateSavingsAccountConnectorOutcome](
+        MockedHttpClient.post[CreateSavingsAccount, CreateSavingsAccountConnectorOutcome](
           s"$baseUrl" + s"/income-tax/income-sources/nino/$nino",
-          SavingsAccount(duplicateAccountName)
+          CreateSavingsAccount(duplicateAccountName)
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: CreateSavingsAccountConnectorOutcome =
-          await(connector.create(CreateSavingsAccountRequestData(Nino(nino), SavingsAccount(duplicateAccountName))))
+          await(connector.create(CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccount(duplicateAccountName))))
 
         result shouldBe Left(expectedDesResponse)
       }
