@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package v2
+package v2.models.domain
 
-import v2.models.domain.{RetrieveSavingsAccount, RetrievedSavingsAccount}
-import v2.models.errors.{DesError, Error}
-import v2.models.outcomes.DesResponse
+import play.api.libs.json._
 
-package object connectors {
+case class RetrievedSavingsAccount(accountName: String)
 
-  type MtdIdLookupOutcome = Either[Error, String]
+object RetrievedSavingsAccount {
+  // Note that we read the array of accounts from DES into a list.
+  // This list may have no entries (when account does not exist)
+  // or more than one entry
+  implicit val desReads: Reads[RetrievedSavingsAccount] =
+    (__ \ "incomeSourceName").read[String].map(RetrievedSavingsAccount.apply)
 
-  type CreateSavingsAccountConnectorOutcome = Either[DesResponse[DesError], DesResponse[String]]
-
-  type RetrieveAllSavingsAccountsConnectorOutcome = Either[DesResponse[DesError], DesResponse[List[RetrieveSavingsAccount]]]
-
-  type RetrieveSavingsAccountsConnectorOutcome = Either[DesResponse[DesError], DesResponse[RetrievedSavingsAccount]]
-
-
+  implicit val vendorWrites: OWrites[RetrievedSavingsAccount] = Json.writes[RetrievedSavingsAccount]
 }
