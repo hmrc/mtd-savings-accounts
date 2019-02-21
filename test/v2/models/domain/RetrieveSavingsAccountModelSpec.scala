@@ -16,102 +16,78 @@
 
 package v2.models.domain
 
-import play.api.libs.json._
+import play.api.libs.json.{JsArray, JsValue, Json}
 import support.UnitSpec
 import v2.models.utils.JsonErrorValidators
 
 class RetrieveSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators {
 
-  val id1 = "SAVKB2UVwUTBQGJ"
-  val accountName1 = "Main account name"
-  val id2 = "SAVKB2UVwUTBQGK"
-  val accountName2 = "Shares savings account"
+  val model = RetrieveSavingsAccount("Bank Account 1")
 
-  val model = List(RetrieveSavingsAccount(id1, accountName1), RetrieveSavingsAccount(id2, accountName2))
-
-  val multipleJsonFromDes =
-    Json.parse(s"""
-      |[
-      |    {
-      |        "incomeSourceId": "$id1",
-      |        "incomeSourceName": "$accountName1"
-      |    },
-      |    {
-      |        "incomeSourceId": "$id2",
-      |        "incomeSourceName": "$accountName2"
-      |    }
+  val multipleJsonFromDes: JsValue = Json.parse(
+    """[
+      |   {
+      |      "incomeSourceId": "000000000000001",
+      |      "incomeSourceName": "Bank Account 1",
+      |      "identifier": "AA111111A",
+      |      "incomeSourceType": "interest-from-uk-banks"
+      |   },
+      |   {
+      |      "incomeSourceId": "000000000000002",
+      |      "incomeSourceName": "Bank Account 2",
+      |      "identifier": "AA111111A",
+      |      "incomeSourceType": "interest-from-uk-banks"
+      |   },
+      |   {
+      |      "incomeSourceId": "000000000000003",
+      |      "incomeSourceName": "Bank Account 3",
+      |      "identifier": "AA111111A",
+      |      "incomeSourceType": "interest-from-uk-banks"
+      |   }
       |]
-    """.stripMargin)
+      |""".stripMargin)
 
-  val multipleJsonToVendor =
-    Json.parse(s"""
-      |{
-      |    "savingsAccounts": [
-      |        {
-      |            "id": "$id1",
-      |            "accountName": "$accountName1"
-      |        },
-      |        {
-      |            "id": "$id2",
-      |            "accountName": "$accountName2"
-      |        }
-      |    ]
-      |}
-    """.stripMargin)
+  val singleJsonFromDes: JsValue = Json.parse(
+    """   {
+      |      "incomeSourceId": "000000000000001",
+      |      "incomeSourceName": "Bank Account 1",
+      |      "identifier": "AA111111A",
+      |      "incomeSourceType": "interest-from-uk-banks"
+      |   }
+      |""".stripMargin)
 
-  val retrieveSavingsAccountModelAsJson =
-    Json.parse(s"""
-      |{
-      |    "id": "$id1",
-      |    "accountName": "$accountName1"
-      |}
-    """.stripMargin)
+  val singleJsonFromDesArray = JsArray(Seq(singleJsonFromDes))
 
-  val singleDesJsonsingleDesJson =
-    Json.parse(s"""
-      |{
-      |    "incomeSourceId": "$id1",
-      |    "incomeSourceName": "$accountName1"
-      |}
-    """.stripMargin)
+  val jsonToVendor: JsValue = Json.parse(
+    """{
+      |  "accountName": "Bank Account 1"
+      |}""".stripMargin)
 
   "reads" when {
-    "passed a valid JSON array from DES" should {
-      "read successfully as a List[RetrieveSavingsAccountModel]" in {
-        multipleJsonFromDes.as[List[RetrieveSavingsAccount]] shouldBe model
+    "single account returned from des" should {
+      "read to model" in {
+        singleJsonFromDesArray.as[List[RetrieveSavingsAccount]] shouldBe List(model)
       }
     }
 
-    testMandatoryProperty[RetrieveSavingsAccount](singleDesJsonsingleDesJson)("/incomeSourceId")
+    "multiple accounts returned from des" should {
+      "read to model" in {
+        singleJsonFromDesArray.as[List[RetrieveSavingsAccount]] shouldBe List(model)
+      }
+    }
 
-    testPropertyType[RetrieveSavingsAccount](singleDesJsonsingleDesJson)(
-      path = "/incomeSourceId",
-      replacement = 12344.toJson,
-      expectedError = JsonError.STRING_FORMAT_EXCEPTION
-    )
+    testMandatoryProperty[RetrieveSavingsAccount](singleJsonFromDes)("/incomeSourceName")
 
-    testMandatoryProperty[RetrieveSavingsAccount](singleDesJsonsingleDesJson)("/incomeSourceName")
-
-    testPropertyType[RetrieveSavingsAccount](singleDesJsonsingleDesJson)(
+    testPropertyType[RetrieveSavingsAccount](singleJsonFromDes)(
       path = "/incomeSourceName",
       replacement = 12344.toJson,
       expectedError = JsonError.STRING_FORMAT_EXCEPTION
     )
   }
 
-  "writes" when {
-    "passed a valid RetrieveSavingsAccountModel" should {
-      "write it as correct JSON" in {
-        retrieveSavingsAccountModelAsJson shouldBe RetrieveSavingsAccount.writes.writes(model.head)
-      }
-    }
-  }
-
-  "writesList" when {
-    "passing valid JSON to vendors" should {
-      "write it in the correct format, with the savingsAccounts field" in {
-        multipleJsonToVendor shouldBe RetrieveSavingsAccount.writesList.writes(model)
-      }
+  "writes" must {
+    "write to vendor format" in {
+      model.toJson shouldBe jsonToVendor
     }
   }
 

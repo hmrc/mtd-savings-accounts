@@ -18,10 +18,10 @@ package v2.services
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
-import v2.models.domain.{CreateSavingsAccount, RetrieveSavingsAccount}
+import v2.models.domain.{CreateSavingsAccount, RetrieveAllSavingsAccount}
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveSavingsAccountRequest}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest}
 
 import scala.concurrent.Future
 
@@ -110,9 +110,9 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
   }
 
   "retrieveAll" when {
-    val modelList = List(RetrieveSavingsAccount(incomeSourceId, accountName))
-    val validRequest = RetrieveSavingsAccountRequest(Nino(nino))
-    val invalidRequest = RetrieveSavingsAccountRequest(Nino(ninoForInvalidCases))
+    val modelList = List(RetrieveAllSavingsAccount(incomeSourceId, accountName))
+    val validRequest = RetrieveAllSavingsAccountRequest(Nino(nino))
+    val invalidRequest = RetrieveAllSavingsAccountRequest(Nino(ninoForInvalidCases))
     "valid data is passed" should {
       "return a valid response" in new Test {
         val expected = DesResponse(correlationId, modelList)
@@ -166,7 +166,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       case(k, v) =>
         s"DES returns a $k error" should {
           s"return a ${v.code} error" in new Test {
-            val input = RetrieveSavingsAccountRequest(Nino(ninoForInvalidCases))
+            val input = RetrieveAllSavingsAccountRequest(Nino(ninoForInvalidCases))
             val desResponse = DesResponse(correlationId, SingleError(Error(k, "doesn't matter")))
             val expected = ErrorWrapper(Some(correlationId), v, None)
             MockedDesConnector.retrieveAll(input).returns(Future.successful(Left(desResponse)))

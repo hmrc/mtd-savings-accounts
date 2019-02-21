@@ -21,7 +21,7 @@ import play.api.http.Status._
 import play.api.libs.json.{Json, Reads, __}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.connectors.RetrieveAllSavingsAccountsConnectorOutcome
-import v2.models.domain.RetrieveSavingsAccount
+import v2.models.domain.RetrieveAllSavingsAccount
 import v2.models.errors.{DownstreamError, OutboundError}
 import v2.models.outcomes.DesResponse
 
@@ -51,7 +51,7 @@ object RetrieveAllSavingsAccountsHttpParser extends HttpParser {
     }
 
     private def parseResponse(correlationId: String, response: HttpResponse): RetrieveAllSavingsAccountsConnectorOutcome =
-      response.validateJson[List[RetrieveSavingsAccount]] match {
+      response.validateJson[List[RetrieveAllSavingsAccount]] match {
         case Some(ref) => Right(DesResponse(correlationId, ref))
         case None => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
       }

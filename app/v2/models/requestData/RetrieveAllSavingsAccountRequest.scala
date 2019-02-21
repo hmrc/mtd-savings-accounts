@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package v2.models.domain
+package v2.models.requestData
 
-import play.api.libs.json._
+import uk.gov.hmrc.domain.Nino
+import v2.models.domain.RetrieveAllSavingsAccount
 
-case class RetrievedSavingsAccount(accountName: String)
-
-object RetrievedSavingsAccount {
-  // Note that we read the array of accounts from DES into a list.
-  // This list may have no entries (when account does not exist)
-  // or more than one entry
-  implicit val desReads: Reads[RetrievedSavingsAccount] =
-    (__ \ "incomeSourceName").read[String].map(RetrievedSavingsAccount.apply)
-
-  implicit val vendorWrites: OWrites[RetrievedSavingsAccount] = Json.writes[RetrievedSavingsAccount]
-}
+case class RetrieveAllSavingsAccountRequest(nino: Nino)

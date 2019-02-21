@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveSavingsAccountRequest}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest}
 import v2.models.domain.CreateSavingsAccount
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,7 +52,7 @@ class DesConnector @Inject()(http: HttpClient,
 
   }
 
-  def retrieveAll(retrieveSavingsAccountRequest: RetrieveSavingsAccountRequest)
+  def retrieveAll(retrieveSavingsAccountRequest: RetrieveAllSavingsAccountRequest)
                  (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveAllSavingsAccountsConnectorOutcome] = {
 
     import v2.connectors.httpparsers.RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads

@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveSavingsAccountRequest}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -49,7 +49,7 @@ class SavingsAccountsService @Inject()(connector: DesConnector) {
     }
   }
 
-  def retrieveAll(retrieveSavingsAccountRequest: RetrieveSavingsAccountRequest)
+  def retrieveAll(retrieveSavingsAccountRequest: RetrieveAllSavingsAccountRequest)
                  (implicit hc: HeaderCarrier,
                   ec: ExecutionContext): Future[RetrieveAllSavingsAccountsOutcome] = {
     connector.retrieveAll(retrieveSavingsAccountRequest).map {
