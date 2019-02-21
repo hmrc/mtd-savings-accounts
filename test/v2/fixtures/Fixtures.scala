@@ -16,7 +16,7 @@
 
 package v2.fixtures
 
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsArray, JsValue, Json}
 import v2.models.domain.CreateSavingsAccount
 import v2.models.errors._
 
@@ -32,11 +32,21 @@ object Fixtures {
     )
     val createJsonResponse: String => JsValue = id => Json.parse(
       s"""
-        |{
-        |  "id": "$id"
-        |}
+         |{
+         |  "id": "$id"
+         |}
       """.stripMargin
     )
+
+    val retrieveAllJsonReponse: (String, String) => JsValue = (id, accountName) => Json.obj(
+      "savingsAccounts" -> JsArray(Seq(
+        Json.obj(
+          "id" -> id,
+          "accountName" -> accountName
+        )
+      ))
+    )
+
     val multipleErrorsFromParserJson: String => JsValue = correlationId => Json.toJson(
       ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(AccountNameMissingError, AccountNameFormatError)))
     )

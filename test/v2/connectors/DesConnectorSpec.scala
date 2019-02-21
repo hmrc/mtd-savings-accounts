@@ -132,7 +132,7 @@ class DesConnectorSpec extends ConnectorSpec {
       }
       "return an error response with multiple errors and the correct correlationId" in new Test {
 
-        val expectedDesResponse = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, MatchingResourceNotFoundError)))
+        val expectedDesResponse = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, NotFoundError)))
 
         MockedHttpClient.get[RetrieveAllSavingsAccountsConnectorOutcome](
           s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks"

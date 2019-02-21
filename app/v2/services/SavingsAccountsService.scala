@@ -86,7 +86,7 @@ class SavingsAccountsService @Inject()(connector: DesConnector) {
     "INVALID_TAXYEAR" -> DownstreamError,
     "INVALID_INCOMESOURCEID" -> DownstreamError,
     "INVALID_ENDDATE" -> DownstreamError,
-    "NOT_FOUND" -> MatchingResourceNotFoundError,
+    "NOT_FOUND" -> NotFoundError,
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
   )

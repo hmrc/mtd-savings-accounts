@@ -124,7 +124,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
 
     "DES returns multiple errors" should {
       "return multiple errors" in new Test {
-        val expected = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, MatchingResourceNotFoundError)))
+        val expected = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, NotFoundError)))
         val desResponse = DesResponse(correlationId, MultipleErrors(Seq(ninoFormatError, matchingResourceNotFoundError)))
         MockedDesConnector.retrieveAll(invalidRequest).returns(Future.successful(Left(desResponse)))
         val result: RetrieveAllSavingsAccountsOutcome = await(service.retrieveAll(invalidRequest))
@@ -159,7 +159,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       "INVALID_TAXYEAR" -> DownstreamError,
       "INVALID_INCOMESOURCEID" -> DownstreamError,
       "INVALID_ENDDATE" -> DownstreamError,
-      "NOT_FOUND" -> MatchingResourceNotFoundError,
+      "NOT_FOUND" -> NotFoundError,
       "SERVER_ERROR" -> DownstreamError,
       "SERVICE_UNAVAILABLE" -> DownstreamError
     ).foreach {
