@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,7 +36,7 @@ class SavingsAccountsService @Inject()(connector: DesConnector) {
     connector.create(createSavingsAccountRequestData).map {
       case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
         val mtdErrors = errors.map(error => desErrorToMtdErrorCreate(error.code))
-        if(mtdErrors.contains(DownstreamError)) {
+        if (mtdErrors.contains(DownstreamError)) {
           logger.info(s"[SavingsAccountsService] [create] [CorrelationId - $correlationId]" +
             s" - downstream returned INVALID_IDTYPE, SERVER_ERROR or SERVICE_UNAVAILABLE. Revert to ISE")
           Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
@@ -55,7 +55,7 @@ class SavingsAccountsService @Inject()(connector: DesConnector) {
     connector.retrieveAll(retrieveSavingsAccountRequest).map {
       case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
         val mtdErrors = errors.map(error => desErrorToMtdErrorRetrieveAll(error.code))
-        if(mtdErrors.contains(DownstreamError)) {
+        if (mtdErrors.contains(DownstreamError)) {
           logger.info(s"[SavingsAccountsService] [retrieveAll] [CorrelationId - $correlationId]" +
             s" - downstream returned INVALID_IDTYPE, INVALID_INCOMESOURCETYPE, INVALID_TAXYEAR, INVALID_INCOMESOURCEID," +
             s" INVALID_ENDDATE, SERVER_ERROR or SERVICE_UNAVAILABLE. Revert to ISE")
@@ -66,6 +66,31 @@ class SavingsAccountsService @Inject()(connector: DesConnector) {
       case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorRetrieveAll(error.code), None))
       case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
       case Right(desResponse) => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
+    }
+  }
+
+
+  def retrieve(request: RetrieveSavingsAccountRequest)(implicit hc: HeaderCarrier,
+                                                       ec: ExecutionContext): Future[RetrieveSavingsAccountsOutcome] = {
+    connector.retrieve(request).map {
+      case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
+        val mtdErrors = errors.map(error => desErrorToMtdErrorRetrieveAll(error.code))
+        if (mtdErrors.contains(DownstreamError)) {
+          logger.info(s"[SavingsAccountsService] [retrieveAll] [CorrelationId - $correlationId]" +
+            s" - downstream returned INVALID_IDTYPE, INVALID_INCOMESOURCETYPE, INVALID_TAXYEAR, INVALID_INCOMESOURCEID," +
+            s" INVALID_ENDDATE, SERVER_ERROR or SERVICE_UNAVAILABLE. Revert to ISE")
+          Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
+        } else {
+          Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
+        }
+      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorRetrieveAll(error.code), None))
+      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
+      case Right(desResponse) =>
+        desResponse.responseData match {
+          case ac :: Nil => Right(DesResponse(desResponse.correlationId, ac))
+          case Nil => Left(ErrorWrapper(Some(desResponse.correlationId), MatchingResourceNotFoundError, None))
+          case acs => Left(???) // FIXME or do we just send back the first one?
+        }
     }
   }
 

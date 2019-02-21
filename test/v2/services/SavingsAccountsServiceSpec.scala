@@ -18,10 +18,10 @@ package v2.services
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
-import v2.models.domain.{CreateSavingsAccount, RetrieveAllSavingsAccount}
+import v2.models.domain.{CreateSavingsAccount, RetrieveAllSavingsAccount, RetrieveSavingsAccount}
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
 
 import scala.concurrent.Future
 
@@ -95,7 +95,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       "SERVER_ERROR" -> DownstreamError,
       "SERVICE_UNAVAILABLE" -> DownstreamError
     ).foreach {
-      case(k, v) =>
+      case (k, v) =>
         s"DES returns a $k error" should {
           s"return a ${v.code} error" in new Test {
             val input = CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccount("doesn't matter"))
@@ -163,7 +163,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       "SERVER_ERROR" -> DownstreamError,
       "SERVICE_UNAVAILABLE" -> DownstreamError
     ).foreach {
-      case(k, v) =>
+      case (k, v) =>
         s"DES returns a $k error" should {
           s"return a ${v.code} error" in new Test {
             val input = RetrieveAllSavingsAccountRequest(Nino(ninoForInvalidCases))
@@ -171,6 +171,90 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
             val expected = ErrorWrapper(Some(correlationId), v, None)
             MockedDesConnector.retrieveAll(input).returns(Future.successful(Left(desResponse)))
             val result = await(service.retrieveAll(input))
+            result shouldBe Left(expected)
+          }
+        }
+    }
+  }
+
+  "retrieve" when {
+    val account = RetrieveSavingsAccount(accountName)
+    val validRequest = RetrieveSavingsAccountRequest(Nino(nino), incomeSourceId)
+    val invalidRequest = RetrieveSavingsAccountRequest(Nino(ninoForInvalidCases), incomeSourceId)
+    "valid data is passed" should {
+      "return a valid response" in new Test {
+        MockedDesConnector.retrieve(validRequest).returns(Future.successful(Right(DesResponse(correlationId, List(account)))))
+        val result: RetrieveSavingsAccountsOutcome = await(service.retrieve(validRequest))
+        result shouldBe Right(DesResponse(correlationId, account))
+      }
+    }
+
+    "no accounts are returned" should {
+      "return 404 with error code MATCHING_RESOURCE_NOT_FOUND" in new Test {
+        MockedDesConnector.retrieve(validRequest).returns(Future.successful(Right(DesResponse(correlationId, Nil))))
+        val result: RetrieveSavingsAccountsOutcome = await(service.retrieve(validRequest))
+        result shouldBe Left(ErrorWrapper(Some(correlationId), MatchingResourceNotFoundError, None))
+      }
+    }
+
+
+    "multiple accounts are returned" should {
+      "return error" in new Test{
+        val account1 = RetrieveSavingsAccount("account1")
+        val account2 = RetrieveSavingsAccount("account2")
+        MockedDesConnector.retrieve(validRequest).returns(Future.successful(Right(DesResponse(correlationId, List(account1, account2)))))
+        val result: RetrieveSavingsAccountsOutcome = await(service.retrieve(validRequest))
+        result shouldBe Left(ErrorWrapper(Some(correlationId), ???, None))
+      }
+    }
+
+    "DES returns multiple errors" should {
+      "return multiple errors" in new Test {
+        val desResponse = DesResponse(correlationId, MultipleErrors(Seq(ninoFormatError, matchingResourceNotFoundError)))
+        MockedDesConnector.retrieve(invalidRequest).returns(Future.successful(Left(desResponse)))
+        val result: RetrieveSavingsAccountsOutcome = await(service.retrieve(invalidRequest))
+        result shouldBe Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, MatchingResourceNotFoundError))))
+      }
+    }
+
+    "the connector returns an outbound error" should {
+      "return that outbound error as-is" in new Test {
+        val fakeError = Error("doesn't matter", "really doesn't matter")
+        val desResponse = DesResponse(correlationId, OutboundError(fakeError))
+        MockedDesConnector.retrieve(invalidRequest).returns(Future.successful(Left(desResponse)))
+        val result: RetrieveSavingsAccountsOutcome = await(service.retrieve(invalidRequest))
+        result shouldBe Left(ErrorWrapper(Some(correlationId), fakeError, None))
+      }
+    }
+
+    "one of the errors from DES is a DownstreamError" should {
+      "return a single error if there are multiple errors" in new Test {
+        val dnsResponse = DesResponse(correlationId, MultipleErrors(Seq(ninoFormatError, serviceUnavailableError)))
+        MockedDesConnector.retrieve(invalidRequest).returns(Future.successful(Left(dnsResponse)))
+        val result: RetrieveSavingsAccountsOutcome = await(service.retrieve(invalidRequest))
+        result shouldBe Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
+      }
+    }
+
+    Map(
+      "INVALID_IDTYPE" -> DownstreamError,
+      "INVALID_IDVALUE" -> NinoFormatError,
+      "INVALID_INCOMESOURCETYPE" -> DownstreamError,
+      "INVALID_TAXYEAR" -> DownstreamError,
+      "INVALID_INCOMESOURCEID" -> DownstreamError,
+      "INVALID_ENDDATE" -> DownstreamError,
+      "NOT_FOUND" -> MatchingResourceNotFoundError,
+      "SERVER_ERROR" -> DownstreamError,
+      "SERVICE_UNAVAILABLE" -> DownstreamError
+    ).foreach {
+      case (k, v) =>
+        s"DES returns a $k error" should {
+          s"return a ${v.code} error" in new Test {
+            val input = RetrieveSavingsAccountRequest(Nino(ninoForInvalidCases), incomeSourceId)
+            val desResponse = DesResponse(correlationId, SingleError(Error(k, "doesn't matter")))
+            val expected = ErrorWrapper(Some(correlationId), v, None)
+            MockedDesConnector.retrieve(input).returns(Future.successful(Left(desResponse)))
+            val result = await(service.retrieve(input))
             result shouldBe Left(expected)
           }
         }

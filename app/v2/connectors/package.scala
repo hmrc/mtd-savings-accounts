@@ -28,7 +28,8 @@ package object connectors {
 
   type RetrieveAllSavingsAccountsConnectorOutcome = Either[DesResponse[DesError], DesResponse[List[RetrieveAllSavingsAccount]]]
 
-  type RetrieveSavingsAccountsConnectorOutcome = Either[DesResponse[DesError], DesResponse[RetrieveSavingsAccount]]
+  // Note: DES returns array of accounts - and so the connector returns these; and then we check exactly one account in the service layer
+  type RetrieveSavingsAccountConnectorOutcome = Either[DesResponse[DesError], DesResponse[List[RetrieveSavingsAccount]]]
 
 
 }

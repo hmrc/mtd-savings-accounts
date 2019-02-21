@@ -18,23 +18,22 @@ package v2.connectors.httpparsers
 
 import play.api.Logger
 import play.api.http.Status._
-import play.api.libs.json.{Json, Reads, __}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import v2.connectors.RetrieveAllSavingsAccountsConnectorOutcome
-import v2.models.domain.RetrieveAllSavingsAccount
+import v2.connectors.RetrieveSavingsAccountConnectorOutcome
+import v2.models.domain.RetrieveSavingsAccount
 import v2.models.errors.{DownstreamError, OutboundError}
 import v2.models.outcomes.DesResponse
 
-object RetrieveAllSavingsAccountsHttpParser extends HttpParser {
+object RetrieveSavingsAccountHttpParser extends HttpParser {
 
-  val logger = Logger(RetrieveAllSavingsAccountsHttpParser.getClass)
+  val logger = Logger(RetrieveSavingsAccountHttpParser.getClass)
 
-  implicit val retrieveHttpReads: HttpReads[RetrieveAllSavingsAccountsConnectorOutcome] = new HttpReads[RetrieveAllSavingsAccountsConnectorOutcome] {
-    override def read(method: String, url: String, response: HttpResponse): RetrieveAllSavingsAccountsConnectorOutcome = {
+  implicit val retrieveHttpReads: HttpReads[RetrieveSavingsAccountConnectorOutcome] = new HttpReads[RetrieveSavingsAccountConnectorOutcome] {
+    override def read(method: String, url: String, response: HttpResponse): RetrieveSavingsAccountConnectorOutcome = {
       val correlationId = retrieveCorrelationId(response)
 
       if (response.status != OK) {
-        logger.info("[RetrieveAllSavingsAccountHttpParser][read] - " +
+        logger.info("[RetrieveSavingsAccountHttpParser][read] - " +
           s"Error response received from DES with status: ${response.status} and body\n" +
           s"${response.body} and correlationId: $correlationId when calling $url")
       }
@@ -50,11 +49,10 @@ object RetrieveAllSavingsAccountsHttpParser extends HttpParser {
       }
     }
 
-    private def parseResponse(correlationId: String, response: HttpResponse): RetrieveAllSavingsAccountsConnectorOutcome =
-      response.validateJson[List[RetrieveAllSavingsAccount]] match {
+    private def parseResponse(correlationId: String, response: HttpResponse): RetrieveSavingsAccountConnectorOutcome =
+      response.validateJson[List[RetrieveSavingsAccount]] match {
         case Some(ref) => Right(DesResponse(correlationId, ref))
         case None => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
       }
   }
-
 }

@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
 import v2.models.domain.CreateSavingsAccount
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,16 +52,29 @@ class DesConnector @Inject()(http: HttpClient,
 
   }
 
-  def retrieveAll(retrieveSavingsAccountRequest: RetrieveAllSavingsAccountRequest)
+  def retrieveAll(retrieveAllSavingsAccountRequest: RetrieveAllSavingsAccountRequest)
                  (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveAllSavingsAccountsConnectorOutcome] = {
 
     import v2.connectors.httpparsers.RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads
 
-    val nino = retrieveSavingsAccountRequest.nino.nino
+    val nino = retrieveAllSavingsAccountRequest.nino.nino
 
     val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks"
 
     http.GET[RetrieveAllSavingsAccountsConnectorOutcome](url)(retrieveHttpReads, desHeaderCarrier, implicitly)
+  }
+
+  def retrieve(request: RetrieveSavingsAccountRequest)
+              (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveSavingsAccountConnectorOutcome] = {
+
+    import v2.connectors.httpparsers.RetrieveSavingsAccountHttpParser.retrieveHttpReads
+
+    val nino = request.nino.nino
+    val incomeSourceId = request.accountId
+
+    val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId"
+
+    http.GET[RetrieveSavingsAccountConnectorOutcome](url)(retrieveHttpReads, desHeaderCarrier, implicitly)
   }
 
 }

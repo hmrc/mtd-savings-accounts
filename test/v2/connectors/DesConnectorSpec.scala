@@ -18,10 +18,10 @@ package v2.connectors
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.{MockAppConfig, MockHttpClient}
-import v2.models.domain.{CreateSavingsAccount, RetrieveAllSavingsAccount}
+import v2.models.domain.{CreateSavingsAccount, RetrieveAllSavingsAccount, RetrieveSavingsAccount}
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
 
 import scala.concurrent.Future
 
@@ -52,8 +52,8 @@ class DesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, incomeSourceId)
 
         MockedHttpClient.post[CreateSavingsAccount, CreateSavingsAccountConnectorOutcome](
-        s"$baseUrl" + s"/income-tax/income-sources/nino/$nino",
-        CreateSavingsAccount(accountName)
+          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino",
+          CreateSavingsAccount(accountName)
         ).returns(Future.successful(Right(expectedDesResponse)))
 
         val result: CreateSavingsAccountConnectorOutcome =
@@ -140,6 +140,57 @@ class DesConnectorSpec extends ConnectorSpec {
 
         val result: RetrieveAllSavingsAccountsConnectorOutcome =
           await(connector.retrieveAll(RetrieveAllSavingsAccountRequest(Nino(nino))))
+
+        result shouldBe Left(expectedDesResponse)
+      }
+    }
+  }
+
+  "Retrieve single account" when {
+
+
+    val expectedResponseBody = List(RetrieveSavingsAccount(incomeSourceId))
+    "a valid request is supplied" should {
+      "return a successful response with a List of RetrieveSavingsAccount and the correct correlationId" in new Test {
+        val expectedDesResponse = DesResponse(correlationId, expectedResponseBody)
+
+        MockedHttpClient.get[RetrieveSavingsAccountConnectorOutcome](
+          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId"
+        ).returns(Future.successful(Right(expectedDesResponse)))
+
+        val result: RetrieveSavingsAccountConnectorOutcome =
+          await(connector.retrieve(RetrieveSavingsAccountRequest(Nino(nino), incomeSourceId)))
+
+        result shouldBe Right(expectedDesResponse)
+      }
+    }
+
+    "a request returning an error is supplied" should {
+      "return an error response with a single error and the correct correlationId" in new Test {
+
+        val expectedDesResponse = DesResponse(correlationId, SingleError(NinoFormatError))
+
+        MockedHttpClient.get[RetrieveSavingsAccountConnectorOutcome](
+          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId"
+        ).returns(Future.successful(Left(expectedDesResponse)))
+
+        val result: RetrieveSavingsAccountConnectorOutcome =
+          await(connector.retrieve(RetrieveSavingsAccountRequest(Nino(nino), incomeSourceId)))
+
+        result shouldBe Left(expectedDesResponse)
+      }
+
+
+      "return an error response with multiple errors and the correct correlationId" in new Test {
+
+        val expectedDesResponse = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, MatchingResourceNotFoundError)))
+
+        MockedHttpClient.get[RetrieveSavingsAccountConnectorOutcome](
+          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId"
+        ).returns(Future.successful(Left(expectedDesResponse)))
+
+        val result: RetrieveSavingsAccountConnectorOutcome =
+          await(connector.retrieve(RetrieveSavingsAccountRequest(Nino(nino), incomeSourceId)))
 
         result shouldBe Left(expectedDesResponse)
       }
