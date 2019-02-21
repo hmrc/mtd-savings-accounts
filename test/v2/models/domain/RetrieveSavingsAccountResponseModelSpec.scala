@@ -20,9 +20,9 @@ import play.api.libs.json.{JsArray, JsValue, Json}
 import support.UnitSpec
 import v2.models.utils.JsonErrorValidators
 
-class RetrieveSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators {
+class RetrieveSavingsAccountResponseModelSpec extends UnitSpec with JsonErrorValidators {
 
-  val model = RetrieveSavingsAccount("Bank Account 1")
+  val model = RetrieveSavingsAccountResponse("Bank Account 1")
 
   val multipleJsonFromDes: JsValue = Json.parse(
     """[
@@ -66,19 +66,19 @@ class RetrieveSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators 
   "reads" when {
     "single account returned from des" should {
       "read to model" in {
-        singleJsonFromDesArray.as[List[RetrieveSavingsAccount]] shouldBe List(model)
+        singleJsonFromDesArray.as[List[RetrieveSavingsAccountResponse]] shouldBe List(model)
       }
     }
 
     "multiple accounts returned from des" should {
       "read to model" in {
-        singleJsonFromDesArray.as[List[RetrieveSavingsAccount]] shouldBe List(model)
+        singleJsonFromDesArray.as[List[RetrieveSavingsAccountResponse]] shouldBe List(model)
       }
     }
 
-    testMandatoryProperty[RetrieveSavingsAccount](singleJsonFromDes)("/incomeSourceName")
+    testMandatoryProperty[RetrieveSavingsAccountResponse](singleJsonFromDes)("/incomeSourceName")
 
-    testPropertyType[RetrieveSavingsAccount](singleJsonFromDes)(
+    testPropertyType[RetrieveSavingsAccountResponse](singleJsonFromDes)(
       path = "/incomeSourceName",
       replacement = 12344.toJson,
       expectedError = JsonError.STRING_FORMAT_EXCEPTION

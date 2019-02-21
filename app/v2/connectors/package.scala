@@ -16,7 +16,7 @@
 
 package v2
 
-import v2.models.domain.{RetrieveAllSavingsAccount, RetrieveSavingsAccount}
+import v2.models.domain.{CreateSavingsAccountResponse, RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
 import v2.models.errors.{DesError, Error}
 import v2.models.outcomes.DesResponse
 
@@ -26,11 +26,11 @@ package object connectors {
 
   type DesConnectorOutcome[A] = Either[DesResponse[DesError], DesResponse[A]]
 
-  type CreateSavingsAccountConnectorOutcome = DesConnectorOutcome[String]
+  type CreateSavingsAccountConnectorOutcome = DesConnectorOutcome[CreateSavingsAccountResponse]
 
-  type RetrieveAllSavingsAccountsConnectorOutcome = DesConnectorOutcome[List[RetrieveAllSavingsAccount]]
+  type RetrieveAllSavingsAccountsConnectorOutcome = DesConnectorOutcome[List[RetrieveAllSavingsAccountResponse]]
 
   // Note: DES returns array of accounts - and so the connector returns these; and then we check exactly one account in the service layer
-  type RetrieveSavingsAccountConnectorOutcome = DesConnectorOutcome[List[RetrieveSavingsAccount]]
+  type RetrieveSavingsAccountConnectorOutcome = DesConnectorOutcome[List[RetrieveSavingsAccountResponse]]
 
 }

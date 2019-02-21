@@ -21,12 +21,12 @@ import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures._
-import v2.mocks.requestParsers.{MockCreateSavingsAccountRequestDataParser, MockRetrieveSavingsAccountRequestDataParser}
+import v2.mocks.requestParsers.{MockCreateSavingsAccountRequestDataParser, MockRetrieveAllSavingsAccountRequestDataParser}
 import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountsService}
-import v2.models.domain.RetrieveSavingsAccount
+import v2.models.domain.{CreateSavingsAccountResponse, RetrieveAllSavingsAccountResponse}
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CreateSavingsAccountRawData, CreateSavingsAccountRequestData, RetrieveSavingsAccountRawData, RetrieveSavingsAccountRequest}
+import v2.models.requestData._
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.auth.core.Enrolment
@@ -37,14 +37,13 @@ import v2.models.errors._
 import v2.services.{EnrolmentsAuthService, MtdIdLookupService}
 
 import scala.concurrent.Future
-import scala.concurrent.Future
 
 class SavingsAccountsControllerSpec extends ControllerBaseSpec {
 
   trait Test extends MockEnrolmentsAuthService
     with MockMtdIdLookupService
     with MockCreateSavingsAccountRequestDataParser
-    with MockRetrieveSavingsAccountRequestDataParser
+    with MockRetrieveAllSavingsAccountRequestDataParser
     with MockSavingsAccountsService {
 
     val hc = HeaderCarrier()
@@ -70,10 +69,10 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
   val createSavingsAccountRequest: CreateSavingsAccountRequestData =
     CreateSavingsAccountRequestData(Nino(nino), SavingsAccountsFixture.createSavingsAccountRequestModel)
 
-  val retrieveAllSavingsAccountRequest: RetrieveSavingsAccountRequest =
-    RetrieveSavingsAccountRequest(Nino(nino))
+  val retrieveAllSavingsAccountRequest: RetrieveAllSavingsAccountRequest =
+    RetrieveAllSavingsAccountRequest(Nino(nino))
 
-  val successRetrieveAllServiceResponse = List(RetrieveSavingsAccount(id, accountName))
+  val successRetrieveAllServiceResponse = List(RetrieveAllSavingsAccountResponse(id, accountName))
 
   "create" when {
     "passed a valid request" should {
@@ -83,7 +82,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
           .returns(Right(createSavingsAccountRequest))
 
         MockSavingsAccountService.create(createSavingsAccountRequest)
-          .returns(Future.successful(Right(DesResponse(correlationId, id))))
+          .returns(Future.successful(Right(DesResponse(correlationId, CreateSavingsAccountResponse(id)))))
 
         val result = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
         status(result) shouldBe CREATED
@@ -149,7 +148,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
   "retrieveAll" when {
     "passed a valid request" should {
       "return a successful response with header X-CorrelationId" in new Test {
-        MockRetrieveSavingsAccountRequestDataParser.parse(RetrieveSavingsAccountRawData(nino))
+        MockRetrieveAllSavingsAccountRequestDataParser.parse(RetrieveAllSavingsAccountRawData(nino))
           .returns(Right(retrieveAllSavingsAccountRequest))
         MockSavingsAccountService.retrieveAll(retrieveAllSavingsAccountRequest)
           .returns(Future.successful(Right(DesResponse(correlationId, successRetrieveAllServiceResponse))))
@@ -164,8 +163,8 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
     "the request received failed the validation" should {
       "return single error response with status 400" in new Test() {
 
-        MockRetrieveSavingsAccountRequestDataParser.parse(
-          RetrieveSavingsAccountRawData(nino))
+        MockRetrieveAllSavingsAccountRequestDataParser.parse(
+          RetrieveAllSavingsAccountRawData(nino))
           .returns(Left(ErrorWrapper(None, BadRequestError, None)))
 
         val result: Future[Result] = controller.retrieveAll(nino)(fakeGetRequest)
@@ -254,9 +253,9 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
     s"a ${error.code} error is returned from the parser" in new Test {
 
       val retrieveSavingsAccountRawData =
-        RetrieveSavingsAccountRawData(nino)
+        RetrieveAllSavingsAccountRawData(nino)
 
-      MockRetrieveSavingsAccountRequestDataParser.parse(retrieveSavingsAccountRawData)
+      MockRetrieveAllSavingsAccountRequestDataParser.parse(retrieveSavingsAccountRawData)
         .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
 
       val response: Future[Result] = controller.retrieveAll(nino)(fakeGetRequest)
@@ -271,9 +270,9 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
     s"a ${error} error is returned from the service" in new Test {
 
       val retrieveSavingsAccountRawData =
-        RetrieveSavingsAccountRawData(nino)
+        RetrieveAllSavingsAccountRawData(nino)
 
-      MockRetrieveSavingsAccountRequestDataParser.parse(retrieveSavingsAccountRawData)
+      MockRetrieveAllSavingsAccountRequestDataParser.parse(retrieveSavingsAccountRawData)
         .returns(Right(retrieveAllSavingsAccountRequest))
 
       MockSavingsAccountService.retrieveAll(retrieveAllSavingsAccountRequest)

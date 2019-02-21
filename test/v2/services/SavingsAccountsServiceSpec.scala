@@ -18,7 +18,7 @@ package v2.services
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
-import v2.models.domain.{CreateSavingsAccount, RetrieveAllSavingsAccount, RetrieveSavingsAccount}
+import v2.models.domain.{CreateSavingsAccountRequest, CreateSavingsAccountResponse, RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
@@ -45,11 +45,11 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
   }
 
   "create" when {
-    val validRequest = CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccount(accountName))
-    val invalidRequest = CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccount(duplicateAccountName))
+    val validRequest = CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccountRequest(accountName))
+    val invalidRequest = CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccountRequest(duplicateAccountName))
     "valid data is passed" should {
       "return a valid id" in new Test {
-        val expected = DesResponse(correlationId, incomeSourceId)
+        val expected = DesResponse(correlationId, CreateSavingsAccountResponse(incomeSourceId))
         MockedDesConnector.create(validRequest).returns(Future.successful(Right(expected)))
         val result: CreateSavingsAccountOutcome = await(service.create(validRequest))
         result shouldBe Right(expected)
@@ -93,12 +93,13 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       "ALREADY_EXISTS" -> AccountNameDuplicateError,
       "INVALID_PAYLOAD" -> BadRequestError,
       "SERVER_ERROR" -> DownstreamError,
-      "SERVICE_UNAVAILABLE" -> DownstreamError
+      "SERVICE_UNAVAILABLE" -> DownstreamError,
+      "UNEXPECTED_ERROR" -> DownstreamError
     ).foreach {
       case (k, v) =>
         s"DES returns a $k error" should {
           s"return a ${v.code} error" in new Test {
-            val input = CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccount("doesn't matter"))
+            val input = CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccountRequest("doesn't matter"))
             val desResponse = DesResponse(correlationId, SingleError(Error(k, "doesn't matter")))
             val expected = ErrorWrapper(Some(correlationId), v, None)
             MockedDesConnector.create(input).returns(Future.successful(Left(desResponse)))
@@ -110,7 +111,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
   }
 
   "retrieveAll" when {
-    val modelList = List(RetrieveAllSavingsAccount(incomeSourceId, accountName))
+    val modelList = List(RetrieveAllSavingsAccountResponse(incomeSourceId, accountName))
     val validRequest = RetrieveAllSavingsAccountRequest(Nino(nino))
     val invalidRequest = RetrieveAllSavingsAccountRequest(Nino(ninoForInvalidCases))
     "valid data is passed" should {
@@ -161,7 +162,8 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       "INVALID_ENDDATE" -> DownstreamError,
       "NOT_FOUND" -> NotFoundError,
       "SERVER_ERROR" -> DownstreamError,
-      "SERVICE_UNAVAILABLE" -> DownstreamError
+      "SERVICE_UNAVAILABLE" -> DownstreamError,
+      "UNEXPECTED_ERROR" -> DownstreamError
     ).foreach {
       case (k, v) =>
         s"DES returns a $k error" should {
@@ -178,7 +180,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
   }
 
   "retrieve" when {
-    val account = RetrieveSavingsAccount(accountName)
+    val account = RetrieveSavingsAccountResponse(accountName)
     val validRequest = RetrieveSavingsAccountRequest(Nino(nino), incomeSourceId)
     val invalidRequest = RetrieveSavingsAccountRequest(Nino(ninoForInvalidCases), incomeSourceId)
     "valid data is passed" should {
@@ -199,12 +201,12 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
 
 
     "multiple accounts are returned" should {
-      "return error" in new Test{
-        val account1 = RetrieveSavingsAccount("account1")
-        val account2 = RetrieveSavingsAccount("account2")
+      "return error" in new Test {
+        val account1 = RetrieveSavingsAccountResponse("account1")
+        val account2 = RetrieveSavingsAccountResponse("account2")
         MockedDesConnector.retrieve(validRequest).returns(Future.successful(Right(DesResponse(correlationId, List(account1, account2)))))
         val result: RetrieveSavingsAccountsOutcome = await(service.retrieve(validRequest))
-        result shouldBe Left(ErrorWrapper(Some(correlationId), ???, None))
+        result shouldBe Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
       }
     }
 
@@ -245,7 +247,8 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       "INVALID_ENDDATE" -> DownstreamError,
       "NOT_FOUND" -> MatchingResourceNotFoundError,
       "SERVER_ERROR" -> DownstreamError,
-      "SERVICE_UNAVAILABLE" -> DownstreamError
+      "SERVICE_UNAVAILABLE" -> DownstreamError,
+      "UNEXPECTED_ERROR" -> DownstreamError
     ).foreach {
       case (k, v) =>
         s"DES returns a $k error" should {

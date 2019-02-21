@@ -20,7 +20,6 @@ import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json, Reads}
 import support.UnitSpec
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import v2.Endpoints.httpparsers.StandardDesHttpParser
 import v2.connectors.DesConnectorOutcome
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
@@ -48,7 +47,7 @@ class StandardDesHttpParserSpec extends UnitSpec  {
   val desModel = DummyModel(data)
   val desResponse = DesResponse(correlationId, desModel)
 
-  import StandardDesHttpParser._
+  import v2.httpparsers.StandardDesHttpParser._
   val httpReads: HttpReads[DesConnectorOutcome[DummyModel]] = implicitly
 
   "read" when {

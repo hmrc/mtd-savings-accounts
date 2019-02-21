@@ -18,21 +18,21 @@ package v2.controllers.requestParsers.validators
 
 import support.UnitSpec
 import v2.models.errors._
-import v2.models.requestData.RetrieveSavingsAccountRawData
+import v2.models.requestData.RetrieveAllSavingsAccountRawData
 
-class RetrieveSavingsAccountValidatorSpec extends UnitSpec {
+class RetrieveAllSavingsAccountValidatorSpec extends UnitSpec {
 
   val validNino = "AA123456A"
 
   private trait Test {
-    val validator = new RetrieveSavingsAccountValidator()
+    val validator = new RetrieveAllSavingsAccountValidator()
   }
 
   "running a validation" when {
 
     "the uri is valid and the JSON payload is Valid with all fields" should {
       "return no errors" in new Test {
-        val inputData =RetrieveSavingsAccountRawData(validNino)
+        val inputData = RetrieveAllSavingsAccountRawData(validNino)
 
         val result: Seq[Error] = validator.validate(inputData)
 
@@ -45,9 +45,9 @@ class RetrieveSavingsAccountValidatorSpec extends UnitSpec {
       "return nino format error" in {
         val nino = "AA1456A"
         val expectedData = List(NinoFormatError)
-        val requestRawData = RetrieveSavingsAccountRawData(nino)
+        val requestRawData = RetrieveAllSavingsAccountRawData(nino)
 
-        val result = new RetrieveSavingsAccountValidator().validate(requestRawData)
+        val result = new RetrieveAllSavingsAccountValidator().validate(requestRawData)
 
         result shouldBe expectedData
       }

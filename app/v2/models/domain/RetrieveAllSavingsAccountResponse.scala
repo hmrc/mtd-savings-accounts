@@ -19,18 +19,18 @@ package v2.models.domain
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class RetrieveAllSavingsAccount(id: String, accountName: String)
+case class RetrieveAllSavingsAccountResponse(id: String, accountName: String)
 
-object RetrieveAllSavingsAccount {
-  implicit val reads: Reads[RetrieveAllSavingsAccount] = (
+object RetrieveAllSavingsAccountResponse {
+  implicit val reads: Reads[RetrieveAllSavingsAccountResponse] = (
     (__ \ "incomeSourceId").read[String] and
       (__ \ "incomeSourceName").read[String]
-  ) (RetrieveAllSavingsAccount.apply _)
+  ) (RetrieveAllSavingsAccountResponse.apply _)
 
-  implicit val writes: Writes[RetrieveAllSavingsAccount] = Json.writes[RetrieveAllSavingsAccount]
+  implicit val writes: Writes[RetrieveAllSavingsAccountResponse] = Json.writes[RetrieveAllSavingsAccountResponse]
 
-  val writesList: Writes[List[RetrieveAllSavingsAccount]] = new Writes[List[RetrieveAllSavingsAccount]] {
-    override def writes(o: List[RetrieveAllSavingsAccount]): JsValue = Json.obj(
+  val writesList: Writes[List[RetrieveAllSavingsAccountResponse]] = new Writes[List[RetrieveAllSavingsAccountResponse]] {
+    override def writes(o: List[RetrieveAllSavingsAccountResponse]): JsValue = Json.obj(
       "savingsAccounts" -> Json.toJson(o)
     )
   }

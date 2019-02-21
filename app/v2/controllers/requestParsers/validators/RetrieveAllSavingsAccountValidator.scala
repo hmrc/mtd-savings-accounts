@@ -18,19 +18,19 @@ package v2.controllers.requestParsers.validators
 
 import v2.controllers.requestParsers.validators.validations._
 import v2.models.errors._
-import v2.models.requestData.RetrieveSavingsAccountRawData
+import v2.models.requestData.RetrieveAllSavingsAccountRawData
 
-class RetrieveSavingsAccountValidator extends Validator[RetrieveSavingsAccountRawData] {
+class RetrieveAllSavingsAccountValidator extends Validator[RetrieveAllSavingsAccountRawData] {
 
   private val validationSet = List(parameterFormatValidation)
 
-  private def parameterFormatValidation: RetrieveSavingsAccountRawData => List[List[Error]] = (data: RetrieveSavingsAccountRawData) => {
+  private def parameterFormatValidation: RetrieveAllSavingsAccountRawData => List[List[Error]] = (data: RetrieveAllSavingsAccountRawData) => {
     List(
       NinoValidation.validate(data.nino)
     )
   }
 
-  override def validate(data: RetrieveSavingsAccountRawData): List[Error] = {
+  override def validate(data: RetrieveAllSavingsAccountRawData): List[Error] = {
     run(validationSet, data).distinct
   }
 

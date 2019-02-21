@@ -18,14 +18,14 @@ package v2.models.domain
 
 import play.api.libs.json._
 
-case class RetrieveSavingsAccount(accountName: String)
+case class RetrieveSavingsAccountResponse(accountName: String)
 
-object RetrieveSavingsAccount {
+object RetrieveSavingsAccountResponse {
   // Note that we read the array of accounts from DES into a list.
   // This list may have no entries (when account does not exist)
   // or more than one entry
-  implicit val desReads: Reads[RetrieveSavingsAccount] =
-    (__ \ "incomeSourceName").read[String].map(RetrieveSavingsAccount.apply)
+  implicit val desReads: Reads[RetrieveSavingsAccountResponse] =
+    (__ \ "incomeSourceName").read[String].map(RetrieveSavingsAccountResponse.apply)
 
-  implicit val vendorWrites: OWrites[RetrieveSavingsAccount] = Json.writes[RetrieveSavingsAccount]
+  implicit val vendorWrites: OWrites[RetrieveSavingsAccountResponse] = Json.writes[RetrieveSavingsAccountResponse]
 }

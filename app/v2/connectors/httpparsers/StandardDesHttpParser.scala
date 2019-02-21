@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package v2.httpparsers
 
 import play.api.Logger
@@ -43,13 +44,13 @@ object StandardDesHttpParser extends HttpParser {
         }
 
         response.status match {
-          case OK                                          =>
+          case OK                                             =>
             logger.info("[StandardDesHttpParser][read] - " +
               s"Success response received from DES with correlationId: $correlationId when calling $url")
             parseResponse(correlationId, response)
-          case BAD_REQUEST | NOT_FOUND                     => Left(DesResponse(correlationId, parseErrors(response)))
-          case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
-          case _                                           => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+          case BAD_REQUEST | NOT_FOUND | FORBIDDEN | CONFLICT => Left(DesResponse(correlationId, parseErrors(response)))
+          case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE    => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+          case _                                              => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
         }
       }
 

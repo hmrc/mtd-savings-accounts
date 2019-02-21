@@ -22,10 +22,10 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson, ControllerComponents}
-import v2.controllers.requestParsers.{CreateSavingsAccountRequestDataParser, RetrieveSavingsAccountRequestDataParser}
-import v2.models.domain.RetrieveSavingsAccount
+import v2.controllers.requestParsers.{CreateSavingsAccountRequestDataParser, RetrieveAllSavingsAccountRequestDataParser}
+import v2.models.domain.RetrieveAllSavingsAccountResponse
 import v2.models.errors._
-import v2.models.requestData.{CreateSavingsAccountRawData, RetrieveSavingsAccountRawData}
+import v2.models.requestData.{CreateSavingsAccountRawData, RetrieveAllSavingsAccountRawData}
 import v2.services.{EnrolmentsAuthService, MtdIdLookupService, SavingsAccountsService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,7 +35,7 @@ import scala.concurrent.Future
 class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService,
                                           val lookupService: MtdIdLookupService,
                                           createSavingsAccountRequestDataParser: CreateSavingsAccountRequestDataParser,
-                                          retrieveSavingsAccountRequestDataParser: RetrieveSavingsAccountRequestDataParser,
+                                          retrieveSavingsAccountRequestDataParser: RetrieveAllSavingsAccountRequestDataParser,
                                           savingsAccountService: SavingsAccountsService,
                                           val cc: ControllerComponents
                                          ) extends AuthorisedController(cc) {
@@ -47,7 +47,7 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
       case Right(createSavingsAccountRequest) => savingsAccountService.create(createSavingsAccountRequest).map {
         case Right(desResponse) =>
           logger.info(s"[SavingsAccountsController][create] - Success response received with CorrelationId: ${desResponse.correlationId}")
-          Created(toJson(desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId,
+          Created(Json.toJson(desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId,
             "Location" -> s"/self-assessment/ni/$nino/savings-accounts/${desResponse.responseData}")
         case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
@@ -58,11 +58,11 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
   }
 
   def retrieveAll(nino: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
-    retrieveSavingsAccountRequestDataParser.parseRequest(RetrieveSavingsAccountRawData(nino)) match {
+    retrieveSavingsAccountRequestDataParser.parseRequest(RetrieveAllSavingsAccountRawData(nino)) match {
       case Right(retrieveSavingsAccountRequest) => savingsAccountService.retrieveAll(retrieveSavingsAccountRequest).map {
         case Right(desResponse) =>
           logger.info(s"[SavingsAccountsController][retrieveAll] - Success response received with CorrelationId: ${desResponse.correlationId}")
-          Ok(RetrieveSavingsAccount.writesList.writes(desResponse.responseData))
+          Ok(RetrieveAllSavingsAccountResponse.writesList.writes(desResponse.responseData))
             .withHeaders("X-CorrelationId" -> desResponse.correlationId)
         case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
@@ -97,13 +97,4 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
         correlationId
     }
   }
-
-  private def toJson: String => JsValue = id => Json.parse(
-    s"""
-       |{
-       |  "id": "$id"
-       |}
-      """.stripMargin
-  )
-
 }

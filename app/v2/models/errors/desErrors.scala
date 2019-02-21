@@ -21,5 +21,3 @@ sealed trait DesError
 case class SingleError(error: Error) extends DesError
 case class MultipleErrors(errors: Seq[Error]) extends DesError
 case class OutboundError(error: Error) extends DesError
-case class BvrErrors(errors: Seq[Error]) extends DesError
-case class GenericError(error: Error) extends DesError

@@ -16,18 +16,15 @@
 
 package v2.models.domain
 
-import play.api.libs.json.Writes._
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
-case class CreateSavingsAccount(accountName: String)
+case class CreateSavingsAccountResponse(incomeSourceId: String)
 
-object CreateSavingsAccount {
-  implicit val reads: Reads[CreateSavingsAccount] = Json.reads[CreateSavingsAccount]
+object CreateSavingsAccountResponse {
+  implicit val reads: Reads[CreateSavingsAccountResponse] = Json.reads[CreateSavingsAccountResponse]
 
-  implicit val writes: Writes[CreateSavingsAccount] = new Writes[CreateSavingsAccount] {
-    override def writes(o: CreateSavingsAccount): JsValue = Json.obj(
-      "incomeSourceType" -> "interest-from-uk-banks",
-      "incomeSourceName" -> o.accountName
-    )
-  }
+  implicit val writes : Writes[CreateSavingsAccountResponse] =
+    (JsPath \ "id" ).write[String].contramap(unlift(CreateSavingsAccountResponse.unapply))
+
 }

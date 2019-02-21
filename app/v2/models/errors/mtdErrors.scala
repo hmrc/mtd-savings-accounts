@@ -27,6 +27,7 @@ object AccountNameMissingError extends Error("MISSING_ACCOUNT_NAME", "Account na
 // Rule Errors
 object AccountNameDuplicateError extends Error("RULE_DUPLICATE_ACCOUNT_NAME", "Duplicate account name given for supplied NINO")
 object MaximumSavingsAccountsLimitError extends Error("RULE_MAXIMUM_SAVINGS_ACCOUNTS_LIMIT", "The 1000 savings account limit exceeded")
+object MatchingResourceNotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
 
 
 //Standard Errors

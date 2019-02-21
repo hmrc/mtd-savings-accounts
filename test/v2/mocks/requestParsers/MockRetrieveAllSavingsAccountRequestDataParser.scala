@@ -18,17 +18,17 @@ package v2.mocks.requestParsers
 
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
-import v2.controllers.requestParsers.RetrieveSavingsAccountRequestDataParser
+import v2.controllers.requestParsers.RetrieveAllSavingsAccountRequestDataParser
 import v2.models.errors.ErrorWrapper
-import v2.models.requestData.{RetrieveSavingsAccountRawData, RetrieveSavingsAccountRequest}
+import v2.models.requestData.{RetrieveAllSavingsAccountRawData, RetrieveAllSavingsAccountRequest}
 
-trait MockRetrieveSavingsAccountRequestDataParser extends MockFactory {
+trait MockRetrieveAllSavingsAccountRequestDataParser extends MockFactory {
 
-  val mockRetrieveSavingsAccountRequestDataParser = mock[RetrieveSavingsAccountRequestDataParser]
+  val mockRetrieveSavingsAccountRequestDataParser = mock[RetrieveAllSavingsAccountRequestDataParser]
 
-  object MockRetrieveSavingsAccountRequestDataParser {
-    def parse(data: RetrieveSavingsAccountRawData): CallHandler[Either[ErrorWrapper, RetrieveSavingsAccountRequest]] = {
-      (mockRetrieveSavingsAccountRequestDataParser.parseRequest(_:RetrieveSavingsAccountRawData)).expects(data)
+  object MockRetrieveAllSavingsAccountRequestDataParser {
+    def parse(data: RetrieveAllSavingsAccountRawData): CallHandler[Either[ErrorWrapper, RetrieveAllSavingsAccountRequest]] = {
+      (mockRetrieveSavingsAccountRequestDataParser.parseRequest(_:RetrieveAllSavingsAccountRawData)).expects(data)
     }
   }
 }
