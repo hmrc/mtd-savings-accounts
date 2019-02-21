@@ -24,12 +24,13 @@ package object connectors {
 
   type MtdIdLookupOutcome = Either[Error, String]
 
-  type CreateSavingsAccountConnectorOutcome = Either[DesResponse[DesError], DesResponse[String]]
+  type DesConnectorOutcome[A] = Either[DesResponse[DesError], DesResponse[A]]
 
-  type RetrieveAllSavingsAccountsConnectorOutcome = Either[DesResponse[DesError], DesResponse[List[RetrieveAllSavingsAccount]]]
+  type CreateSavingsAccountConnectorOutcome = DesConnectorOutcome[String]
+
+  type RetrieveAllSavingsAccountsConnectorOutcome = DesConnectorOutcome[List[RetrieveAllSavingsAccount]]
 
   // Note: DES returns array of accounts - and so the connector returns these; and then we check exactly one account in the service layer
-  type RetrieveSavingsAccountConnectorOutcome = Either[DesResponse[DesError], DesResponse[List[RetrieveSavingsAccount]]]
-
+  type RetrieveSavingsAccountConnectorOutcome = DesConnectorOutcome[List[RetrieveSavingsAccount]]
 
 }

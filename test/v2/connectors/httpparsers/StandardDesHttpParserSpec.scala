@@ -17,50 +17,57 @@
 package v2.connectors.httpparsers
 
 import play.api.http.Status._
-import play.api.libs.json.{JsArray, JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Reads}
 import support.UnitSpec
-import uk.gov.hmrc.http.HttpResponse
-import v2.models.domain.RetrieveAllSavingsAccount
+import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import v2.Endpoints.httpparsers.StandardDesHttpParser
+import v2.connectors.DesConnectorOutcome
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 
 
-class RetrieveAllSavingsAccountsHttpParserSpec extends UnitSpec {
+// WLOG if Reads tested elsewhere
+case class DummyModel(data: String)
 
+object DummyModel {
+  implicit val reads: Reads[DummyModel] = Json.reads
+}
+
+
+class StandardDesHttpParserSpec extends UnitSpec  {
+
+  // WLOG (unused)
   val method = "POST"
   val url = "test-url"
 
-  val incomeSourceId1 = "SAVKB2UVwUTBQGJ"
-  val incomeSourceName1 = "Main account name"
-  val incomeSourceId2 = "SAVKB2UVwUTBQGK"
-  val incomeSourceName2 = "Shares savings account"
   val correlationId = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
-  val desExpectedJson: JsValue = JsArray(Seq(
-    Json.obj("incomeSourceId" -> incomeSourceId1, "incomeSourceName" -> incomeSourceName1),
-    Json.obj("incomeSourceId" -> incomeSourceId2, "incomeSourceName" -> incomeSourceName2)
-  ))
-  val desExpectedJsonAfterReads: List[RetrieveAllSavingsAccount] = List(
-    RetrieveAllSavingsAccount(incomeSourceId1, incomeSourceName1),
-    RetrieveAllSavingsAccount(incomeSourceId2, incomeSourceName2)
-  )
-  val desResponse = DesResponse(correlationId, desExpectedJsonAfterReads)
+
+  val data = "someData"
+  val desExpectedJson: JsValue = Json.obj("data" -> data)
+
+  val desModel = DummyModel(data)
+  val desResponse = DesResponse(correlationId, desModel)
+
+  import StandardDesHttpParser._
+  val httpReads: HttpReads[DesConnectorOutcome[DummyModel]] = implicitly
 
   "read" when {
     "the HTTP response status is 200" when {
-      "return a Right DES response if the response is a List of RetrieveAllSavingsAccount" in {
+      "return a Right DES response containing the model object if the response json corresponds to a model object" in {
 
         val httpResponse = HttpResponse(OK, Some(desExpectedJson), Map("CorrelationId" -> Seq(correlationId)))
 
-        val result = RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads.read(method, url, httpResponse)
+        val result = httpReads.read(method, url, httpResponse)
         result shouldBe Right(desResponse)
       }
-      "return an outbound error if the response is not a List of RetrieveAllSavingsAccount" in {
+
+      "return an outbound error if a model object cannot be read from the response json" in {
 
         val badFieldTypeJson: JsValue = Json.obj("incomeSourceId" -> 1234, "incomeSourceName" -> 1234)
         val httpResponse = HttpResponse(OK, Some(badFieldTypeJson), Map("CorrelationId" -> Seq(correlationId)))
         val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
-        val result = RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads.read(method, url, httpResponse)
+        val result = httpReads.read(method, url, httpResponse)
         result shouldBe Left(expected)
       }
     }
@@ -80,7 +87,7 @@ class RetrieveAllSavingsAccountsHttpParserSpec extends UnitSpec {
             val expected = DesResponse(correlationId, SingleError(Error("TEST_CODE", "some reason")))
 
             val httpResponse = HttpResponse(response, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
-            val result = RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads.read(method, url, httpResponse)
+            val result = httpReads.read(method, url, httpResponse)
             result shouldBe Left(expected)
           }
 
@@ -103,7 +110,7 @@ class RetrieveAllSavingsAccountsHttpParserSpec extends UnitSpec {
             val expected = DesResponse(correlationId, MultipleErrors(Seq(Error("TEST_CODE_1", "some reason"), Error("TEST_CODE_2", "some reason"))))
 
             val httpResponse = HttpResponse(response, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
-            val result = RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads.read(method, url, httpResponse)
+            val result = httpReads.read(method, url, httpResponse)
             result shouldBe Left(expected)
           }
 
@@ -118,7 +125,7 @@ class RetrieveAllSavingsAccountsHttpParserSpec extends UnitSpec {
             val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
             val httpResponse = HttpResponse(response, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
-            val result = RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads.read(method, url, httpResponse)
+            val result = httpReads.read(method, url, httpResponse)
             result shouldBe Left(expected)
           }
         }
@@ -138,7 +145,7 @@ class RetrieveAllSavingsAccountsHttpParserSpec extends UnitSpec {
             val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
             val httpResponse = HttpResponse(response, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
-            val result = RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads.read(method, url, httpResponse)
+            val result = httpReads.read(method, url, httpResponse)
             result shouldBe Left(expected)
           }
 
@@ -153,7 +160,7 @@ class RetrieveAllSavingsAccountsHttpParserSpec extends UnitSpec {
             val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
             val httpResponse = HttpResponse(response, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
-            val result = RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads.read(method, url, httpResponse)
+            val result = httpReads.read(method, url, httpResponse)
             result shouldBe Left(expected)
           }
         }
@@ -174,7 +181,7 @@ class RetrieveAllSavingsAccountsHttpParserSpec extends UnitSpec {
         val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
         val httpResponse = HttpResponse(status, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
-        val result = RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads.read(method, url, httpResponse)
+        val result = httpReads.read(method, url, httpResponse)
         result shouldBe Left(expected)
       }
 
@@ -189,7 +196,7 @@ class RetrieveAllSavingsAccountsHttpParserSpec extends UnitSpec {
         val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
         val httpResponse = HttpResponse(status, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
-        val result = RetrieveAllSavingsAccountsHttpParser.retrieveHttpReads.read(method, url, httpResponse)
+        val result = httpReads.read(method, url, httpResponse)
         result shouldBe Left(expected)
       }
     }

@@ -43,9 +43,9 @@ class SavingsAccountsService @Inject()(connector: DesConnector) {
         } else {
           Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
         }
-      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorCreate(error.code), None))
-      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
-      case Right(desResponse) => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
+      case Left(DesResponse(correlationId, SingleError(error)))     => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorCreate(error.code), None))
+      case Left(DesResponse(correlationId, OutboundError(error)))   => Left(ErrorWrapper(Some(correlationId), error, None))
+      case Right(desResponse)                                       => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
     }
   }
 
@@ -63,9 +63,9 @@ class SavingsAccountsService @Inject()(connector: DesConnector) {
         } else {
           Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
         }
-      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorRetrieveAll(error.code), None))
-      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
-      case Right(desResponse) => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
+      case Left(DesResponse(correlationId, SingleError(error)))     => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorRetrieveAll(error.code), None))
+      case Left(DesResponse(correlationId, OutboundError(error)))   => Left(ErrorWrapper(Some(correlationId), error, None))
+      case Right(desResponse)                                       => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
     }
   }
 
@@ -83,13 +83,13 @@ class SavingsAccountsService @Inject()(connector: DesConnector) {
         } else {
           Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
         }
-      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorRetrieveAll(error.code), None))
-      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
-      case Right(desResponse) =>
+      case Left(DesResponse(correlationId, SingleError(error)))     => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorRetrieveAll(error.code), None))
+      case Left(DesResponse(correlationId, OutboundError(error)))   => Left(ErrorWrapper(Some(correlationId), error, None))
+      case Right(desResponse)                                       =>
         desResponse.responseData match {
           case ac :: Nil => Right(DesResponse(desResponse.correlationId, ac))
-          case Nil => Left(ErrorWrapper(Some(desResponse.correlationId), MatchingResourceNotFoundError, None))
-          case acs => Left(???) // FIXME or do we just send back the first one?
+          case Nil       => Left(ErrorWrapper(Some(desResponse.correlationId), MatchingResourceNotFoundError, None))
+          case acs       => Left(???) // FIXME or do we just send back the first one?
         }
     }
   }
