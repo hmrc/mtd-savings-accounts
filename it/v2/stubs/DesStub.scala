@@ -26,6 +26,9 @@ object DesStub extends WireMockMethods {
   private def savingsIncomeUrl(nino: String): String =
     s"/income-tax/income-sources/nino/$nino"
 
+  private def getAllSavingsAccountsUrl(nino: String): String =
+    s"/income-tax/income-sources/nino/$nino.*"
+
   private val createResponseBody = Json.parse(
     """
       |{
@@ -40,6 +43,24 @@ object DesStub extends WireMockMethods {
 
   def createError(nino: String, errorStatus: Int, errorBody: String): StubMapping = {
     when(method = POST, uri = savingsIncomeUrl(nino))
+      .thenReturn(status = errorStatus, errorBody)
+  }
+
+  private val retrieveResponseBody = Json.parse(
+    """
+      |[{
+      | "incomeSourceId": "SAVKB2UVwUTBQGJ",
+      | "incomeSourceName": "Main account name"
+      |}]
+    """.stripMargin)
+
+  def retrieveSuccess(nino: String): StubMapping = {
+    when(method = GET, uri = getAllSavingsAccountsUrl(nino))
+      .thenReturn(status = OK, retrieveResponseBody)
+  }
+
+  def retrieveError(nino: String, errorStatus: Int, errorBody: String): StubMapping = {
+    when(method = GET, uri = getAllSavingsAccountsUrl(nino))
       .thenReturn(status = errorStatus, errorBody)
   }
 
