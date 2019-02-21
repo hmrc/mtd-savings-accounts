@@ -16,7 +16,7 @@
 
 package v2
 
-import v2.models.domain.{RetrieveSavingsAccount, RetrievedSavingsAccount}
+import v2.models.domain.{RetrieveAllSavingsAccount, RetrieveSavingsAccount}
 import v2.models.errors.{DesError, Error}
 import v2.models.outcomes.DesResponse
 
@@ -26,9 +26,9 @@ package object connectors {
 
   type CreateSavingsAccountConnectorOutcome = Either[DesResponse[DesError], DesResponse[String]]
 
-  type RetrieveAllSavingsAccountsConnectorOutcome = Either[DesResponse[DesError], DesResponse[List[RetrieveSavingsAccount]]]
+  type RetrieveAllSavingsAccountsConnectorOutcome = Either[DesResponse[DesError], DesResponse[List[RetrieveAllSavingsAccount]]]
 
-  type RetrieveSavingsAccountsConnectorOutcome = Either[DesResponse[DesError], DesResponse[RetrievedSavingsAccount]]
+  type RetrieveSavingsAccountsConnectorOutcome = Either[DesResponse[DesError], DesResponse[RetrieveSavingsAccount]]
 
 
 }

@@ -18,10 +18,10 @@ package v2.connectors
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.{MockAppConfig, MockHttpClient}
-import v2.models.domain.{CreateSavingsAccount, RetrieveSavingsAccount}
+import v2.models.domain.{CreateSavingsAccount, RetrieveAllSavingsAccount}
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveSavingsAccountRequest}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest}
 
 import scala.concurrent.Future
 
@@ -99,7 +99,7 @@ class DesConnectorSpec extends ConnectorSpec {
   }
 
   "Retrieve all savings accounts" when {
-    val expectedResponseBody = List(RetrieveSavingsAccount(incomeSourceId, accountName))
+    val expectedResponseBody = List(RetrieveAllSavingsAccount(incomeSourceId, accountName))
     "a valid request is supplied" should {
       "return a successful response with a List of RetrieveSavingsAccount and the correct correlationId" in new Test {
 
@@ -110,7 +110,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Right(expectedDesResponse)))
 
         val result: RetrieveAllSavingsAccountsConnectorOutcome =
-          await(connector.retrieveAll(RetrieveSavingsAccountRequest(Nino(nino))))
+          await(connector.retrieveAll(RetrieveAllSavingsAccountRequest(Nino(nino))))
 
         result shouldBe Right(expectedDesResponse)
       }
@@ -126,7 +126,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveAllSavingsAccountsConnectorOutcome =
-          await(connector.retrieveAll(RetrieveSavingsAccountRequest(Nino(nino))))
+          await(connector.retrieveAll(RetrieveAllSavingsAccountRequest(Nino(nino))))
 
         result shouldBe Left(expectedDesResponse)
       }
@@ -139,7 +139,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveAllSavingsAccountsConnectorOutcome =
-          await(connector.retrieveAll(RetrieveSavingsAccountRequest(Nino(nino))))
+          await(connector.retrieveAll(RetrieveAllSavingsAccountRequest(Nino(nino))))
 
         result shouldBe Left(expectedDesResponse)
       }

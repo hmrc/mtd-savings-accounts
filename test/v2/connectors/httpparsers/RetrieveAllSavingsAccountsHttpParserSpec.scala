@@ -20,7 +20,7 @@ import play.api.http.Status._
 import play.api.libs.json.{JsArray, JsValue, Json}
 import support.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
-import v2.models.domain.RetrieveSavingsAccount
+import v2.models.domain.RetrieveAllSavingsAccount
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 
@@ -39,9 +39,9 @@ class RetrieveAllSavingsAccountsHttpParserSpec extends UnitSpec {
     Json.obj("incomeSourceId" -> incomeSourceId1, "incomeSourceName" -> incomeSourceName1),
     Json.obj("incomeSourceId" -> incomeSourceId2, "incomeSourceName" -> incomeSourceName2)
   ))
-  val desExpectedJsonAfterReads: List[RetrieveSavingsAccount] = List(
-    RetrieveSavingsAccount(incomeSourceId1, incomeSourceName1),
-    RetrieveSavingsAccount(incomeSourceId2, incomeSourceName2)
+  val desExpectedJsonAfterReads: List[RetrieveAllSavingsAccount] = List(
+    RetrieveAllSavingsAccount(incomeSourceId1, incomeSourceName1),
+    RetrieveAllSavingsAccount(incomeSourceId2, incomeSourceName2)
   )
   val desResponse = DesResponse(correlationId, desExpectedJsonAfterReads)
 
