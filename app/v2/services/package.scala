@@ -17,7 +17,7 @@
 package v2
 
 import v2.models.auth.UserDetails
-import v2.models.domain.RetrieveSavingsAccount
+import v2.models.domain.{RetrieveSavingsAccount, RetrievedSavingsAccount}
 import v2.models.errors.{Error, ErrorWrapper}
 import v2.models.outcomes.DesResponse
 
@@ -27,5 +27,7 @@ package object services {
 
   type CreateSavingsAccountOutcome = Either[ErrorWrapper, DesResponse[String]]
   type RetrieveAllSavingsAccountsOutcome = Either[ErrorWrapper, DesResponse[List[RetrieveSavingsAccount]]]
+
+  type RetrieveSavingsAccountsOutcome = Either[ErrorWrapper, DesResponse[RetrievedSavingsAccount]]
 
 }

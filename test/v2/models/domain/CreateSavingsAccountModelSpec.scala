@@ -17,9 +17,7 @@
 package v2.models.domain
 
 import play.api.libs.json._
-import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
-import v2.controllers.requestParsers.validators.validations.JsonFormatValidation
 import v2.models.utils.JsonErrorValidators
 
 class CreateSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators {
