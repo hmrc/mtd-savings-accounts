@@ -30,13 +30,19 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
   private trait Test {
 
     val nino: String
+    val specificAccountId: Option[String] = None
     val correlationId = "X-123"
 
     def setupStubs(): StubMapping
 
+    private def uri = specificAccountId match {
+      case None     => s"/2.0/ni/$nino/savings-accounts"
+      case Some(id) => s"/2.0/ni/$nino/savings-accounts/$id"
+    }
+
     def request(): WSRequest = {
       setupStubs()
-      buildRequest(s"/2.0/ni/$nino/savings-accounts")
+      buildRequest(uri)
     }
   }
 
@@ -115,27 +121,27 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
 
     s"incorrect body is supplied" in new Test {
-        val requestBody:JsValue = Json.parse(
-          s"""{
-             | "accountName": "1*"
-             |}""".stripMargin
-        )
+      val requestBody: JsValue = Json.parse(
+        s"""{
+           | "accountName": "1*"
+           |}""".stripMargin
+      )
 
-        override val nino: String = "AA123456A"
+      override val nino: String = "AA123456A"
 
-        override def setupStubs(): StubMapping = {
-          AuditStub.audit()
-          AuthStub.authorised()
-          MtdIdLookupStub.ninoFound(nino)
-        }
+      override def setupStubs(): StubMapping = {
+        AuditStub.audit()
+        AuthStub.authorised()
+        MtdIdLookupStub.ninoFound(nino)
+      }
 
-        val response: WSResponse = await(request().post(requestBody))
-        response.status shouldBe Status.BAD_REQUEST
-        response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameFormatError, None))
+      val response: WSResponse = await(request().post(requestBody))
+      response.status shouldBe Status.BAD_REQUEST
+      response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameFormatError, None))
     }
 
     s"empty body is supplied" in new Test {
-      val requestBody:JsValue = Json.parse(
+      val requestBody: JsValue = Json.parse(
         s"""{
            |
            |}""".stripMargin
@@ -155,7 +161,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
   }
 
-  "Calling the retrieve savings account endpoint" should {
+  "Calling the retrieve all savings account endpoint" should {
 
     "return a 200 status code" when {
 
@@ -166,7 +172,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
           AuditStub.audit()
           AuthStub.authorised()
           MtdIdLookupStub.ninoFound(nino)
-          DesStub.retrieveSuccess(nino)
+          DesStub.retrieveAllSuccess(nino)
         }
 
         val response: WSResponse = await(request().get())
@@ -201,7 +207,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
           AuditStub.audit()
           AuthStub.authorised()
           MtdIdLookupStub.ninoFound(nino)
-          DesStub.retrieveError(nino, desStatus, errorBody(desCode))
+          DesStub.retrieveAllError(nino, desStatus, errorBody(desCode))
         }
 
         val response: WSResponse = await(request().get())
@@ -223,6 +229,95 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
           AuditStub.audit()
           AuthStub.authorised()
           MtdIdLookupStub.ninoFound(nino)
+        }
+
+        val response: WSResponse = await(request().get())
+        response.status shouldBe expectedStatus
+        response.json shouldBe Json.toJson(expectedBody)
+      }
+    }
+  }
+
+
+  "Calling the retrieve savings account endpoint" should {
+
+    "return a 200 status code" when {
+
+      "any valid request is made" in new Test {
+
+        val accountId = "SAVKB2UVwUTBQGJ"
+        override val specificAccountId = Some(accountId)
+        override val nino: String = "AA123456A"
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.retrieveSuccess(nino, accountId)
+        }
+
+        val response: WSResponse = await(request().get())
+        response.status shouldBe Status.OK
+        response.json shouldBe Json.parse(
+        s"""
+            |{
+            |    "accountName": "Main account name"
+            |}
+          """.stripMargin)
+      }
+    }
+
+    "return 500 (Internal Server Error)" when {
+
+      createErrorTest(Status.BAD_REQUEST, "INVALID_IDTYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      createErrorTest(Status.BAD_REQUEST, "INVALID_INCOMESOURCETYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      createErrorTest(Status.BAD_REQUEST, "INVALID_TAXYEAR", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      createErrorTest(Status.BAD_REQUEST, "INVALID_INCOMESOURCEID", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      createErrorTest(Status.BAD_REQUEST, "INVALID_ENDDATE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      createErrorTest(Status.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      createErrorTest(Status.INTERNAL_SERVER_ERROR, "SERVER_ERROR", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+    }
+
+    "return 400 (Bad Request)" when {
+      createErrorTest(Status.BAD_REQUEST, "INVALID_IDVALUE", Status.BAD_REQUEST, NinoFormatError)
+    }
+
+    "return 404 (Not Found)" when {
+      createErrorTest(Status.NOT_FOUND, "NOT_FOUND", Status.NOT_FOUND, NotFoundError)
+    }
+
+    def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
+      s"des returns an $desCode error" in new Test {
+        val accountId = "SAVKB2UVwUTBQGJ"
+        override val specificAccountId = Some(accountId)
+        override val nino: String = "AA123456A"
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.retrieveError(nino, accountId, desStatus, errorBody(desCode))
+        }
+
+        val response: WSResponse = await(request().get())
+        response.status shouldBe expectedStatus
+        response.json shouldBe Json.toJson(expectedBody)
+      }
+    }
+
+    "return 400 (Bad Request)" when {
+      createRequestValidationErrorTest("BADNINO", "SAVKB2UVwUTBQGJ", Status.BAD_REQUEST, NinoFormatError)
+      createRequestValidationErrorTest("AA123456A", "BADID", Status.BAD_REQUEST, AccountIdFormatError)
+    }
+
+    def createRequestValidationErrorTest(requestNino: String, accountId: String, expectedStatus: Int, expectedBody: Error): Unit = {
+      s"validation fails with ${expectedBody.code} error" in new Test {
+        override val specificAccountId = Some(accountId)
+        override val nino: String = requestNino
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
         }
 
         val response: WSResponse = await(request().get())

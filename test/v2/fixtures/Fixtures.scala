@@ -47,6 +47,10 @@ object Fixtures {
       ))
     )
 
+    val retrieveJsonReponse: String => JsValue =  accountName => Json.obj(
+          "accountName" -> accountName
+    )
+
     val multipleErrorsFromParserJson: String => JsValue = correlationId => Json.toJson(
       ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(AccountNameMissingError, AccountNameFormatError)))
     )
