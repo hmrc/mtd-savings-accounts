@@ -19,7 +19,7 @@ package v2.mocks.services
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveSavingsAccountRequest}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest}
 import v2.services.{CreateSavingsAccountOutcome, RetrieveAllSavingsAccountsOutcome, SavingsAccountsService}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,8 +33,8 @@ trait MockSavingsAccountsService extends MockFactory{
       (mockSavingsAccountService.create(_:CreateSavingsAccountRequestData)(_: HeaderCarrier, _: ExecutionContext))
         .expects(savingsAccountRequest, *, *)
     }
-    def retrieveAll(savingsAccountRequest: RetrieveSavingsAccountRequest): CallHandler[Future[RetrieveAllSavingsAccountsOutcome]] = {
-      (mockSavingsAccountService.retrieveAll(_:RetrieveSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
+    def retrieveAll(savingsAccountRequest: RetrieveAllSavingsAccountRequest): CallHandler[Future[RetrieveAllSavingsAccountsOutcome]] = {
+      (mockSavingsAccountService.retrieveAll(_:RetrieveAllSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
         .expects(savingsAccountRequest, *, *)
     }
   }

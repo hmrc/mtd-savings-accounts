@@ -17,55 +17,46 @@
 package v2.services
 
 import javax.inject.Inject
-import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveSavingsAccountRequest}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SavingsAccountsService @Inject()(connector: DesConnector) {
+class SavingsAccountsService @Inject()(connector: DesConnector) extends DesServiceSupport {
 
-  val logger: Logger = Logger(this.getClass)
+  override val serviceName: String = "SavingsAccountsService"
 
-  def create(createSavingsAccountRequestData: CreateSavingsAccountRequestData)
+  def create(request: CreateSavingsAccountRequestData)
             (implicit hc: HeaderCarrier,
              ec: ExecutionContext): Future[CreateSavingsAccountOutcome] = {
-    connector.create(createSavingsAccountRequestData).map {
-      case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
-        val mtdErrors = errors.map(error => desErrorToMtdErrorCreate(error.code))
-        if(mtdErrors.contains(DownstreamError)) {
-          logger.info(s"[SavingsAccountsService] [create] [CorrelationId - $correlationId]" +
-            s" - downstream returned INVALID_IDTYPE, SERVER_ERROR or SERVICE_UNAVAILABLE. Revert to ISE")
-          Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
-        } else {
-          Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
-        }
-      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorCreate(error.code), None))
-      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
-      case Right(desResponse) => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
-    }
+    connector.create(request)
+      .map(mapToVendorDirect("create", desErrorToMtdErrorCreate))
   }
 
-  def retrieveAll(retrieveSavingsAccountRequest: RetrieveSavingsAccountRequest)
+  def retrieveAll(request: RetrieveAllSavingsAccountRequest)
                  (implicit hc: HeaderCarrier,
                   ec: ExecutionContext): Future[RetrieveAllSavingsAccountsOutcome] = {
-    connector.retrieveAll(retrieveSavingsAccountRequest).map {
-      case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
-        val mtdErrors = errors.map(error => desErrorToMtdErrorRetrieveAll(error.code))
-        if(mtdErrors.contains(DownstreamError)) {
-          logger.info(s"[SavingsAccountsService] [retrieveAll] [CorrelationId - $correlationId]" +
-            s" - downstream returned INVALID_IDTYPE, INVALID_INCOMESOURCETYPE, INVALID_TAXYEAR, INVALID_INCOMESOURCEID," +
-            s" INVALID_ENDDATE, SERVER_ERROR or SERVICE_UNAVAILABLE. Revert to ISE")
-          Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
-        } else {
-          Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
-        }
-      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorRetrieveAll(error.code), None))
-      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
-      case Right(desResponse) => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
+    connector.retrieveAll(request)
+      .map(mapToVendorDirect("retrieveAll", desErrorToMtdErrorRetrieveAll))
+  }
+
+  def retrieve(request: RetrieveSavingsAccountRequest)(implicit hc: HeaderCarrier,
+                                                       ec: ExecutionContext): Future[RetrieveSavingsAccountsOutcome] = {
+    connector.retrieve(request).map {
+      mapToVendor("retrieve", desErrorToMtdErrorRetrieve) {
+        desResponse =>
+          desResponse.responseData match {
+            case ac :: Nil => Right(DesResponse(desResponse.correlationId, ac))
+            case Nil       => Left(ErrorWrapper(Some(desResponse.correlationId), MatchingResourceNotFoundError, None))
+            case _         =>
+              logger.info(s"[SavingsAccountsService] [retrieve] [CorrelationId - ${desResponse.correlationId}] - " +
+                "More than one matching account found")
+              Left(ErrorWrapper(Some(desResponse.correlationId), DownstreamError, None))
+          }
+      }
     }
   }
 
@@ -77,7 +68,11 @@ class SavingsAccountsService @Inject()(connector: DesConnector) {
     "INVALID_PAYLOAD" -> BadRequestError,
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
-  )
+  ).withDefault { error =>
+    logger.info(s"[SavingsAccountsService] [create] - No mapping found for error code $error")
+    DownstreamError
+  }
+
 
   private def desErrorToMtdErrorRetrieveAll: Map[String, Error] = Map(
     "INVALID_IDTYPE" -> DownstreamError,
@@ -89,6 +84,24 @@ class SavingsAccountsService @Inject()(connector: DesConnector) {
     "NOT_FOUND" -> NotFoundError,
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
-  )
+  ).withDefault { error =>
+    logger.info(s"[SavingsAccountsService] [retrieveAll] - No mapping found for error code $error")
+    DownstreamError
+  }
+
+  private def desErrorToMtdErrorRetrieve: Map[String, Error] = Map(
+    "INVALID_IDTYPE" -> DownstreamError,
+    "INVALID_IDVALUE" -> NinoFormatError,
+    "INVALID_INCOMESOURCETYPE" -> DownstreamError,
+    "INVALID_TAXYEAR" -> DownstreamError,
+    "INVALID_INCOMESOURCEID" -> DownstreamError,
+    "INVALID_ENDDATE" -> DownstreamError,
+    "NOT_FOUND" -> MatchingResourceNotFoundError,
+    "SERVER_ERROR" -> DownstreamError,
+    "SERVICE_UNAVAILABLE" -> DownstreamError
+  ).withDefault { error =>
+    logger.info(s"[SavingsAccountsService] [retrieve] - No mapping found for error code $error")
+    DownstreamError
+  }
 
 }

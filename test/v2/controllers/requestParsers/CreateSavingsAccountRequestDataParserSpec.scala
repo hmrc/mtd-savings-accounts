@@ -21,7 +21,7 @@ import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.validators.MockCreateSavingsAccountValidator
-import v2.models.domain.CreateSavingsAccount
+import v2.models.domain.CreateSavingsAccountRequest
 import v2.models.errors.{AccountNameDuplicateError, BadRequestError, ErrorWrapper, NinoFormatError}
 import v2.models.requestData.{CreateSavingsAccountRawData, CreateSavingsAccountRequestData}
 
@@ -37,7 +37,7 @@ class CreateSavingsAccountRequestDataParserSpec extends UnitSpec {
   val validJsonBody = AnyContentAsJson(Json.parse(json))
   val correlationId = "X-123"
 
-  val model = CreateSavingsAccount(accountName = "Main account name")
+  val model = CreateSavingsAccountRequest(accountName = "Main account name")
 
   trait Test extends MockCreateSavingsAccountValidator {
     lazy val parser = new CreateSavingsAccountRequestDataParser(mockValidator)

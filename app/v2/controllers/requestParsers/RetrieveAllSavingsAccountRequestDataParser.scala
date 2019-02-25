@@ -18,17 +18,17 @@ package v2.controllers.requestParsers
 
 import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
-import v2.controllers.requestParsers.validators.RetrieveSavingsAccountValidator
+import v2.controllers.requestParsers.validators.RetrieveAllSavingsAccountValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper}
-import v2.models.requestData.{RetrieveSavingsAccountRawData, RetrieveSavingsAccountRequest}
+import v2.models.requestData.{RetrieveAllSavingsAccountRawData, RetrieveAllSavingsAccountRequest}
 
-class RetrieveSavingsAccountRequestDataParser @Inject()(validator: RetrieveSavingsAccountValidator) {
+class RetrieveAllSavingsAccountRequestDataParser @Inject()(validator: RetrieveAllSavingsAccountValidator) {
 
-  def parseRequest(data: RetrieveSavingsAccountRawData): Either[ErrorWrapper, RetrieveSavingsAccountRequest] = {
+  def parseRequest(data: RetrieveAllSavingsAccountRawData): Either[ErrorWrapper, RetrieveAllSavingsAccountRequest] = {
     validator.validate(data) match {
       case List() =>
         //Validation passed.  Request data is ok to transform.
-        Right(RetrieveSavingsAccountRequest(Nino(data.nino)))
+        Right(RetrieveAllSavingsAccountRequest(Nino(data.nino)))
       case err :: Nil => Left(ErrorWrapper(None, err, None))
       case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }

@@ -19,7 +19,7 @@ package v2.controllers.requestParsers
 import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.CreateSavingsAccountValidator
-import v2.models.domain.CreateSavingsAccount
+import v2.models.domain.CreateSavingsAccountRequest
 import v2.models.errors.{BadRequestError, ErrorWrapper}
 import v2.models.requestData.{CreateSavingsAccountRawData, CreateSavingsAccountRequestData}
 
@@ -29,7 +29,7 @@ class CreateSavingsAccountRequestDataParser @Inject()(validator: CreateSavingsAc
     validator.validate(data) match {
       case List() =>
         //Validation passed.  Request data is ok to transform.
-        Right(CreateSavingsAccountRequestData(Nino(data.nino), data.body.json.as[CreateSavingsAccount]))
+        Right(CreateSavingsAccountRequestData(Nino(data.nino), data.body.json.as[CreateSavingsAccountRequest]))
       case err :: Nil => Left(ErrorWrapper(None, err, None))
       case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }

@@ -17,12 +17,10 @@
 package v2.models.domain
 
 import play.api.libs.json._
-import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
-import v2.controllers.requestParsers.validators.validations.JsonFormatValidation
 import v2.models.utils.JsonErrorValidators
 
-class CreateSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators {
+class CreateSavingsAccountRequestModelSpec extends UnitSpec with JsonErrorValidators {
 
   val mtdFormatJson: JsValue = Json.parse(
     """
@@ -35,15 +33,15 @@ class CreateSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators {
     "passed valid JSON" should {
       "return a valid SavingsAccount object" in {
 
-        val model = CreateSavingsAccount(accountName = "Main account name")
+        val model = CreateSavingsAccountRequest(accountName = "Main account name")
 
-        mtdFormatJson.as[CreateSavingsAccount] shouldBe model
+        mtdFormatJson.as[CreateSavingsAccountRequest] shouldBe model
       }
     }
 
-    testMandatoryProperty[CreateSavingsAccount](mtdFormatJson)("/accountName")
+    testMandatoryProperty[CreateSavingsAccountRequest](mtdFormatJson)("/accountName")
 
-    testPropertyType[CreateSavingsAccount](mtdFormatJson)(
+    testPropertyType[CreateSavingsAccountRequest](mtdFormatJson)(
       path = "/accountName",
       replacement = 12344.toJson,
       expectedError = JsonError.STRING_FORMAT_EXCEPTION
@@ -61,9 +59,9 @@ class CreateSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators {
             |}
           """.stripMargin
 
-        val model = CreateSavingsAccount(accountName = "Main account name")
+        val model = CreateSavingsAccountRequest(accountName = "Main account name")
 
-        Json.parse(json) shouldBe CreateSavingsAccount.writes.writes(model)
+        Json.parse(json) shouldBe CreateSavingsAccountRequest.writes.writes(model)
       }
     }
   }

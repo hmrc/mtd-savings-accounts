@@ -16,7 +16,4 @@
 
 package v2.models.requestData
 
-import uk.gov.hmrc.domain.Nino
-import v2.models.domain.CreateSavingsAccountRequest
-
-case class CreateSavingsAccountRequestData(nino: Nino, createSavingsAccount: CreateSavingsAccountRequest)
+case class RetrieveAllSavingsAccountRawData(nino: String) extends InputData

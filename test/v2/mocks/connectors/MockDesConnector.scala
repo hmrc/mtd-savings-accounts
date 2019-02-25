@@ -19,8 +19,8 @@ package v2.mocks.connectors
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.connectors.{CreateSavingsAccountConnectorOutcome, DesConnector, RetrieveAllSavingsAccountsConnectorOutcome}
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveSavingsAccountRequest}
+import v2.connectors.{CreateSavingsAccountConnectorOutcome, DesConnector, RetrieveAllSavingsAccountsConnectorOutcome, RetrieveSavingsAccountConnectorOutcome}
+import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -34,8 +34,13 @@ trait MockDesConnector extends MockFactory {
         .expects(createSavingsAccountRequestData, *, *)
     }
 
-    def retrieveAll(retrieveSavingsAccountRequest: RetrieveSavingsAccountRequest): CallHandler[Future[RetrieveAllSavingsAccountsConnectorOutcome]] = {
-      (connector.retrieveAll(_: RetrieveSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
+    def retrieveAll(retrieveSavingsAccountRequest: RetrieveAllSavingsAccountRequest): CallHandler[Future[RetrieveAllSavingsAccountsConnectorOutcome]] = {
+      (connector.retrieveAll(_: RetrieveAllSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(retrieveSavingsAccountRequest, *, *)
+    }
+
+    def retrieve(retrieveSavingsAccountRequest: RetrieveSavingsAccountRequest): CallHandler[Future[RetrieveSavingsAccountConnectorOutcome]] = {
+      (connector.retrieve(_: RetrieveSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
         .expects(retrieveSavingsAccountRequest, *, *)
     }
   }

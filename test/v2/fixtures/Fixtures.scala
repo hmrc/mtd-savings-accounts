@@ -16,8 +16,8 @@
 
 package v2.fixtures
 
+import v2.models.domain.CreateSavingsAccountRequest
 import play.api.libs.json.{JsArray, JsValue, Json}
-import v2.models.domain.CreateSavingsAccount
 import v2.models.errors._
 
 object Fixtures {
@@ -32,9 +32,9 @@ object Fixtures {
     )
     val createJsonResponse: String => JsValue = id => Json.parse(
       s"""
-         |{
-         |  "id": "$id"
-         |}
+        |{
+        |  "id": "$id"
+        |}
       """.stripMargin
     )
 
@@ -55,7 +55,7 @@ object Fixtures {
     )
     val downstreamErrorJson: JsValue = Json.toJson(DownstreamError)
 
-    val createSavingsAccountRequestModel = CreateSavingsAccount("Main account name")
+    val createSavingsAccountRequestModel = CreateSavingsAccountRequest("Main account name")
   }
 
 }

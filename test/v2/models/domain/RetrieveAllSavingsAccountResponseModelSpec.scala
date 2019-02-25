@@ -20,14 +20,14 @@ import play.api.libs.json._
 import support.UnitSpec
 import v2.models.utils.JsonErrorValidators
 
-class RetrieveSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators {
+class RetrieveAllSavingsAccountResponseModelSpec extends UnitSpec with JsonErrorValidators {
 
   val id1 = "SAVKB2UVwUTBQGJ"
   val accountName1 = "Main account name"
   val id2 = "SAVKB2UVwUTBQGK"
   val accountName2 = "Shares savings account"
 
-  val model = List(RetrieveSavingsAccount(id1, accountName1), RetrieveSavingsAccount(id2, accountName2))
+  val model = List(RetrieveAllSavingsAccountResponse(id1, accountName1), RetrieveAllSavingsAccountResponse(id2, accountName2))
 
   val multipleJsonFromDes =
     Json.parse(s"""
@@ -78,21 +78,21 @@ class RetrieveSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators 
   "reads" when {
     "passed a valid JSON array from DES" should {
       "read successfully as a List[RetrieveSavingsAccountModel]" in {
-        multipleJsonFromDes.as[List[RetrieveSavingsAccount]] shouldBe model
+        multipleJsonFromDes.as[List[RetrieveAllSavingsAccountResponse]] shouldBe model
       }
     }
 
-    testMandatoryProperty[RetrieveSavingsAccount](singleDesJsonsingleDesJson)("/incomeSourceId")
+    testMandatoryProperty[RetrieveAllSavingsAccountResponse](singleDesJsonsingleDesJson)("/incomeSourceId")
 
-    testPropertyType[RetrieveSavingsAccount](singleDesJsonsingleDesJson)(
+    testPropertyType[RetrieveAllSavingsAccountResponse](singleDesJsonsingleDesJson)(
       path = "/incomeSourceId",
       replacement = 12344.toJson,
       expectedError = JsonError.STRING_FORMAT_EXCEPTION
     )
 
-    testMandatoryProperty[RetrieveSavingsAccount](singleDesJsonsingleDesJson)("/incomeSourceName")
+    testMandatoryProperty[RetrieveAllSavingsAccountResponse](singleDesJsonsingleDesJson)("/incomeSourceName")
 
-    testPropertyType[RetrieveSavingsAccount](singleDesJsonsingleDesJson)(
+    testPropertyType[RetrieveAllSavingsAccountResponse](singleDesJsonsingleDesJson)(
       path = "/incomeSourceName",
       replacement = 12344.toJson,
       expectedError = JsonError.STRING_FORMAT_EXCEPTION
@@ -102,7 +102,7 @@ class RetrieveSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators 
   "writes" when {
     "passed a valid RetrieveSavingsAccountModel" should {
       "write it as correct JSON" in {
-        retrieveSavingsAccountModelAsJson shouldBe RetrieveSavingsAccount.writes.writes(model.head)
+        retrieveSavingsAccountModelAsJson shouldBe RetrieveAllSavingsAccountResponse.writes.writes(model.head)
       }
     }
   }
@@ -110,7 +110,7 @@ class RetrieveSavingsAccountModelSpec extends UnitSpec with JsonErrorValidators 
   "writesList" when {
     "passing valid JSON to vendors" should {
       "write it in the correct format, with the savingsAccounts field" in {
-        multipleJsonToVendor shouldBe RetrieveSavingsAccount.writesList.writes(model)
+        multipleJsonToVendor shouldBe RetrieveAllSavingsAccountResponse.writesList.writes(model)
       }
     }
   }

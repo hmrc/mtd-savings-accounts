@@ -16,22 +16,16 @@
 
 package v2.models.domain
 
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class RetrieveSavingsAccount(id: String, accountName: String)
+case class RetrieveSavingsAccountResponse(accountName: String)
 
-object RetrieveSavingsAccount {
-  implicit val reads: Reads[RetrieveSavingsAccount] = (
-    (__ \ "incomeSourceId").read[String] and
-      (__ \ "incomeSourceName").read[String]
-  ) (RetrieveSavingsAccount.apply _)
+object RetrieveSavingsAccountResponse {
+  // Note that we read the array of accounts from DES into a list.
+  // This list may have no entries (when account does not exist)
+  // or more than one entry
+  implicit val desReads: Reads[RetrieveSavingsAccountResponse] =
+    (__ \ "incomeSourceName").read[String].map(RetrieveSavingsAccountResponse.apply)
 
-  implicit val writes: Writes[RetrieveSavingsAccount] = Json.writes[RetrieveSavingsAccount]
-
-  val writesList: Writes[List[RetrieveSavingsAccount]] = new Writes[List[RetrieveSavingsAccount]] {
-    override def writes(o: List[RetrieveSavingsAccount]): JsValue = Json.obj(
-      "savingsAccounts" -> Json.toJson(o)
-    )
-  }
+  implicit val vendorWrites: OWrites[RetrieveSavingsAccountResponse] = Json.writes[RetrieveSavingsAccountResponse]
 }

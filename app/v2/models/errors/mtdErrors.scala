@@ -20,12 +20,14 @@ package v2.models.errors
 object NinoFormatError extends Error("FORMAT_NINO", "The provided NINO is invalid")
 
 // Format Errors
+object AccountIdFormatError extends Error("FORMAT_SAVINGS_ACCOUNT_ID", "The provided savings account ID is invalid")
 object AccountNameFormatError extends Error("FORMAT_ACCOUNT_NAME", "The provided account name is invalid")
 object AccountNameMissingError extends Error("MISSING_ACCOUNT_NAME", "Account name field is required")
 
 // Rule Errors
 object AccountNameDuplicateError extends Error("RULE_DUPLICATE_ACCOUNT_NAME", "Duplicate account name given for supplied NINO")
 object MaximumSavingsAccountsLimitError extends Error("RULE_MAXIMUM_SAVINGS_ACCOUNTS_LIMIT", "The 1000 savings account limit exceeded")
+object MatchingResourceNotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
 
 
 //Standard Errors

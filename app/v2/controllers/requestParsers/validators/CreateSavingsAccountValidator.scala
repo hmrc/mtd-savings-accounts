@@ -17,7 +17,7 @@
 package v2.controllers.requestParsers.validators
 
 import v2.controllers.requestParsers.validators.validations._
-import v2.models.domain.CreateSavingsAccount
+import v2.models.domain.CreateSavingsAccountRequest
 import v2.models.errors._
 import v2.models.requestData.CreateSavingsAccountRawData
 
@@ -33,13 +33,13 @@ class CreateSavingsAccountValidator extends Validator[CreateSavingsAccountRawDat
 
   private def requestRuleValidation: CreateSavingsAccountRawData => List[List[Error]] = (data: CreateSavingsAccountRawData) => {
     List(
-      JsonFormatValidation.validate[CreateSavingsAccount](data.body)
+      JsonFormatValidation.validate[CreateSavingsAccountRequest](data.body)
     )
   }
 
   private def bodyFieldsFormatValidation: CreateSavingsAccountRawData => List[List[Error]] = (data: CreateSavingsAccountRawData) => {
 
-    val createSavingsAccount = data.body.json.as[CreateSavingsAccount]
+    val createSavingsAccount = data.body.json.as[CreateSavingsAccountRequest]
     val accountNameRegex = "^[^\\*\\<\\>\\[\\]\\{\\}\\/\\:\\;\\?\\#\\`\\\"\\'\\%\\^\\~\\|\\$\\¬\\\\]{1,32}$"
     List(
       RegexValidation.validate(AccountNameFormatError, createSavingsAccount.accountName, accountNameRegex)
