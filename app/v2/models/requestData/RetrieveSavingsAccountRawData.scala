@@ -16,4 +16,4 @@
 
 package v2.models.requestData
 
-case class RetrieveSavingsAccountRawData(nino: String, accountId: String)
+case class RetrieveSavingsAccountRawData(nino: String, accountId: String) extends InputData
