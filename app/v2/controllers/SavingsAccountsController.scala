@@ -22,10 +22,10 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson, ControllerComponents}
-import v2.controllers.requestParsers.{CreateSavingsAccountRequestDataParser, RetrieveAllSavingsAccountRequestDataParser}
-import v2.models.domain.RetrieveAllSavingsAccountResponse
+import v2.controllers.requestParsers.{CreateSavingsAccountRequestDataParser, RetrieveAllSavingsAccountRequestDataParser, RetrieveSavingsAccountRequestDataParser}
+import v2.models.domain.{RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
 import v2.models.errors._
-import v2.models.requestData.{CreateSavingsAccountRawData, RetrieveAllSavingsAccountRawData}
+import v2.models.requestData.{CreateSavingsAccountRawData, RetrieveAllSavingsAccountRawData, RetrieveSavingsAccountRawData}
 import v2.services.{EnrolmentsAuthService, MtdIdLookupService, SavingsAccountsService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,7 +35,8 @@ import scala.concurrent.Future
 class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService,
                                           val lookupService: MtdIdLookupService,
                                           createSavingsAccountRequestDataParser: CreateSavingsAccountRequestDataParser,
-                                          retrieveSavingsAccountRequestDataParser: RetrieveAllSavingsAccountRequestDataParser,
+                                          retrieveAllSavingsAccountRequestDataParser: RetrieveAllSavingsAccountRequestDataParser,
+                                          retrieveSavingsAccountRequestDataParser: RetrieveSavingsAccountRequestDataParser,
                                           savingsAccountService: SavingsAccountsService,
                                           val cc: ControllerComponents
                                          ) extends AuthorisedController(cc) {
@@ -58,7 +59,7 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
   }
 
   def retrieveAll(nino: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
-    retrieveSavingsAccountRequestDataParser.parseRequest(RetrieveAllSavingsAccountRawData(nino)) match {
+    retrieveAllSavingsAccountRequestDataParser.parseRequest(RetrieveAllSavingsAccountRawData(nino)) match {
       case Right(retrieveSavingsAccountRequest) => savingsAccountService.retrieveAll(retrieveSavingsAccountRequest).map {
         case Right(desResponse) =>
           logger.info(s"[SavingsAccountsController][retrieveAll] - Success response received with CorrelationId: ${desResponse.correlationId}")
@@ -72,10 +73,27 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
     }
   }
 
+
+  def retrieve(nino: String, accountId:String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
+        retrieveSavingsAccountRequestDataParser.parseRequest(RetrieveSavingsAccountRawData(nino, accountId)) match {
+      case Right(retrieveSavingsAccountRequest) => savingsAccountService.retrieve(retrieveSavingsAccountRequest).map {
+        case Right(desResponse) =>
+          logger.info(s"[SavingsAccountsController][retrieve] - Success response received with CorrelationId: ${desResponse.correlationId}")
+          Ok(RetrieveSavingsAccountResponse.vendorWrites.writes(desResponse.responseData))
+            .withHeaders("X-CorrelationId" -> desResponse.correlationId)
+        case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
+      }
+      case Left(errorWrapper) => Future.successful(
+        processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
+      )
+    }
+  }
+
   private def processError(errorWrapper: ErrorWrapper) = {
     errorWrapper.error match {
       case BadRequestError
            | NinoFormatError
+           | AccountIdFormatError
            | AccountNameFormatError
            | AccountNameMissingError => BadRequest(Json.toJson(errorWrapper))
       case AccountNameDuplicateError

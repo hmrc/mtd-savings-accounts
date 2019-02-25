@@ -27,7 +27,14 @@ object DesStub extends WireMockMethods {
     s"/income-tax/income-sources/nino/$nino"
 
   private def getAllSavingsAccountsUrl(nino: String): String =
-    s"/income-tax/income-sources/nino/$nino.*"
+    s"/income-tax/income-sources/nino/$nino"
+
+  private def getAllSavingsAccountsQueryParams = Map("incomeSourceType" -> "interest-from-uk-banks")
+
+  private def getSavingsAccountsUrl(nino: String): String =
+    s"/income-tax/income-sources/nino/$nino"
+
+  private def getSavingsAccountQueryParams(accountId: String) = Map("incomeSourceType" -> "interest-from-uk-banks", "incomeSourceId" -> accountId)
 
   private val createResponseBody = Json.parse(
     """
@@ -46,7 +53,7 @@ object DesStub extends WireMockMethods {
       .thenReturn(status = errorStatus, errorBody)
   }
 
-  private val retrieveResponseBody = Json.parse(
+  private val retrieveAllResponseBody = Json.parse(
     """
       |[{
       | "incomeSourceId": "SAVKB2UVwUTBQGJ",
@@ -54,14 +61,32 @@ object DesStub extends WireMockMethods {
       |}]
     """.stripMargin)
 
-  def retrieveSuccess(nino: String): StubMapping = {
-    when(method = GET, uri = getAllSavingsAccountsUrl(nino))
-      .thenReturn(status = OK, retrieveResponseBody)
+  def retrieveAllSuccess(nino: String): StubMapping = {
+    when(method = GET, uri = getAllSavingsAccountsUrl(nino), queryParams = getAllSavingsAccountsQueryParams)
+      .thenReturn(status = OK, retrieveAllResponseBody)
   }
 
-  def retrieveError(nino: String, errorStatus: Int, errorBody: String): StubMapping = {
-    when(method = GET, uri = getAllSavingsAccountsUrl(nino))
+  def retrieveAllError(nino: String, errorStatus: Int, errorBody: String): StubMapping = {
+    when(method = GET, uri = getAllSavingsAccountsUrl(nino), queryParams = getAllSavingsAccountsQueryParams)
       .thenReturn(status = errorStatus, errorBody)
   }
 
+
+  private val retrieveResponseBody = Json.parse(
+    """
+      |[{
+      | "incomeSourceName": "Main account name"
+      |}]
+    """.stripMargin)
+
+
+  def retrieveSuccess(nino: String, accountId: String): StubMapping = {
+    when(method = GET, uri = getSavingsAccountsUrl(nino), queryParams = getSavingsAccountQueryParams(accountId))
+      .thenReturn(status = OK, retrieveResponseBody)
+  }
+
+  def retrieveError(nino: String, accountId: String, errorStatus: Int, errorBody: String): StubMapping = {
+    when(method = GET, uri = getSavingsAccountsUrl(nino), queryParams = getSavingsAccountQueryParams(accountId))
+      .thenReturn(status = errorStatus, errorBody)
+  }
 }

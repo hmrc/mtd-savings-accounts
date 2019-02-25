@@ -61,7 +61,7 @@ class AuthISpec extends IntegrationBaseSpec {
           AuditStub.audit()
           MtdIdLookupStub.ninoFound(nino)
           AuthStub.authorised()
-          DesStub.retrieveSuccess(nino)
+          DesStub.retrieveAllSuccess(nino)
         }
 
         val response: WSResponse = await(request().get())
