@@ -34,7 +34,7 @@ object StandardDesHttpParser extends HttpParser {
 
     new HttpReads[DesConnectorOutcome[A]] {
 
-      override def read(unused: String, url: String, response: HttpResponse): DesConnectorOutcome[A] = {
+      override def read(method: String, url: String, response: HttpResponse): DesConnectorOutcome[A] = {
         val correlationId = retrieveCorrelationId(response)
 
         if (response.status != OK) {
