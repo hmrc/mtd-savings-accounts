@@ -20,4 +20,4 @@ import uk.gov.hmrc.domain.Nino
 import v2.models.domain.SavingsAccountAnnualSummary
 
 case class AmendSavingsAccountAnnualSummaryRequest(nino: Nino, taxYear: String, savingsAccountId: String,
-                                                   savingsAccountAnnualSummary: SavingsAccountAnnualSummary) extends InputData
+                                                   savingsAccountAnnualSummary: SavingsAccountAnnualSummary)

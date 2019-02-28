@@ -96,7 +96,7 @@ class SavingsAccountAnnualSummarySpec  extends UnitSpec with JsonErrorValidators
 
         val model = SavingsAccountAnnualSummary(Some(2000.99), Some(5000.50))
 
-        Json.parse(json) shouldBe SavingsAccountAnnualSummary.writes.writes(model)
+        SavingsAccountAnnualSummary.writes.writes(model) shouldBe Json.parse(json)
       }
     }
   }
