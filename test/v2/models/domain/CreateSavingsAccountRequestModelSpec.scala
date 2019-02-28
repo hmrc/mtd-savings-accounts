@@ -61,7 +61,7 @@ class CreateSavingsAccountRequestModelSpec extends UnitSpec with JsonErrorValida
 
         val model = CreateSavingsAccountRequest(accountName = "Main account name")
 
-        Json.parse(json) shouldBe CreateSavingsAccountRequest.writes.writes(model)
+        CreateSavingsAccountRequest.writes.writes(model) shouldBe Json.parse(json)
       }
     }
   }

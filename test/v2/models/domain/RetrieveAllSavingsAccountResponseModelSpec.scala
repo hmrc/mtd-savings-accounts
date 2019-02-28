@@ -102,7 +102,7 @@ class RetrieveAllSavingsAccountResponseModelSpec extends UnitSpec with JsonError
   "writes" when {
     "passed a valid RetrieveSavingsAccountModel" should {
       "write it as correct JSON" in {
-        retrieveSavingsAccountModelAsJson shouldBe RetrieveAllSavingsAccountResponse.writes.writes(model.head)
+        RetrieveAllSavingsAccountResponse.writes.writes(model.head) shouldBe retrieveSavingsAccountModelAsJson
       }
     }
   }
@@ -110,7 +110,7 @@ class RetrieveAllSavingsAccountResponseModelSpec extends UnitSpec with JsonError
   "writesList" when {
     "passing valid JSON to vendors" should {
       "write it in the correct format, with the savingsAccounts field" in {
-        multipleJsonToVendor shouldBe RetrieveAllSavingsAccountResponse.writesList.writes(model)
+        RetrieveAllSavingsAccountResponse.writesList.writes(model) shouldBe multipleJsonToVendor
       }
     }
   }
