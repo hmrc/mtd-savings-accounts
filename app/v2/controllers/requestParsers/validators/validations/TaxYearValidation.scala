@@ -14,8 +14,29 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators.validations
 
-case class DesTaxYear(taxYear: String) {
-  def toDesTaxYear: String = taxYear.take(2) + taxYear.drop(5)
+import v2.models.errors.{Error, TaxYearFormatError}
+
+object TaxYearValidation {
+
+  val taxYearFormat = "20[1-9][0-9]\\-[1-9][0-9]"
+
+  def validate(taxYear: String): List[Error] = {
+    if (taxYear.matches(taxYearFormat)) {
+
+      val start = taxYear.substring(2, 4).toInt
+      val end = taxYear.substring(5, 7).toInt
+
+      if (end - start == 1) {
+        NoValidationErrors
+      } else {
+        List(TaxYearFormatError)
+      }
+    } else {
+      List(TaxYearFormatError)
+    }
+  }
+
+
 }

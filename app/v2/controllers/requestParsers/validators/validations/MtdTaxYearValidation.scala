@@ -14,8 +14,24 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators.validations
 
-case class DesTaxYear(taxYear: String) {
-  def toDesTaxYear: String = taxYear.take(2) + taxYear.drop(5)
+import v2.config.FixedConfig
+import v2.models.errors.Error
+import v2.models.requestData.DesTaxYear
+
+object MtdTaxYearValidation extends FixedConfig {
+
+  // @param taxYear In format YYYY-YY
+  def validate(taxYear: String, error: Error): List[Error] = {
+
+    val desTaxYear = Integer.parseInt(DesTaxYear(taxYear).toDesTaxYear)
+
+    if (desTaxYear >= minimumTaxYear) NoValidationErrors else List(error)
+
+  }
+
+
+
+
 }

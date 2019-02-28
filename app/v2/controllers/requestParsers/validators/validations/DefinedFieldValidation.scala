@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators.validations
 
-case class DesTaxYear(taxYear: String) {
-  def toDesTaxYear: String = taxYear.take(2) + taxYear.drop(5)
+import v2.models.errors.Error
+
+object DefinedFieldValidation {
+
+  def validate(error: Error, fields: Option[_]*): List[Error] = {
+
+    if (!fields.exists(_.isDefined)) {
+      List(error)
+    } else {
+      NoValidationErrors
+    }
+  }
+
 }

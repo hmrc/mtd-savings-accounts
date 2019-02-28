@@ -33,7 +33,7 @@ class CreateSavingsAccountValidator extends Validator[CreateSavingsAccountRawDat
 
   private def requestRuleValidation: CreateSavingsAccountRawData => List[List[Error]] = (data: CreateSavingsAccountRawData) => {
     List(
-      JsonFormatValidation.validate[CreateSavingsAccountRequest](data.body)
+      JsonFormatValidation.validate[CreateSavingsAccountRequest](data.body, AccountNameMissingError)
     )
   }
 

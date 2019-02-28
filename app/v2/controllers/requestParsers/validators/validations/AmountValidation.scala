@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators.validations
 
-case class DesTaxYear(taxYear: String) {
-  def toDesTaxYear: String = taxYear.take(2) + taxYear.drop(5)
+import v2.models.errors.Error
+
+object AmountValidation {
+
+  def validate(amount: Option[BigDecimal], error: Error): List[Error] = {
+
+    if (amount.exists(x => x <= 99999999999.99 && x >= 0 && x.scale < 3) || amount.isEmpty) {
+      NoValidationErrors
+    } else {
+      List(error)
+    }
+
+  }
+
 }
