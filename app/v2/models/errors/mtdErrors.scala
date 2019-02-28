@@ -20,6 +20,7 @@ package v2.models.errors
 object NinoFormatError extends Error("FORMAT_NINO", "The provided NINO is invalid")
 
 // Format Errors
+object TaxYearFormatError extends Error("FORMAT_TAX_YEAR", "The provided tax year is invalidd")
 object AccountIdFormatError extends Error("FORMAT_SAVINGS_ACCOUNT_ID", "The provided savings account ID is invalid")
 object AccountNameFormatError extends Error("FORMAT_ACCOUNT_NAME", "The provided account name is invalid")
 object AccountNameMissingError extends Error("MISSING_ACCOUNT_NAME", "Account name field is required")
@@ -27,6 +28,7 @@ object TaxedInterestFormatError extends Error("FORMAT_TAXED_INTEREST", "The prov
 object UnTaxedInterestFormatError extends Error("FORMAT_UNTAXED_INTEREST", "The provided untaxed UK interest amount is invalid")
 
 // Rule Errors
+object RuleTaxYearNotSupportedError extends Error("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
 object AccountNameDuplicateError extends Error("RULE_DUPLICATE_ACCOUNT_NAME", "Duplicate account name given for supplied NINO")
 object MaximumSavingsAccountsLimitError extends Error("RULE_MAXIMUM_SAVINGS_ACCOUNTS_LIMIT", "The 1000 savings account limit exceeded")
 object MatchingResourceNotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
