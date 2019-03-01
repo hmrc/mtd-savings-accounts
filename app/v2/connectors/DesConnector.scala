@@ -23,8 +23,8 @@ import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
 import v2.httpparsers.StandardDesHttpParser
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
-import v2.models.domain.{CreateSavingsAccountRequest, CreateSavingsAccountResponse, RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
+import v2.models.requestData.{AmendSavingsAccountAnnualSummaryRequest, CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
+import v2.models.domain._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,8 +40,8 @@ class DesConnector @Inject()(http: HttpClient,
     .copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
     .withExtraHeaders("Environment" -> appConfig.desEnv)
 
-  def create(createSavingsAccountRequestData: CreateSavingsAccountRequestData)
-            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CreateSavingsAccountConnectorOutcome] = {
+  def createSavingsAccount(createSavingsAccountRequestData: CreateSavingsAccountRequestData)
+                          (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CreateSavingsAccountConnectorOutcome] = {
 
     import CreateSavingsAccountRequest.writes
     val nino = createSavingsAccountRequestData.nino.nino
@@ -50,12 +50,12 @@ class DesConnector @Inject()(http: HttpClient,
 
     http.POST[CreateSavingsAccountRequest,
       CreateSavingsAccountConnectorOutcome](url,
-      createSavingsAccountRequestData.createSavingsAccount)(writes, StandardDesHttpParser.reads[CreateSavingsAccountResponse], desHeaderCarrier, implicitly)
+      createSavingsAccountRequestData.createSavingsAccount)(writes, reads[CreateSavingsAccountResponse], desHeaderCarrier, implicitly)
 
   }
 
-  def retrieveAll(retrieveAllSavingsAccountRequest: RetrieveAllSavingsAccountRequest)
-                 (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveAllSavingsAccountsConnectorOutcome] = {
+  def retrieveAllSavingsAccounts(retrieveAllSavingsAccountRequest: RetrieveAllSavingsAccountRequest)
+                                (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveAllSavingsAccountsConnectorOutcome] = {
 
     val nino = retrieveAllSavingsAccountRequest.nino.nino
 
@@ -65,8 +65,8 @@ class DesConnector @Inject()(http: HttpClient,
       StandardDesHttpParser.reads[List[RetrieveAllSavingsAccountResponse]], desHeaderCarrier, implicitly)
   }
 
-  def retrieve(request: RetrieveSavingsAccountRequest)
-              (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[DesConnectorOutcome[List[RetrieveSavingsAccountResponse]]] = {
+  def retrieveSavingsAccount(request: RetrieveSavingsAccountRequest)
+                            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[DesConnectorOutcome[List[RetrieveSavingsAccountResponse]]] = {
 
     val nino = request.nino.nino
     val incomeSourceId = request.accountId
@@ -74,7 +74,23 @@ class DesConnector @Inject()(http: HttpClient,
     val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId"
 
     http.GET[DesConnectorOutcome[List[RetrieveSavingsAccountResponse]]](url)(
-      StandardDesHttpParser.reads[List[RetrieveSavingsAccountResponse]], desHeaderCarrier, implicitly)
+      reads[List[RetrieveSavingsAccountResponse]], desHeaderCarrier, implicitly)
   }
 
+  def amendSavingsAccountAnnualSummary(amendSavingsAccountAnnualSummaryRequest: AmendSavingsAccountAnnualSummaryRequest)
+                          (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmendSavingsAccountAnnualSummaryConnectorOutcome] = {
+
+    import v2.models.domain.SavingsAccountAnnualSummary.desWrites
+    val nino = amendSavingsAccountAnnualSummaryRequest.nino.nino
+    val desTaxYear = amendSavingsAccountAnnualSummaryRequest.desTaxYear
+    val incomeSourceId = amendSavingsAccountAnnualSummaryRequest.savingsAccountId
+
+    val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/savings/annual/$desTaxYear"
+
+    http.POST[SavingsAccountAnnualSummary,
+      AmendSavingsAccountAnnualSummaryConnectorOutcome](url,
+      amendSavingsAccountAnnualSummaryRequest.
+        savingsAccountAnnualSummary)(desWrites(incomeSourceId), reads[AmendSavingsAccountAnnualSummaryResponse], desHeaderCarrier, implicitly)
+
+  }
 }

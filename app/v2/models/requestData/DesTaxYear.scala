@@ -16,8 +16,6 @@
 
 package v2.models.requestData
 
-import uk.gov.hmrc.domain.Nino
-import v2.models.domain.SavingsAccountAnnualSummary
-
-case class AmendSavingsAccountAnnualSummaryRequest(nino: Nino, desTaxYear: String, savingsAccountId: String,
-                                                   savingsAccountAnnualSummary: SavingsAccountAnnualSummary)
+object DesTaxYear {
+  def apply(taxYear: String): String = taxYear.take(2) + taxYear.drop(5)
+}
