@@ -33,7 +33,7 @@ class AmendSavingsAccountAnnualSummaryRequestDataParser @Inject()(validator: Ame
         //Validation passed.  Request data is ok to transform.
         Right(AmendSavingsAccountAnnualSummaryRequest(
           nino = Nino(data.nino),
-          taxYear = DesTaxYear(data.taxYear),
+          desTaxYear = DesTaxYear.fromMtd(data.taxYear),
           savingsAccountId = data.savingsAccountId,
           data.body.json.as[SavingsAccountAnnualSummary]))
 

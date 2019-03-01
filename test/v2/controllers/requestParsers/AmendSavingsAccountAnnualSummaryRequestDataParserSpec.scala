@@ -47,7 +47,7 @@ class AmendSavingsAccountAnnualSummaryRequestDataParserSpec
     AmendSavingsAccountAnnualSummaryRawData(nino, taxYear, accountId, jsonBody)
 
   val request =
-    AmendSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear(taxYear), accountId, model)
+    AmendSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear.fromMtd(taxYear), accountId, model)
 
   trait Test extends MockAmendSavingsAccountAnnualSummaryValidator {
     lazy val parser = new AmendSavingsAccountAnnualSummaryRequestDataParser(mockValidator)

@@ -25,7 +25,7 @@ object MtdTaxYearValidation extends FixedConfig {
   // @param taxYear In format YYYY-YY
   def validate(taxYear: String, error: Error): List[Error] = {
 
-    val desTaxYear = Integer.parseInt(DesTaxYear(taxYear).toDesTaxYear)
+    val desTaxYear = Integer.parseInt(DesTaxYear.fromMtd(taxYear).value)
 
     if (desTaxYear >= minimumTaxYear) NoValidationErrors else List(error)
 
