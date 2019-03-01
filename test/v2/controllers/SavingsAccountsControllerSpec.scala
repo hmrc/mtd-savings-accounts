@@ -21,9 +21,9 @@ import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures._
-import v2.mocks.requestParsers.{MockCreateSavingsAccountRequestDataParser, MockRetrieveAllSavingsAccountRequestDataParser, MockRetrieveSavingsAccountRequestDataParser}
-import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountsService}
-import v2.models.domain.{CreateSavingsAccountResponse, RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
+import v2.mocks.requestParsers._
+import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountAnnualSummaryService, MockSavingsAccountsService}
+import v2.models.domain._
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData._
@@ -37,7 +37,9 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
     with MockCreateSavingsAccountRequestDataParser
     with MockRetrieveAllSavingsAccountRequestDataParser
     with MockRetrieveSavingsAccountRequestDataParser
-    with MockSavingsAccountsService {
+    with MockAmendSavingsAccountAnnualSummaryRequestDataParser
+    with MockSavingsAccountsService
+  with MockSavingsAccountAnnualSummaryService{
 
     val hc = HeaderCarrier()
 
@@ -47,7 +49,9 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
       createSavingsAccountRequestDataParser = mockCreateSavingsAccountRequestDataParser,
       retrieveAllSavingsAccountRequestDataParser = mockRetrieveAllSavingsAccountRequestDataParser,
       retrieveSavingsAccountRequestDataParser = mockRetrieveSavingsAccountRequestDataParser,
+      amendSavingsAccountAnnualSummaryRequestDataParser = mockAmendSavingsAccountAnnualSummaryRequestDataParser,
       savingsAccountService = mockSavingsAccountService,
+      savingsAccountAnnualSummaryService = mockSavingsAccountAnnualSummaryService ,
       cc = cc
     )
 
@@ -58,6 +62,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
   val nino = "AA123456A"
   val correlationId = "X-123"
   val id = "SAVKB2UVwUTBQGJ"
+  val taxYear = "2017-18"
   val accountName = "Main account name"
   val location = s"/self-assessment/ni/$nino/savings-accounts/$id"
 
@@ -379,6 +384,119 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
           .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
 
         val response: Future[Result] = controller.retrieve(nino, id)(fakeGetRequest)
+
+        status(response) shouldBe expectedStatus
+        contentAsJson(response) shouldBe Json.toJson(error)
+        header("X-CorrelationId", response) shouldBe Some(correlationId)
+      }
+    }
+  }
+
+  "amend" when {
+
+    val rawData = AmendSavingsAccountAnnualSummaryRawData(nino, taxYear, id, AnyContentAsJson(SavingsAccountsFixture.amendRequestJson()))
+
+    val request = AmendSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear(taxYear), id,
+      SavingsAccountAnnualSummary(Some(123.45), Some(456.78)))
+
+    val response = AmendSavingsAccountAnnualSummaryResponse("FIXME")
+
+
+    "passed a valid request" should {
+      "return a successful response with header X-CorrelationId" in new Test {
+
+        MockAmendSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
+          .returns(Right(request))
+
+        MockSavingsAccountAnnualSummaryService.amend(request)
+          .returns(Future.successful(Right(DesResponse(correlationId, response))))
+
+        val result: Future[Result] = controller.amend(nino, id, taxYear)(fakePutRequest(SavingsAccountsFixture.amendRequestJson()))
+        status(result) shouldBe OK
+        header("X-CorrelationId", result) shouldBe Some(correlationId)
+      }
+    }
+
+    "return single error response with status 400" when {
+      "the request received failed the validation" in new Test() {
+
+        MockAmendSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
+          .returns(Left(ErrorWrapper(None, BadRequestError, None)))
+
+        val result: Future[Result] = controller.amend(nino, id, taxYear)(fakePutRequest(SavingsAccountsFixture.amendRequestJson()))
+        status(result) shouldBe BAD_REQUEST
+        header("X-CorrelationId", result).nonEmpty shouldBe true
+      }
+    }
+
+    "return a 400 Bad Request with a single error" when {
+
+      val badRequestErrorsFromParser = List(
+        BadRequestError,
+        NinoFormatError,
+        TaxYearFormatError,
+        RuleTaxYearNotSupportedError,
+        TaxedInterestFormatError,
+        UnTaxedInterestFormatError,
+        AccountIdFormatError,
+        RuleIncorrectOrEmptyBodyError
+      )
+
+      val badRequestErrorsFromService = List(
+        NinoFormatError,
+        BadRequestError,
+        TaxYearFormatError,
+        RuleTaxYearNotSupportedError
+      )
+
+      badRequestErrorsFromParser.foreach(errorsFromAmendParserTester(_, BAD_REQUEST))
+      badRequestErrorsFromService.foreach(errorsFromAmendServiceTester(_, BAD_REQUEST))
+
+    }
+
+    "return a 500 Internal Server Error with a single error" when {
+
+      val internalServerErrorErrors = List(
+        DownstreamError
+      )
+
+      internalServerErrorErrors.foreach(errorsFromAmendParserTester(_, INTERNAL_SERVER_ERROR))
+      internalServerErrorErrors.foreach(errorsFromAmendServiceTester(_, INTERNAL_SERVER_ERROR))
+
+    }
+
+    "return a 404 Not Found Error" when {
+      val notFoundErrors = List(
+        NotFoundError
+      )
+
+      notFoundErrors.foreach(errorsFromAmendServiceTester(_, NOT_FOUND))
+    }
+
+    def errorsFromAmendParserTester(error: Error, expectedStatus: Int): Unit = {
+      s"a ${error.code} error is returned from the parser" in new Test {
+
+        MockAmendSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
+          .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
+
+        val response: Future[Result] = controller.amend(nino, id, taxYear)(fakePutRequest(SavingsAccountsFixture.amendRequestJson()))
+
+        status(response) shouldBe expectedStatus
+        contentAsJson(response) shouldBe Json.toJson(error)
+        header("X-CorrelationId", response) shouldBe Some(correlationId)
+      }
+    }
+
+    def errorsFromAmendServiceTester(error: Error, expectedStatus: Int): Unit = {
+      s"a ${error.code} error is returned from the service" in new Test {
+
+        MockAmendSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
+          .returns(Right(request))
+
+        MockSavingsAccountAnnualSummaryService.amend(request)
+          .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+
+        val response: Future[Result] = controller.amend(nino, id, taxYear)(fakePutRequest(SavingsAccountsFixture.amendRequestJson()))
 
         status(response) shouldBe expectedStatus
         contentAsJson(response) shouldBe Json.toJson(error)

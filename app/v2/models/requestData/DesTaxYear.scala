@@ -21,7 +21,9 @@ package v2.models.requestData
   *
   * @param value the tax year string (where 2018 represents 2017-18)
   */
-case class DesTaxYear(value: String) extends AnyVal
+case class DesTaxYear(value: String) extends AnyVal {
+  override def toString: String = value
+}
 
 object DesTaxYear {
 

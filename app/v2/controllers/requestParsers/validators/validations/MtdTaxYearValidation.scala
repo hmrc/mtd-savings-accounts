@@ -28,10 +28,5 @@ object MtdTaxYearValidation extends FixedConfig {
     val desTaxYear = Integer.parseInt(DesTaxYear.fromMtd(taxYear).value)
 
     if (desTaxYear >= minimumTaxYear) NoValidationErrors else List(error)
-
   }
-
-
-
-
 }

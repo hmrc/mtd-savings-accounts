@@ -54,11 +54,11 @@ object StandardDesHttpParser extends HttpParser {
         }
       }
 
-      private def parseResponse(correlationId: String, response: HttpResponse): DesConnectorOutcome[A] =
+      private def parseResponse(correlationId: String, response: HttpResponse): DesConnectorOutcome[A] ={
         response.validateJson[A] match {
           case Some(ref) => Right(DesResponse(correlationId, ref))
 
           case None => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
-        }
+        }}
     }
 }

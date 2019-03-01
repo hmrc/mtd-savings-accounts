@@ -195,7 +195,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       "return 404 with error code MATCHING_RESOURCE_NOT_FOUND" in new Test {
         MockedDesConnector.retrieve(validRequest).returns(Future.successful(Right(DesResponse(correlationId, Nil))))
         val result: RetrieveSavingsAccountsOutcome = await(service.retrieve(validRequest))
-        result shouldBe Left(ErrorWrapper(Some(correlationId), MatchingResourceNotFoundError, None))
+        result shouldBe Left(ErrorWrapper(Some(correlationId), NotFoundError, None))
       }
     }
 
@@ -215,7 +215,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
         val desResponse = DesResponse(correlationId, MultipleErrors(Seq(ninoFormatError, matchingResourceNotFoundError)))
         MockedDesConnector.retrieve(invalidRequest).returns(Future.successful(Left(desResponse)))
         val result: RetrieveSavingsAccountsOutcome = await(service.retrieve(invalidRequest))
-        result shouldBe Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, MatchingResourceNotFoundError))))
+        result shouldBe Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, NotFoundError))))
       }
     }
 
@@ -245,7 +245,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
       "INVALID_TAXYEAR" -> DownstreamError,
       "INVALID_INCOMESOURCEID" -> DownstreamError,
       "INVALID_ENDDATE" -> DownstreamError,
-      "NOT_FOUND" -> MatchingResourceNotFoundError,
+      "NOT_FOUND" -> NotFoundError,
       "SERVER_ERROR" -> DownstreamError,
       "SERVICE_UNAVAILABLE" -> DownstreamError,
       "UNEXPECTED_ERROR" -> DownstreamError
