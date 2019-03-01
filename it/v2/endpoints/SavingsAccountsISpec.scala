@@ -23,6 +23,7 @@ import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
 import v2.fixtures.Fixtures.SavingsAccountsFixture
 import v2.models.errors._
+import v2.models.requestData.DesTaxYear
 import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
 class SavingsAccountsISpec extends IntegrationBaseSpec {
@@ -31,14 +32,18 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
     val nino: String
     val specificAccountId: Option[String] = None
+    val specificTaxYear: Option[String] = None
     val correlationId = "X-123"
 
     def setupStubs(): StubMapping
 
-    private def uri = specificAccountId match {
-      case None     => s"/2.0/ni/$nino/savings-accounts"
-      case Some(id) => s"/2.0/ni/$nino/savings-accounts/$id"
-    }
+    private def uri =
+      (specificAccountId, specificTaxYear) match {
+        case (None, None)         => s"/2.0/ni/$nino/savings-accounts"
+        case (Some(id), Some(ty)) => s"/2.0/ni/$nino/savings-accounts/$id/$ty"
+        case (Some(id), None)     => s"/2.0/ni/$nino/savings-accounts/$id"
+        case _                    => throw new MatchError("invalid account/tax year combination")
+      }
 
     def request(): WSRequest = {
       setupStubs()
@@ -259,10 +264,10 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
         val response: WSResponse = await(request().get())
         response.status shouldBe Status.OK
         response.json shouldBe Json.parse(
-        s"""
-            |{
-            |    "accountName": "Main account name"
-            |}
+          s"""
+             |{
+             |    "accountName": "Main account name"
+             |}
           """.stripMargin)
       }
     }
@@ -324,6 +329,135 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
         response.status shouldBe expectedStatus
         response.json shouldBe Json.toJson(expectedBody)
       }
+    }
+  }
+
+
+  "Calling the amend savings account annual summary endpoint" should {
+
+    val taxed = 123.45
+    val untaxed = 543.21
+
+    "return a 200 status code" when {
+
+      "any valid request is made" in new Test {
+        val accountId = "SAVKB2UVwUTBQGJ"
+        val taxYear = "2017-18"
+        override val specificAccountId = Some(accountId)
+        override val specificTaxYear = Some(taxYear)
+        override val nino: String = "AA123456A"
+
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.amendSuccess(nino, accountId, DesTaxYear.fromMtd(taxYear))
+        }
+
+        val response: WSResponse = await(request().put(SavingsAccountsFixture.amendRequestJson(taxed, untaxed)))
+        response.status shouldBe Status.OK
+      }
+    }
+
+    "return 500 (Internal Server Error)" when {
+      amendErrorTest(Status.BAD_REQUEST, "INVALID_IDTYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      amendErrorTest(Status.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      amendErrorTest(Status.INTERNAL_SERVER_ERROR, "SERVER_ERROR", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+    }
+
+    "return 400 (Bad Request)" when {
+      amendErrorTest(Status.BAD_REQUEST, "INVALID_TAXYEAR", Status.BAD_REQUEST, TaxYearFormatError)
+      amendErrorTest(Status.BAD_REQUEST, "NOT_FOUND_INCOME_SOURCE", Status.NOT_FOUND, NotFoundError)
+      amendErrorTest(Status.BAD_REQUEST, "INVALID_ACCOUNTING_PERIOD", Status.BAD_REQUEST, RuleTaxYearNotSupportedError)
+      amendErrorTest(Status.BAD_REQUEST, "INVALID_PAYLOAD", Status.BAD_REQUEST, BadRequestError)
+    }
+
+
+    def amendErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
+      s"des returns an $desCode error" in new Test {
+        val accountId = "SAVKB2UVwUTBQGJ"
+        val taxYear = "2017-18"
+        override val specificAccountId = Some(accountId)
+        override val specificTaxYear = Some(taxYear)
+        override val nino: String = "AA123456A"
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.amendError(nino, accountId, DesTaxYear.fromMtd(taxYear), desStatus, errorBody(desCode))
+        }
+
+        val response: WSResponse = await(request().put(SavingsAccountsFixture.amendRequestJson(taxed, untaxed)))
+        response.status shouldBe expectedStatus
+        response.json shouldBe Json.toJson(expectedBody)
+      }
+    }
+
+    "return 400 (Bad Request)" when {
+      amendRequestValidationErrorTest("AA1123A", Status.BAD_REQUEST, NinoFormatError)
+    }
+
+    def amendRequestValidationErrorTest(requestNino: String, expectedStatus: Int, expectedBody: Error): Unit = {
+      s"validation fails with ${expectedBody.code} error" in new Test {
+
+        val accountId = "SAVKB2UVwUTBQGJ"
+        val taxYear = "2017-18"
+        override val specificAccountId = Some(accountId)
+        override val specificTaxYear = Some(taxYear)
+        override val nino: String = requestNino
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+        }
+
+        val response: WSResponse = await(request().put(SavingsAccountsFixture.amendRequestJson(taxed, untaxed)))
+        response.status shouldBe expectedStatus
+        response.json shouldBe Json.toJson(expectedBody)
+      }
+    }
+
+    s"incorrect body is supplied" in new Test {
+      val requestBody: JsValue = Json.parse(
+        s"""{
+           | "accountName": "1*"
+           |}""".stripMargin
+      )
+
+      override val nino: String = "AA123456A"
+
+      override def setupStubs(): StubMapping = {
+        AuditStub.audit()
+        AuthStub.authorised()
+        MtdIdLookupStub.ninoFound(nino)
+      }
+
+      val response: WSResponse = await(request().post(requestBody))
+      response.status shouldBe Status.BAD_REQUEST
+      response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameFormatError, None))
+    }
+
+    s"empty body is supplied" in new Test {
+      val requestBody: JsValue = Json.parse(
+        s"""{
+           |
+           |}""".stripMargin
+      )
+
+      override val nino: String = "AA123456A"
+
+      override def setupStubs(): StubMapping = {
+        AuditStub.audit()
+        AuthStub.authorised()
+        MtdIdLookupStub.ninoFound(nino)
+      }
+
+      val response: WSResponse = await(request().post(requestBody))
+      response.status shouldBe Status.BAD_REQUEST
+      response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameMissingError, None))
     }
   }
 

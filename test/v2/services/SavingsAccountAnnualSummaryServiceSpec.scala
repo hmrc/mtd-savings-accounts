@@ -87,7 +87,7 @@ class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
       "INVALID_TYPE" -> DownstreamError,
       "INVALID_NINO" -> NinoFormatError,
       "INVALID_TAXYEAR" -> TaxYearFormatError,
-      "NOT_FOUND_INCOME_SOURCE" -> MatchingResourceNotFoundError,
+      "NOT_FOUND_INCOME_SOURCE" -> NotFoundError,
       "INVALID_ACCOUNTING_PERIOD" -> RuleTaxYearNotSupportedError,
       "INVALID_PAYLOAD" -> BadRequestError,
       "MISSING_CHARITIES_NAME_GIFT_AID" -> DownstreamError,

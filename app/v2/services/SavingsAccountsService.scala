@@ -21,7 +21,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
+import v2.models.requestData.{AmendSavingsAccountAnnualSummaryRequest, CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -50,7 +50,7 @@ class SavingsAccountsService @Inject()(connector: DesConnector) extends DesServi
         desResponse =>
           desResponse.responseData match {
             case ac :: Nil => Right(DesResponse(desResponse.correlationId, ac))
-            case Nil       => Left(ErrorWrapper(Some(desResponse.correlationId), MatchingResourceNotFoundError, None))
+            case Nil       => Left(ErrorWrapper(Some(desResponse.correlationId), NotFoundError, None))
             case _         =>
               logger.info(s"[SavingsAccountsService] [retrieve] [CorrelationId - ${desResponse.correlationId}] - " +
                 "More than one matching account found")
@@ -96,7 +96,7 @@ class SavingsAccountsService @Inject()(connector: DesConnector) extends DesServi
     "INVALID_TAXYEAR" -> DownstreamError,
     "INVALID_INCOMESOURCEID" -> DownstreamError,
     "INVALID_ENDDATE" -> DownstreamError,
-    "NOT_FOUND" -> MatchingResourceNotFoundError,
+    "NOT_FOUND" -> NotFoundError,
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
   ).withDefault { error =>
