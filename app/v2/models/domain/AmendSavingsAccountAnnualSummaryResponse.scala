@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.models.domain
 
-import uk.gov.hmrc.domain.Nino
-import v2.models.domain.SavingsAccountAnnualSummary
+import play.api.libs.json.{Json, Reads, __}
 
-case class AmendSavingsAccountAnnualSummaryRequest(nino: Nino, desTaxYear: String, savingsAccountId: String,
-                                                   savingsAccountAnnualSummary: SavingsAccountAnnualSummary)
+case class AmendSavingsAccountAnnualSummaryResponse(transactionReference: String)
+
+object AmendSavingsAccountAnnualSummaryResponse {
+
+  implicit val reads: Reads[AmendSavingsAccountAnnualSummaryResponse] = Json.reads[AmendSavingsAccountAnnualSummaryResponse]
+
+}

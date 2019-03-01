@@ -16,11 +16,20 @@
 
 package v2.models.domain
 
-import play.api.libs.json.{Json, Reads, Writes}
+import play.api.libs.json.{JsValue, Json, Reads, Writes}
 
 case class SavingsAccountAnnualSummary(taxedUKInterest: Option[BigDecimal], untaxedUKInterest: Option[BigDecimal])
 
 object SavingsAccountAnnualSummary {
   implicit val reads: Reads[SavingsAccountAnnualSummary] = Json.reads[SavingsAccountAnnualSummary]
   implicit val writes: Writes[SavingsAccountAnnualSummary] = Json.writes[SavingsAccountAnnualSummary]
+
+  val desWrites : String => Writes[SavingsAccountAnnualSummary] = incomeSourceId =>
+    new Writes[SavingsAccountAnnualSummary] {
+    override def writes(o: SavingsAccountAnnualSummary): JsValue = Json.obj(
+      "incomeSourceId" -> incomeSourceId,
+      "taxedUkInterest" -> o.taxedUKInterest,
+      "untaxedUkInterest" -> o.untaxedUKInterest
+    )
+  }
 }
