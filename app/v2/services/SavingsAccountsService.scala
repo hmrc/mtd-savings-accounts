@@ -32,20 +32,20 @@ class SavingsAccountsService @Inject()(connector: DesConnector) extends DesServi
   def create(request: CreateSavingsAccountRequestData)
             (implicit hc: HeaderCarrier,
              ec: ExecutionContext): Future[CreateSavingsAccountOutcome] = {
-    connector.create(request)
+    connector.createSavingsAccount(request)
       .map(mapToVendorDirect("create", desErrorToMtdErrorCreate))
   }
 
   def retrieveAll(request: RetrieveAllSavingsAccountRequest)
                  (implicit hc: HeaderCarrier,
                   ec: ExecutionContext): Future[RetrieveAllSavingsAccountsOutcome] = {
-    connector.retrieveAll(request)
+    connector.retrieveAllSavingsAccounts(request)
       .map(mapToVendorDirect("retrieveAll", desErrorToMtdErrorRetrieveAll))
   }
 
   def retrieve(request: RetrieveSavingsAccountRequest)(implicit hc: HeaderCarrier,
                                                        ec: ExecutionContext): Future[RetrieveSavingsAccountsOutcome] = {
-    connector.retrieve(request).map {
+    connector.retrieveSavingsAccount(request).map {
       mapToVendor("retrieve", desErrorToMtdErrorRetrieve) {
         desResponse =>
           desResponse.responseData match {

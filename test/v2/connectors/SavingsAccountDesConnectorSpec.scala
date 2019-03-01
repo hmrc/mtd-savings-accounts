@@ -25,7 +25,7 @@ import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSaving
 
 import scala.concurrent.Future
 
-class DesConnectorSpec extends ConnectorSpec {
+class SavingsAccountDesConnectorSpec extends ConnectorSpec {
 
   lazy val baseUrl = "test-BaseUrl"
 
@@ -57,7 +57,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Right(expectedDesResponse)))
 
         val result: CreateSavingsAccountConnectorOutcome =
-          await(connector.create(CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccountRequest(accountName))))
+          await(connector.createSavingsAccount(CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccountRequest(accountName))))
 
         result shouldBe Right(expectedDesResponse)
       }
@@ -74,7 +74,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: CreateSavingsAccountConnectorOutcome =
-          await(connector.create(CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccountRequest(duplicateAccountName))))
+          await(connector.createSavingsAccount(CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccountRequest(duplicateAccountName))))
 
         result shouldBe Left(expectedDesResponse)
       }
@@ -91,7 +91,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: CreateSavingsAccountConnectorOutcome =
-          await(connector.create(CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccountRequest(duplicateAccountName))))
+          await(connector.createSavingsAccount(CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccountRequest(duplicateAccountName))))
 
         result shouldBe Left(expectedDesResponse)
       }
@@ -110,7 +110,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Right(expectedDesResponse)))
 
         val result: RetrieveAllSavingsAccountsConnectorOutcome =
-          await(connector.retrieveAll(RetrieveAllSavingsAccountRequest(Nino(nino))))
+          await(connector.retrieveAllSavingsAccounts(RetrieveAllSavingsAccountRequest(Nino(nino))))
 
         result shouldBe Right(expectedDesResponse)
       }
@@ -126,7 +126,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveAllSavingsAccountsConnectorOutcome =
-          await(connector.retrieveAll(RetrieveAllSavingsAccountRequest(Nino(nino))))
+          await(connector.retrieveAllSavingsAccounts(RetrieveAllSavingsAccountRequest(Nino(nino))))
 
         result shouldBe Left(expectedDesResponse)
       }
@@ -139,7 +139,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveAllSavingsAccountsConnectorOutcome =
-          await(connector.retrieveAll(RetrieveAllSavingsAccountRequest(Nino(nino))))
+          await(connector.retrieveAllSavingsAccounts(RetrieveAllSavingsAccountRequest(Nino(nino))))
 
         result shouldBe Left(expectedDesResponse)
       }
@@ -159,7 +159,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Right(expectedDesResponse)))
 
         val result: RetrieveSavingsAccountConnectorOutcome =
-          await(connector.retrieve(RetrieveSavingsAccountRequest(Nino(nino), incomeSourceId)))
+          await(connector.retrieveSavingsAccount(RetrieveSavingsAccountRequest(Nino(nino), incomeSourceId)))
 
         result shouldBe Right(expectedDesResponse)
       }
@@ -175,7 +175,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveSavingsAccountConnectorOutcome =
-          await(connector.retrieve(RetrieveSavingsAccountRequest(Nino(nino), incomeSourceId)))
+          await(connector.retrieveSavingsAccount(RetrieveSavingsAccountRequest(Nino(nino), incomeSourceId)))
 
         result shouldBe Left(expectedDesResponse)
       }
@@ -190,7 +190,7 @@ class DesConnectorSpec extends ConnectorSpec {
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveSavingsAccountConnectorOutcome =
-          await(connector.retrieve(RetrieveSavingsAccountRequest(Nino(nino), incomeSourceId)))
+          await(connector.retrieveSavingsAccount(RetrieveSavingsAccountRequest(Nino(nino), incomeSourceId)))
 
         result shouldBe Left(expectedDesResponse)
       }
