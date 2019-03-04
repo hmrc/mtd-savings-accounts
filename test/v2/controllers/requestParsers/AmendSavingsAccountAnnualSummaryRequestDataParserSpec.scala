@@ -56,7 +56,7 @@ class AmendSavingsAccountAnnualSummaryRequestDataParserSpec
   "parse" should {
     "return an create savings account request object" when {
       "valid request data is supplied" in new Test {
-        MockedMockAmendSavingsAccountAnnualSummaryValidator.validate(requestData)
+        MockAmendSavingsAccountAnnualSummaryValidator.validate(requestData)
           .returns(Nil)
 
         parser.parseRequest(requestData) shouldBe Right(request)
@@ -66,7 +66,7 @@ class AmendSavingsAccountAnnualSummaryRequestDataParserSpec
     "return an ErrorWrapper" when {
 
       "a single validation error occurs" in new Test {
-        MockedMockAmendSavingsAccountAnnualSummaryValidator.validate(requestData)
+        MockAmendSavingsAccountAnnualSummaryValidator.validate(requestData)
           .returns(List(NinoFormatError))
 
         parser.parseRequest(requestData) shouldBe Left(
@@ -74,7 +74,7 @@ class AmendSavingsAccountAnnualSummaryRequestDataParserSpec
       }
 
       "multiple validation errors occur" in new Test {
-        MockedMockAmendSavingsAccountAnnualSummaryValidator.validate(requestData)
+        MockAmendSavingsAccountAnnualSummaryValidator.validate(requestData)
           .returns(List(NinoFormatError, AccountNameDuplicateError))
 
 
