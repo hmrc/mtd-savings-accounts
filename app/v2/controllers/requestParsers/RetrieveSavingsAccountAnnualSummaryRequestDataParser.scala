@@ -20,7 +20,7 @@ import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.RetrieveSavingsAccountAnnualSummaryValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper}
-import v2.models.requestData.{RetrieveSavingsAccountAnnualSummaryRawData, RetrieveSavingsAccountAnnualSummaryRequest}
+import v2.models.requestData.{DesTaxYear, RetrieveSavingsAccountAnnualSummaryRawData, RetrieveSavingsAccountAnnualSummaryRequest}
 
 class RetrieveSavingsAccountAnnualSummaryRequestDataParser @Inject()(validator: RetrieveSavingsAccountAnnualSummaryValidator) {
 
@@ -30,7 +30,7 @@ class RetrieveSavingsAccountAnnualSummaryRequestDataParser @Inject()(validator: 
     validator.validate(data) match {
       case Nil => Right(RetrieveSavingsAccountAnnualSummaryRequest(
         nino = Nino(data.nino),
-        taxYear = data.taxYear,
+        desTaxYear = DesTaxYear.fromMtd(data.taxYear),
         savingsAccountId = data.savingsAccountId))
       case err :: Nil => Left(ErrorWrapper(None, err, None))
       case errors => Left(ErrorWrapper(None, BadRequestError, Some(errors)))

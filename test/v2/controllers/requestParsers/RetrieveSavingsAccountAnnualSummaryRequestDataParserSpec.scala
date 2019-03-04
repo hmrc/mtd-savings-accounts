@@ -20,7 +20,7 @@ import support.UnitSpec
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.validators.MockRetrieveSavingsAccountAnnualSummaryValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper, NinoFormatError, TaxYearFormatError}
-import v2.models.requestData.{RetrieveSavingsAccountAnnualSummaryRawData, RetrieveSavingsAccountAnnualSummaryRequest}
+import v2.models.requestData.{DesTaxYear, RetrieveSavingsAccountAnnualSummaryRawData, RetrieveSavingsAccountAnnualSummaryRequest}
 
 class RetrieveSavingsAccountAnnualSummaryRequestDataParserSpec extends UnitSpec {
 
@@ -38,7 +38,7 @@ class RetrieveSavingsAccountAnnualSummaryRequestDataParserSpec extends UnitSpec 
   "parse request" should {
     "return a valid request details object" when {
       "a valid request details is supplied" in new Test{
-        val validRequest = RetrieveSavingsAccountAnnualSummaryRequest(Nino(nino), taxYear, savingsAccountId)
+        val validRequest = RetrieveSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear.fromMtd(taxYear), savingsAccountId)
         MockRetrieveSavingsAccountAnnualSummaryValidator.validate(requestRawData).returns(Nil)
 
         val result = parser.parseRequest(requestRawData)
