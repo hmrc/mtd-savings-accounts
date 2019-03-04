@@ -26,7 +26,7 @@ import v2.controllers.requestParsers._
 import v2.models.domain.{RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
 import v2.models.errors._
 import v2.models.requestData._
-import v2.services.{EnrolmentsAuthService, MtdIdLookupService, SavingsAccountAnnualSummaryService, SavingsAccountsService}
+import v2.services.{EnrolmentsAuthService, MtdIdLookupService, SavingsAccountsService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -37,9 +37,7 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
                                           createSavingsAccountRequestDataParser: CreateSavingsAccountRequestDataParser,
                                           retrieveAllSavingsAccountRequestDataParser: RetrieveAllSavingsAccountRequestDataParser,
                                           retrieveSavingsAccountRequestDataParser: RetrieveSavingsAccountRequestDataParser,
-                                          amendSavingsAccountAnnualSummaryRequestDataParser: AmendSavingsAccountAnnualSummaryRequestDataParser,
                                           savingsAccountService: SavingsAccountsService,
-                                          savingsAccountAnnualSummaryService: SavingsAccountAnnualSummaryService,
                                           val cc: ControllerComponents
                                          ) extends AuthorisedController(cc) {
 
@@ -90,41 +88,13 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
     }
   }
 
-  def amend(nino: String, accountId: String, taxYear: String): Action[JsValue] = authorisedAction(nino).async(parse.json) { implicit request =>
-    amendSavingsAccountAnnualSummaryRequestDataParser.parseRequest(
-      AmendSavingsAccountAnnualSummaryRawData(
-        nino, taxYear, accountId,
-        AnyContentAsJson(request.body))) match {
-      case Right(amendRequest) =>
-        savingsAccountAnnualSummaryService.amend(amendRequest)
-          .map {
-            case Right(desResponse) =>
-              logger.info(s"[SavingsAccountsController][amend] - Success response received with CorrelationId: ${desResponse.correlationId}")
-              Ok.withHeaders("X-CorrelationId" -> desResponse.correlationId)
-
-            case Left(errorWrapper) =>
-              processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
-          }
-
-      case Left(errorWrapper) =>
-        Future.successful(
-          processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
-        )
-    }
-  }
-
   private def processError(errorWrapper: ErrorWrapper) = {
     errorWrapper.error match {
       case BadRequestError
            | NinoFormatError
            | AccountIdFormatError
            | AccountNameFormatError
-           | AccountNameMissingError
-           | TaxYearFormatError
-           | RuleTaxYearNotSupportedError
-           | TaxedInterestFormatError
-           | UnTaxedInterestFormatError
-           | RuleIncorrectOrEmptyBodyError    => BadRequest(Json.toJson(errorWrapper))
+           | AccountNameMissingError          => BadRequest(Json.toJson(errorWrapper))
       case AccountNameDuplicateError
            | MaximumSavingsAccountsLimitError => Forbidden(Json.toJson(errorWrapper))
       case NotFoundError                      => NotFound(Json.toJson(errorWrapper))
