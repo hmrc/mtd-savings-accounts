@@ -52,7 +52,7 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
           .map {
             case Right(desResponse) =>
               logger.info(s"[SavingsAccountAnnualSummaryController][amend] - Success response received with CorrelationId: ${desResponse.correlationId}")
-              Ok.withHeaders("X-CorrelationId" -> desResponse.correlationId)
+              NoContent.withHeaders("X-CorrelationId" -> desResponse.correlationId)
 
             case Left(errorWrapper) =>
               processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))

@@ -66,7 +66,7 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, AmendSavingsAccountAnnualSummaryResponse(transactionReference))
 
         MockedHttpClient.post[SavingsAccountAnnualSummary, AmendSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
+          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear).toString}",
           savingsAccountAnnualSummary
         ).returns(Future.successful(Right(expectedDesResponse)))
 
@@ -83,7 +83,7 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, SingleError(NinoFormatError))
 
         MockedHttpClient.post[SavingsAccountAnnualSummary, AmendSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
+          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear).toString}",
           savingsAccountAnnualSummary
         ).returns(Future.successful(Left(expectedDesResponse)))
 
@@ -100,7 +100,7 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockedHttpClient.post[SavingsAccountAnnualSummary, AmendSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
+          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear).toString}",
           savingsAccountAnnualSummary
         ).returns(Future.successful(Left(expectedDesResponse)))
 

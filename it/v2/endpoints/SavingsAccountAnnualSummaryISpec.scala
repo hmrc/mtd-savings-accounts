@@ -55,7 +55,7 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
     val taxed = 123.45
     val untaxed = 543.21
 
-    "return a 200 status code" when {
+    "return a 204 status code" when {
 
       "any valid request is made" in new AmendTest {
 
@@ -67,7 +67,7 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
         }
 
         val response: WSResponse = await(request().put(SavingsAccountsFixture.amendRequestJson(taxed, untaxed)))
-        response.status shouldBe Status.OK
+        response.status shouldBe Status.NO_CONTENT
       }
     }
 

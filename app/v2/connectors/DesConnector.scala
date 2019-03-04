@@ -82,7 +82,7 @@ class DesConnector @Inject()(http: HttpClient,
 
     import v2.models.domain.SavingsAccountAnnualSummary.desWrites
     val nino = amendSavingsAccountAnnualSummaryRequest.nino.nino
-    val desTaxYear = amendSavingsAccountAnnualSummaryRequest.desTaxYear
+    val desTaxYear = amendSavingsAccountAnnualSummaryRequest.desTaxYear.toString
     val incomeSourceId = amendSavingsAccountAnnualSummaryRequest.savingsAccountId
 
     val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/savings/annual/$desTaxYear"

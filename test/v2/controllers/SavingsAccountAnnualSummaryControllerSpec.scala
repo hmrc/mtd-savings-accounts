@@ -78,7 +78,7 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
           .returns(Future.successful(Right(DesResponse(correlationId, response))))
 
         val result: Future[Result] = controller.amend(nino, id, taxYear)(fakePutRequest(SavingsAccountsFixture.amendRequestJson()))
-        status(result) shouldBe OK
+        status(result) shouldBe NO_CONTENT
         header("X-CorrelationId", result) shouldBe Some(correlationId)
       }
     }

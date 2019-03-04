@@ -49,7 +49,7 @@ class SavingsAccountAnnualSummaryService @Inject()(connector: DesConnector) exte
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
   ).withDefault { error =>
-    logger.info(s"[SavingsAccountsService] [amend] - No mapping found for error code $error")
+    logger.info(s"[SavingsAccountAnnualSummaryService] [amend] - No mapping found for error code $error")
     DownstreamError
   }
 }
