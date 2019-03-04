@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package v2.models.domain
+package v2.models.des
 
-import play.api.libs.json.{Json, Reads, __}
+import play.api.libs.json.{Json, Reads}
 
-case class AmendSavingsAccountAnnualSummaryResponse(transactionReference: String)
+case class DesAmendSavingsAccountAnnualSummaryResponse(transactionReference: String)
 
-object AmendSavingsAccountAnnualSummaryResponse {
+object DesAmendSavingsAccountAnnualSummaryResponse {
 
-  implicit val reads: Reads[AmendSavingsAccountAnnualSummaryResponse] = Json.reads[AmendSavingsAccountAnnualSummaryResponse]
+  implicit val reads: Reads[DesAmendSavingsAccountAnnualSummaryResponse] = Json.reads[DesAmendSavingsAccountAnnualSummaryResponse]
 
 }

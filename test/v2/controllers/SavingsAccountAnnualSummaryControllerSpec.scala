@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures._
 import v2.mocks.requestParsers._
 import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountAnnualSummaryService}
+import v2.models.des.DesAmendSavingsAccountAnnualSummaryResponse
 import v2.models.domain._
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
@@ -65,7 +66,7 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
     val request = AmendSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear(taxYear), id,
       SavingsAccountAnnualSummary(Some(123.45), Some(456.78)))
 
-    val response = AmendSavingsAccountAnnualSummaryResponse("FIXME")
+    val response = DesAmendSavingsAccountAnnualSummaryResponse("FIXME")
 
 
     "passed a valid request" should {

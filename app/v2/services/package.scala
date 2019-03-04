@@ -17,6 +17,7 @@
 package v2
 
 import v2.models.auth.UserDetails
+import v2.models.des.DesAmendSavingsAccountAnnualSummaryResponse
 import v2.models.domain._
 import v2.models.errors.{Error, ErrorWrapper}
 import v2.models.outcomes.DesResponse
@@ -30,5 +31,7 @@ package object services {
 
   type RetrieveSavingsAccountsOutcome = Either[ErrorWrapper, DesResponse[RetrieveSavingsAccountResponse]]
 
-  type AmendSavingsAccountAnnualSummaryOutcome = Either[ErrorWrapper, DesResponse[AmendSavingsAccountAnnualSummaryResponse]]
+  type AmendSavingsAccountAnnualSummaryOutcome = Either[ErrorWrapper, DesResponse[DesAmendSavingsAccountAnnualSummaryResponse]]
+
+  type RetrieveSavingsAccountAnnualSummaryOutcome = Either[ErrorWrapper, DesResponse[SavingsAccountAnnualSummary]]
 }

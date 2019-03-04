@@ -100,23 +100,4 @@ class SavingsAccountAnnualSummarySpec  extends UnitSpec with JsonErrorValidators
       }
     }
   }
-
-  "desWrites" when {
-    "passed a valid SavingsAccountAnnualSummary object" should {
-      "return valid des formatted JSON" in {
-        val json =
-          """
-            |{
-            |   "incomeSourceId": "ZZIS12345678901",
-            |   "taxedUkInterest": 2000.99,
-            |   "untaxedUkInterest": 5000.50
-            |}
-          """.stripMargin
-
-        val model = SavingsAccountAnnualSummary(Some(2000.99), Some(5000.50))
-
-        SavingsAccountAnnualSummary.desWrites("ZZIS12345678901").writes(model) shouldBe Json.parse(json)
-      }
-    }
-  }
 }
