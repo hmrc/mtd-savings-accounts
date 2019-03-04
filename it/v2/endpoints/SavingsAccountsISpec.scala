@@ -30,20 +30,12 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
   private trait Test {
 
-    val nino: String
-    val specificAccountId: Option[String] = None
-    val specificTaxYear: Option[String] = None
+    val nino: String = "AA123456A"
     val correlationId = "X-123"
 
     def setupStubs(): StubMapping
 
-    private def uri =
-      (specificAccountId, specificTaxYear) match {
-        case (None, None)         => s"/2.0/ni/$nino/savings-accounts"
-        case (Some(id), Some(ty)) => s"/2.0/ni/$nino/savings-accounts/$id/$ty"
-        case (Some(id), None)     => s"/2.0/ni/$nino/savings-accounts/$id"
-        case _                    => throw new MatchError("invalid account/tax year combination")
-      }
+    def uri: String
 
     def request(): WSRequest = {
       setupStubs()
@@ -53,10 +45,13 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
   "Calling the create savings account endpoint" should {
 
+    trait CreateTest extends Test {
+      def uri = s"/2.0/ni/$nino/savings-accounts"
+    }
+
     "return a 201 status code" when {
 
-      "any valid request is made" in new Test {
-        override val nino: String = "AA123456A"
+      "any valid request is made" in new CreateTest {
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
@@ -88,8 +83,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
 
     def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
-      s"des returns an $desCode error" in new Test {
-        override val nino: String = "AA123456A"
+      s"des returns an $desCode error" in new CreateTest {
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
@@ -109,7 +103,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
 
     def createRequestValidationErrorTest(requestNino: String, expectedStatus: Int, expectedBody: Error): Unit = {
-      s"validation fails with ${expectedBody.code} error" in new Test {
+      s"validation fails with ${expectedBody.code} error" in new CreateTest {
 
         override val nino: String = requestNino
 
@@ -125,14 +119,12 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       }
     }
 
-    s"incorrect body is supplied" in new Test {
+    s"incorrect body is supplied" in new CreateTest {
       val requestBody: JsValue = Json.parse(
         s"""{
            | "accountName": "1*"
            |}""".stripMargin
       )
-
-      override val nino: String = "AA123456A"
 
       override def setupStubs(): StubMapping = {
         AuditStub.audit()
@@ -145,14 +137,12 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameFormatError, None))
     }
 
-    s"empty body is supplied" in new Test {
+    s"empty body is supplied" in new CreateTest {
       val requestBody: JsValue = Json.parse(
         s"""{
            |
            |}""".stripMargin
       )
-
-      override val nino: String = "AA123456A"
 
       override def setupStubs(): StubMapping = {
         AuditStub.audit()
@@ -168,10 +158,13 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
   "Calling the retrieve all savings account endpoint" should {
 
+    trait RetrieveAllTest extends Test {
+      def uri = s"/2.0/ni/$nino/savings-accounts"
+    }
+
     "return a 200 status code" when {
 
-      "any valid request is made" in new Test {
-        override val nino: String = "AA123456A"
+      "any valid request is made" in new RetrieveAllTest {
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
@@ -205,8 +198,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
 
     def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
-      s"des returns an $desCode error" in new Test {
-        override val nino: String = "AA123456A"
+      s"des returns an $desCode error" in new RetrieveAllTest {
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
@@ -226,7 +218,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
 
     def createRequestValidationErrorTest(requestNino: String, expectedStatus: Int, expectedBody: Error): Unit = {
-      s"validation fails with ${expectedBody.code} error" in new Test {
+      s"validation fails with ${expectedBody.code} error" in new RetrieveAllTest {
 
         override val nino: String = requestNino
 
@@ -246,13 +238,15 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
   "Calling the retrieve savings account endpoint" should {
 
+    trait RetrieveTest extends Test {
+      val accountId = "SAVKB2UVwUTBQGJ"
+
+      def uri = s"/2.0/ni/$nino/savings-accounts/$accountId"
+    }
+
     "return a 200 status code" when {
 
-      "any valid request is made" in new Test {
-
-        val accountId = "SAVKB2UVwUTBQGJ"
-        override val specificAccountId = Some(accountId)
-        override val nino: String = "AA123456A"
+      "any valid request is made" in new RetrieveTest {
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
@@ -273,7 +267,6 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
 
     "return 500 (Internal Server Error)" when {
-
       createErrorTest(Status.BAD_REQUEST, "INVALID_IDTYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
       createErrorTest(Status.BAD_REQUEST, "INVALID_INCOMESOURCETYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
       createErrorTest(Status.BAD_REQUEST, "INVALID_TAXYEAR", Status.INTERNAL_SERVER_ERROR, DownstreamError)
@@ -292,10 +285,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
 
     def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
-      s"des returns an $desCode error" in new Test {
-        val accountId = "SAVKB2UVwUTBQGJ"
-        override val specificAccountId = Some(accountId)
-        override val nino: String = "AA123456A"
+      s"des returns an $desCode error" in new RetrieveTest {
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
@@ -315,9 +305,9 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       createRequestValidationErrorTest("AA123456A", "BADID", Status.BAD_REQUEST, AccountIdFormatError)
     }
 
-    def createRequestValidationErrorTest(requestNino: String, accountId: String, expectedStatus: Int, expectedBody: Error): Unit = {
-      s"validation fails with ${expectedBody.code} error" in new Test {
-        override val specificAccountId = Some(accountId)
+    def createRequestValidationErrorTest(requestNino: String, requestAccountId: String, expectedStatus: Int, expectedBody: Error): Unit = {
+      s"validation fails with ${expectedBody.code} error" in new RetrieveTest {
+        override val accountId: String = requestAccountId
         override val nino: String = requestNino
 
         override def setupStubs(): StubMapping = {
@@ -335,18 +325,19 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
   "Calling the amend savings account annual summary endpoint" should {
 
+    trait AmendTest extends Test {
+      val accountId = "SAVKB2UVwUTBQGJ"
+      val taxYear = "2017-18"
+
+      def uri = s"/2.0/ni/$nino/savings-accounts/$accountId/$taxYear"
+    }
+
     val taxed = 123.45
     val untaxed = 543.21
 
     "return a 200 status code" when {
 
-      "any valid request is made" in new Test {
-        val accountId = "SAVKB2UVwUTBQGJ"
-        val taxYear = "2017-18"
-        override val specificAccountId = Some(accountId)
-        override val specificTaxYear = Some(taxYear)
-        override val nino: String = "AA123456A"
-
+      "any valid request is made" in new AmendTest {
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
@@ -361,26 +352,26 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
 
     "return 500 (Internal Server Error)" when {
-      amendErrorTest(Status.BAD_REQUEST, "INVALID_IDTYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
-      amendErrorTest(Status.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      amendErrorTest(Status.BAD_REQUEST, "INVALID_TYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      amendErrorTest(Status.FORBIDDEN, "MISSING_CHARITIES_NAME_GIFT_AID", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      amendErrorTest(Status.FORBIDDEN, "MISSING_GIFT_AID_AMOUNT", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      amendErrorTest(Status.FORBIDDEN, "MISSING_CHARITIES_NAME_INVESTMENT", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      amendErrorTest(Status.FORBIDDEN, "MISSING_INVESTMENT_AMOUNT", Status.INTERNAL_SERVER_ERROR, DownstreamError)
       amendErrorTest(Status.INTERNAL_SERVER_ERROR, "SERVER_ERROR", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      amendErrorTest(Status.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
     }
 
     "return 400 (Bad Request)" when {
+      amendErrorTest(Status.BAD_REQUEST, "INVALID_NINO", Status.BAD_REQUEST, NinoFormatError)
       amendErrorTest(Status.BAD_REQUEST, "INVALID_TAXYEAR", Status.BAD_REQUEST, TaxYearFormatError)
-      amendErrorTest(Status.BAD_REQUEST, "NOT_FOUND_INCOME_SOURCE", Status.NOT_FOUND, NotFoundError)
-      amendErrorTest(Status.BAD_REQUEST, "INVALID_ACCOUNTING_PERIOD", Status.BAD_REQUEST, RuleTaxYearNotSupportedError)
       amendErrorTest(Status.BAD_REQUEST, "INVALID_PAYLOAD", Status.BAD_REQUEST, BadRequestError)
+      amendErrorTest(Status.FORBIDDEN, "NOT_FOUND_INCOME_SOURCE", Status.NOT_FOUND, NotFoundError)
+      amendErrorTest(Status.FORBIDDEN, "INVALID_ACCOUNTING_PERIOD", Status.BAD_REQUEST, RuleTaxYearNotSupportedError)
     }
 
 
     def amendErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
-      s"des returns an $desCode error" in new Test {
-        val accountId = "SAVKB2UVwUTBQGJ"
-        val taxYear = "2017-18"
-        override val specificAccountId = Some(accountId)
-        override val specificTaxYear = Some(taxYear)
-        override val nino: String = "AA123456A"
+      s"des returns an $desCode error" in new AmendTest {
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
@@ -396,17 +387,21 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
 
     "return 400 (Bad Request)" when {
-      amendRequestValidationErrorTest("AA1123A", Status.BAD_REQUEST, NinoFormatError)
+      amendRequestValidationErrorTest("BADNINO", "SAVKB2UVwUTBQGJ", "2017-18", Status.BAD_REQUEST, NinoFormatError)
+      amendRequestValidationErrorTest("AA123456A", "BADID", "2017-18", Status.BAD_REQUEST, AccountIdFormatError)
+      amendRequestValidationErrorTest("AA123456A", "SAVKB2UVwUTBQGJ", "ABCD", Status.BAD_REQUEST, TaxYearFormatError)
     }
 
-    def amendRequestValidationErrorTest(requestNino: String, expectedStatus: Int, expectedBody: Error): Unit = {
-      s"validation fails with ${expectedBody.code} error" in new Test {
+    def amendRequestValidationErrorTest(
+                                         requestNino: String,
+                                         requestAccountId: String,
+                                         requestTaxYear: String,
+                                         expectedStatus: Int, expectedBody: Error): Unit = {
+      s"validation fails with ${expectedBody.code} error" in new AmendTest {
 
-        val accountId = "SAVKB2UVwUTBQGJ"
-        val taxYear = "2017-18"
-        override val specificAccountId = Some(accountId)
-        override val specificTaxYear = Some(taxYear)
         override val nino: String = requestNino
+        override val accountId: String = requestAccountId
+        override val taxYear: String = requestTaxYear
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
@@ -420,14 +415,12 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       }
     }
 
-    s"incorrect body is supplied" in new Test {
+    s"incorrect body is supplied" in new AmendTest {
       val requestBody: JsValue = Json.parse(
         s"""{
-           | "accountName": "1*"
+           | "incorrectFieldName": "ABCDE"
            |}""".stripMargin
       )
-
-      override val nino: String = "AA123456A"
 
       override def setupStubs(): StubMapping = {
         AuditStub.audit()
@@ -435,29 +428,27 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
         MtdIdLookupStub.ninoFound(nino)
       }
 
-      val response: WSResponse = await(request().post(requestBody))
+      val response: WSResponse = await(request().put(requestBody))
       response.status shouldBe Status.BAD_REQUEST
-      response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameFormatError, None))
+      response.json shouldBe Json.toJson(ErrorWrapper(None, RuleIncorrectOrEmptyBodyError, None))
     }
 
-    s"empty body is supplied" in new Test {
+    s"empty body is supplied" in new AmendTest {
       val requestBody: JsValue = Json.parse(
         s"""{
            |
            |}""".stripMargin
       )
 
-      override val nino: String = "AA123456A"
-
       override def setupStubs(): StubMapping = {
         AuditStub.audit()
         AuthStub.authorised()
         MtdIdLookupStub.ninoFound(nino)
       }
 
-      val response: WSResponse = await(request().post(requestBody))
+      val response: WSResponse = await(request().put(requestBody))
       response.status shouldBe Status.BAD_REQUEST
-      response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameMissingError, None))
+      response.json shouldBe Json.toJson(ErrorWrapper(None, RuleIncorrectOrEmptyBodyError, None))
     }
   }
 
