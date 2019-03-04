@@ -24,8 +24,7 @@ import v2.models.requestData.{DesTaxYear, RetrieveSavingsAccountAnnualSummaryRaw
 
 class RetrieveSavingsAccountAnnualSummaryRequestDataParser @Inject()(validator: RetrieveSavingsAccountAnnualSummaryValidator) {
 
-  def parseRequest(data: RetrieveSavingsAccountAnnualSummaryRawData):
-  Either[ErrorWrapper, RetrieveSavingsAccountAnnualSummaryRequest] = {
+  def parseRequest(data: RetrieveSavingsAccountAnnualSummaryRawData): Either[ErrorWrapper, RetrieveSavingsAccountAnnualSummaryRequest] = {
 
     validator.validate(data) match {
       case Nil => Right(RetrieveSavingsAccountAnnualSummaryRequest(
