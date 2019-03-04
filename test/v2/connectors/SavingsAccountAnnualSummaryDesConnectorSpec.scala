@@ -57,7 +57,7 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
   }
 
   val savingsAccountAnnualSummary = SavingsAccountAnnualSummary(Some(2000.99), Some(5000.50))
-  val request = AmendSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear(taxYear), incomeSourceId, savingsAccountAnnualSummary)
+  val request = AmendSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear.fromMtd(taxYear), incomeSourceId, savingsAccountAnnualSummary)
 
   "Amend annual summary" when {
     "a valid request is supplied" should {
@@ -66,7 +66,7 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, AmendSavingsAccountAnnualSummaryResponse(transactionReference))
 
         MockedHttpClient.post[SavingsAccountAnnualSummary, AmendSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear(taxYear)}",
+          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
           savingsAccountAnnualSummary
         ).returns(Future.successful(Right(expectedDesResponse)))
 
@@ -83,7 +83,7 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, SingleError(NinoFormatError))
 
         MockedHttpClient.post[SavingsAccountAnnualSummary, AmendSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear(taxYear)}",
+          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
           savingsAccountAnnualSummary
         ).returns(Future.successful(Left(expectedDesResponse)))
 
@@ -100,7 +100,7 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockedHttpClient.post[SavingsAccountAnnualSummary, AmendSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear(taxYear)}",
+          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
           savingsAccountAnnualSummary
         ).returns(Future.successful(Left(expectedDesResponse)))
 

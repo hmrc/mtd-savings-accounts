@@ -14,20 +14,29 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators.validations
 
-/**
-  * Represents a tax year for DES
-  *
-  * @param value the tax year string (where 2018 represents 2017-18)
-  */
-case class DesTaxYear(value: String) extends AnyVal
+import v2.models.errors.{Error, TaxYearFormatError}
 
-object DesTaxYear {
+object TaxYearValidation {
 
-  /**
-    * @param taxYear tax year in MTD format (e.g. 2017-18)
-    */
-  def fromMtd(taxYear: String): DesTaxYear =
-    DesTaxYear(taxYear.take(2) + taxYear.drop(5))
+  val taxYearFormat = "20[1-9][0-9]\\-[1-9][0-9]"
+
+  def validate(taxYear: String): List[Error] = {
+    if (taxYear.matches(taxYearFormat)) {
+
+      val start = taxYear.substring(2, 4).toInt
+      val end = taxYear.substring(5, 7).toInt
+
+      if (end - start == 1) {
+        NoValidationErrors
+      } else {
+        List(TaxYearFormatError)
+      }
+    } else {
+      List(TaxYearFormatError)
+    }
+  }
+
+
 }

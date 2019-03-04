@@ -19,7 +19,7 @@ package v2.controllers.requestParsers.validators.validations
 import play.api.libs.json.{Json, Reads}
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
-import v2.models.errors.AccountNameMissingError
+import v2.models.errors.{AccountNameMissingError, Error}
 import v2.models.utils.JsonErrorValidators
 
 class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
@@ -28,15 +28,16 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
   implicit val testDataObjectReads: Reads[TestDataObject] = Json.reads[TestDataObject]
 
+  val dummyError = Error("DUMMY_CODE", "dummy message")
+
   "validate" should {
     "return no errors" when {
       "when a valid JSON object with all the necessary fields is supplied" in {
 
         val validJson = AnyContentAsJson(Json.parse("""{ "fieldOne" : "Something", "fieldTwo" : "SomethingElse" }"""))
 
-        val validationResult = JsonFormatValidation.validate[TestDataObject](validJson)
-        validationResult.isEmpty shouldBe true
-
+        val validationResult = JsonFormatValidation.validate[TestDataObject](validJson, dummyError)
+        validationResult shouldBe empty
       }
     }
 
@@ -46,10 +47,8 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
         // fieldTwo is missing
         val json = AnyContentAsJson(Json.parse("""{ "fieldOne" : "Something" }"""))
 
-        val validationResult = JsonFormatValidation.validate[TestDataObject](json)
-        validationResult.isEmpty shouldBe false
-        validationResult.head shouldBe AccountNameMissingError
-
+        val validationResult = JsonFormatValidation.validate[TestDataObject](json, dummyError)
+        validationResult shouldBe List(dummyError)
       }
 
     }

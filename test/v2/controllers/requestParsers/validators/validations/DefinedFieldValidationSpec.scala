@@ -16,19 +16,24 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import play.api.libs.json._
-import play.api.mvc.AnyContentAsJson
-import v2.models.errors.{AccountNameMissingError, Error}
+import support.UnitSpec
+import v2.models.errors.Error
+import v2.models.utils.JsonErrorValidators
 
-object JsonFormatValidation {
+class DefinedFieldValidationSpec extends UnitSpec with JsonErrorValidators {
 
-  def validate[A](data: AnyContentAsJson, error: Error)(implicit reads: Reads[A]): List[Error] = {
+  val dummyError = Error("DUMMY_CODE", "dummy message")
 
-    data.json.validate[A] match {
-      case JsSuccess(_, _) => NoValidationErrors
-      case _               => List(error)
+  "validate" should {
+    "return no errors" when {
+      "top level optional fields exist" in {
+        val validationResult = DefinedFieldValidation.validate(dummyError, Some(Unit), None)
+        validationResult shouldBe empty
+      }
     }
 
+    "return an error" in {
+      DefinedFieldValidation.validate(dummyError, None, None) shouldBe List(dummyError)
+    }
   }
-
 }

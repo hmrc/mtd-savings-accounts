@@ -31,7 +31,7 @@ trait AppConfig {
 }
 
 @Singleton
-class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig {
+class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig with FixedConfig{
 
 
   val mtdIdBaseUrl: String = config.baseUrl("mtd-id-lookup")
@@ -39,4 +39,9 @@ class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig {
   val desEnv: String = config.getString("microservice.services.des.env")
   val desToken: String = config.getString("microservice.services.des.token")
 
+}
+
+trait FixedConfig {
+  // Minimum tax year for MTD
+  val minimumTaxYear = 2018
 }

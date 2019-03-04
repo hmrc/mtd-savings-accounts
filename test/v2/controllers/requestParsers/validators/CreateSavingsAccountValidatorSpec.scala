@@ -42,7 +42,7 @@ class CreateSavingsAccountValidatorSpec extends UnitSpec {
 
     "return no errors" when {
       "the uri is valid and the JSON payload is Valid with all fields" in new Test {
-        val inputData =CreateSavingsAccountRawData(validNino, validJsonBody)
+        val inputData = CreateSavingsAccountRawData(validNino, validJsonBody)
 
         val result: Seq[Error] = validator.validate(inputData)
 
@@ -67,7 +67,8 @@ class CreateSavingsAccountValidatorSpec extends UnitSpec {
       "empty body is supplied" in {
         val nino = "AA123456A"
         val expectedData = List(AccountNameMissingError)
-        val emptyJson ="""
+        val emptyJson =
+          """
             |{
             |}
           """.stripMargin
@@ -84,11 +85,12 @@ class CreateSavingsAccountValidatorSpec extends UnitSpec {
       "an invalid account name is supplied" in {
         val nino = "AA123456A"
         val expectedData = List(AccountNameFormatError)
-        val invalidJson ="""
-                         |{
-                         |"accountName": "Main*account^name"
-                         |}
-                       """.stripMargin
+        val invalidJson =
+          """
+            |{
+            |"accountName": "Main*account^name"
+            |}
+          """.stripMargin
 
         val requestRawData = CreateSavingsAccountRawData(nino, AnyContentAsJson(Json.parse(invalidJson)))
 

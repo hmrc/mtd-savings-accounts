@@ -19,5 +19,5 @@ package v2.models.requestData
 import uk.gov.hmrc.domain.Nino
 import v2.models.domain.SavingsAccountAnnualSummary
 
-case class AmendSavingsAccountAnnualSummaryRequest(nino: Nino, desTaxYear: String, savingsAccountId: String,
+case class AmendSavingsAccountAnnualSummaryRequest(nino: Nino, desTaxYear: DesTaxYear, savingsAccountId: String,
                                                    savingsAccountAnnualSummary: SavingsAccountAnnualSummary)
