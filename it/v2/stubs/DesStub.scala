@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 import support.WireMockMethods
+import v2.models.requestData.DesTaxYear
 
 object DesStub extends WireMockMethods {
 
@@ -33,6 +34,9 @@ object DesStub extends WireMockMethods {
 
   private def getSavingsAccountsUrl(nino: String): String =
     s"/income-tax/income-sources/nino/$nino"
+
+  private def savingsAccountSummartUrl(nino: String, accountId: String, taxYear: DesTaxYear): String =
+    s"/income-tax/nino/$nino/income-source/savings/annual/${taxYear.value}"
 
   private def getSavingsAccountQueryParams(accountId: String) = Map("incomeSourceType" -> "interest-from-uk-banks", "incomeSourceId" -> accountId)
 
@@ -87,6 +91,22 @@ object DesStub extends WireMockMethods {
 
   def retrieveError(nino: String, accountId: String, errorStatus: Int, errorBody: String): StubMapping = {
     when(method = GET, uri = getSavingsAccountsUrl(nino), queryParams = getSavingsAccountQueryParams(accountId))
+      .thenReturn(status = errorStatus, errorBody)
+  }
+
+  private val amendSuccessResponseBody = Json.parse(
+    s"""{
+       |  "transactionReference": "0000000000000001"
+       |}
+    """.stripMargin)
+
+  def amendSuccess(nino: String, accountId: String, taxYear: DesTaxYear): StubMapping = {
+    when(method = POST, uri = savingsAccountSummartUrl(nino, accountId, taxYear))
+      .thenReturn(status = OK, amendSuccessResponseBody)
+  }
+
+  def amendError(nino: String, accountId: String, taxYear: DesTaxYear, errorStatus: Int, errorBody: String): StubMapping = {
+    when(method = POST, uri = savingsAccountSummartUrl(nino, accountId, taxYear))
       .thenReturn(status = errorStatus, errorBody)
   }
 }

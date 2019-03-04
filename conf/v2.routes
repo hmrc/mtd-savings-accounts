@@ -1,3 +1,4 @@
 POST            /ni/:nino/savings-accounts                  v2.controllers.SavingsAccountsController.create(nino: String)
 GET             /ni/:nino/savings-accounts                  v2.controllers.SavingsAccountsController.retrieveAll(nino: String)
 GET             /ni/:nino/savings-accounts/:id              v2.controllers.SavingsAccountsController.retrieve(nino: String, id: String)
+PUT             /ni/:nino/savings-accounts/:id/:taxYear     v2.controllers.SavingsAccountAnnualSummaryController.amend(nino: String, id: String, taxYear: String)

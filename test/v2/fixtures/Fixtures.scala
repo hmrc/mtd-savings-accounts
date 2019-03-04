@@ -32,9 +32,9 @@ object Fixtures {
     )
     val createJsonResponse: String => JsValue = id => Json.parse(
       s"""
-        |{
-        |  "id": "$id"
-        |}
+         |{
+         |  "id": "$id"
+         |}
       """.stripMargin
     )
 
@@ -47,9 +47,16 @@ object Fixtures {
       ))
     )
 
-    val retrieveJsonReponse: String => JsValue =  accountName => Json.obj(
-          "accountName" -> accountName
+    val retrieveJsonReponse: String => JsValue = accountName => Json.obj(
+      "accountName" -> accountName
     )
+
+    def amendRequestJson(taxedUkInterest: BigDecimal  = 123.45, untaxedUkInterest: BigDecimal = 543.21) = Json.parse(
+      s"""{
+        |"taxedUKInterest": $taxedUkInterest,
+        |"untaxedUKInterest": $untaxedUkInterest
+        |}
+      """.stripMargin)
 
     val multipleErrorsFromParserJson: String => JsValue = correlationId => Json.toJson(
       ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(AccountNameMissingError, AccountNameFormatError)))

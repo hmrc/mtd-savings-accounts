@@ -39,7 +39,7 @@ class SavingsAccountAnnualSummaryService @Inject()(connector: DesConnector) exte
     "INVALID_TYPE" -> DownstreamError,
     "INVALID_NINO" -> NinoFormatError,
     "INVALID_TAXYEAR" -> TaxYearFormatError,
-    "NOT_FOUND_INCOME_SOURCE" -> MatchingResourceNotFoundError,
+    "NOT_FOUND_INCOME_SOURCE" -> NotFoundError,
     "INVALID_ACCOUNTING_PERIOD" -> RuleTaxYearNotSupportedError,
     "INVALID_PAYLOAD" -> BadRequestError,
     "MISSING_CHARITIES_NAME_GIFT_AID" -> DownstreamError,
@@ -49,7 +49,7 @@ class SavingsAccountAnnualSummaryService @Inject()(connector: DesConnector) exte
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
   ).withDefault { error =>
-    logger.info(s"[SavingsAccountsService] [amend] - No mapping found for error code $error")
+    logger.info(s"[SavingsAccountAnnualSummaryService] [amend] - No mapping found for error code $error")
     DownstreamError
   }
 }

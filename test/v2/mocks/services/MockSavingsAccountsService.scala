@@ -19,28 +19,29 @@ package v2.mocks.services
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
-import v2.services.{CreateSavingsAccountOutcome, RetrieveAllSavingsAccountsOutcome, RetrieveSavingsAccountsOutcome, SavingsAccountsService}
+import v2.models.requestData._
+import v2.services._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait MockSavingsAccountsService extends MockFactory{
+trait MockSavingsAccountsService extends MockFactory {
 
   val mockSavingsAccountService: SavingsAccountsService = mock[SavingsAccountsService]
 
   object MockSavingsAccountService {
     def create(savingsAccountRequest: CreateSavingsAccountRequestData): CallHandler[Future[CreateSavingsAccountOutcome]] = {
-      (mockSavingsAccountService.create(_:CreateSavingsAccountRequestData)(_: HeaderCarrier, _: ExecutionContext))
+      (mockSavingsAccountService.create(_: CreateSavingsAccountRequestData)(_: HeaderCarrier, _: ExecutionContext))
         .expects(savingsAccountRequest, *, *)
     }
+
     def retrieveAll(savingsAccountRequest: RetrieveAllSavingsAccountRequest): CallHandler[Future[RetrieveAllSavingsAccountsOutcome]] = {
-      (mockSavingsAccountService.retrieveAll(_:RetrieveAllSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
+      (mockSavingsAccountService.retrieveAll(_: RetrieveAllSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
         .expects(savingsAccountRequest, *, *)
     }
 
 
     def retrieve(savingsAccountRequest: RetrieveSavingsAccountRequest): CallHandler[Future[RetrieveSavingsAccountsOutcome]] = {
-      (mockSavingsAccountService.retrieve(_:RetrieveSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
+      (mockSavingsAccountService.retrieve(_: RetrieveSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
         .expects(savingsAccountRequest, *, *)
     }
   }

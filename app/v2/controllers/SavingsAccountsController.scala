@@ -22,10 +22,10 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson, ControllerComponents}
-import v2.controllers.requestParsers.{CreateSavingsAccountRequestDataParser, RetrieveAllSavingsAccountRequestDataParser, RetrieveSavingsAccountRequestDataParser}
+import v2.controllers.requestParsers._
 import v2.models.domain.{RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
 import v2.models.errors._
-import v2.models.requestData.{CreateSavingsAccountRawData, RetrieveAllSavingsAccountRawData, RetrieveSavingsAccountRawData}
+import v2.models.requestData._
 import v2.services.{EnrolmentsAuthService, MtdIdLookupService, SavingsAccountsService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -52,7 +52,7 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
             "Location" -> s"/self-assessment/ni/$nino/savings-accounts/${desResponse.responseData}")
         case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
-      case Left(errorWrapper) => Future.successful {
+      case Left(errorWrapper)                 => Future.successful {
         processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
     }
@@ -67,15 +67,14 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
             .withHeaders("X-CorrelationId" -> desResponse.correlationId)
         case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
-      case Left(errorWrapper) => Future.successful(
+      case Left(errorWrapper)                   => Future.successful(
         processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       )
     }
   }
 
-
-  def retrieve(nino: String, accountId:String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
-        retrieveSavingsAccountRequestDataParser.parseRequest(RetrieveSavingsAccountRawData(nino, accountId)) match {
+  def retrieve(nino: String, accountId: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
+    retrieveSavingsAccountRequestDataParser.parseRequest(RetrieveSavingsAccountRawData(nino, accountId)) match {
       case Right(retrieveSavingsAccountRequest) => savingsAccountService.retrieve(retrieveSavingsAccountRequest).map {
         case Right(desResponse) =>
           logger.info(s"[SavingsAccountsController][retrieve] - Success response received with CorrelationId: ${desResponse.correlationId}")
@@ -83,7 +82,7 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
             .withHeaders("X-CorrelationId" -> desResponse.correlationId)
         case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
-      case Left(errorWrapper) => Future.successful(
+      case Left(errorWrapper)                   => Future.successful(
         processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       )
     }
@@ -95,11 +94,11 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
            | NinoFormatError
            | AccountIdFormatError
            | AccountNameFormatError
-           | AccountNameMissingError => BadRequest(Json.toJson(errorWrapper))
+           | AccountNameMissingError          => BadRequest(Json.toJson(errorWrapper))
       case AccountNameDuplicateError
            | MaximumSavingsAccountsLimitError => Forbidden(Json.toJson(errorWrapper))
-      case NotFoundError => NotFound(Json.toJson(errorWrapper))
-      case DownstreamError => InternalServerError(Json.toJson(errorWrapper))
+      case NotFoundError                      => NotFound(Json.toJson(errorWrapper))
+      case DownstreamError                    => InternalServerError(Json.toJson(errorWrapper))
     }
   }
 
@@ -108,7 +107,7 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
       case Some(correlationId) => logger.info("[SavingsAccountsController][getCorrelationId] - " +
         s"Error received from DES ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
         correlationId
-      case None =>
+      case None                =>
         val correlationId = UUID.randomUUID().toString
         logger.info("[SavingsAccountsController][getCorrelationId] - " +
           s"Validation error: ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
