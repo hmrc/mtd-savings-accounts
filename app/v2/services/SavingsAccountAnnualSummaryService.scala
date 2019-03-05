@@ -19,8 +19,10 @@ package v2.services
 import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
+import v2.models.des.DesRetrieveSavingsAccountAnnualIncomeResponse
 import v2.models.errors._
-import v2.models.requestData.AmendSavingsAccountAnnualSummaryRequest
+import v2.models.outcomes.DesResponse
+import v2.models.requestData.{AmendSavingsAccountAnnualSummaryRequest, RetrieveSavingsAccountAnnualSummaryRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -29,10 +31,25 @@ class SavingsAccountAnnualSummaryService @Inject()(connector: DesConnector) exte
   override val serviceName: String = "SavingsAccountsService"
 
   def amend(request: AmendSavingsAccountAnnualSummaryRequest)
-            (implicit hc: HeaderCarrier,
-             ec: ExecutionContext): Future[AmendSavingsAccountAnnualSummaryOutcome] = {
+           (implicit hc: HeaderCarrier,
+            ec: ExecutionContext): Future[AmendSavingsAccountAnnualSummaryOutcome] = {
     connector.amendSavingsAccountAnnualSummary(request)
       .map(mapToVendorDirect("AMEND", desErrorToMtdErrorAmend))
+  }
+
+  def retrieve(request: RetrieveSavingsAccountAnnualSummaryRequest)(implicit hc: HeaderCarrier,
+                                                                    ec: ExecutionContext): Future[RetrieveSavingsAccountAnnualSummaryOutcome] = {
+    connector.retrieveSavingsAccountAnnualSummary(request)
+      .map(mapToVendor("RETRIEVE", desErrorToMtdErrorRetrieve) { desResponse =>
+        desResponse.responseData match {
+          case DesRetrieveSavingsAccountAnnualIncomeResponse(x :: Nil) => Right(DesResponse(desResponse.correlationId, x.toMtd))
+          case DesRetrieveSavingsAccountAnnualIncomeResponse(Nil)      => Left(ErrorWrapper(Some(desResponse.correlationId), NotFoundError, None))
+          case _                                                       =>
+            logger.info(s"[SavingsAccountAnnualSummaryService] [retrieve] [CorrelationId - ${desResponse.correlationId}] - " +
+              "More than one matching account found")
+            Left(ErrorWrapper(Some(desResponse.correlationId), DownstreamError, None))
+        }
+      })
   }
 
   private def desErrorToMtdErrorAmend: Map[String, Error] = Map(
@@ -50,6 +67,20 @@ class SavingsAccountAnnualSummaryService @Inject()(connector: DesConnector) exte
     "SERVICE_UNAVAILABLE" -> DownstreamError
   ).withDefault { error =>
     logger.info(s"[SavingsAccountAnnualSummaryService] [amend] - No mapping found for error code $error")
+    DownstreamError
+  }
+
+  private def desErrorToMtdErrorRetrieve: Map[String, Error] = Map(
+    "INVALID_TYPE" -> DownstreamError,
+    "INVALID_NINO" -> NinoFormatError,
+    "INVALID_TAXYEAR" -> TaxYearFormatError,
+    "INVALID_INCOME_SOURCE" -> AccountIdFormatError,
+    "NOT_FOUND_PERIOD" -> NotFoundError,
+    "NOT_FOUND_INCOME_SOURCE" -> NotFoundError,
+    "SERVER_ERROR" -> DownstreamError,
+    "SERVICE_UNAVAILABLE" -> DownstreamError
+  ).withDefault { error =>
+    logger.info(s"[SavingsAccountAnnualSummaryService] [retrieve] - No mapping found for error code $error")
     DownstreamError
   }
 }

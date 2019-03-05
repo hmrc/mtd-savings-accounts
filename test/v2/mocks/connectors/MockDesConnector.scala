@@ -20,7 +20,7 @@ import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors._
-import v2.models.requestData.{AmendSavingsAccountAnnualSummaryRequest, CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
+import v2.models.requestData._
 import v2.services.AmendSavingsAccountAnnualSummaryOutcome
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,6 +49,11 @@ trait MockDesConnector extends MockFactory {
                            AmendSavingsAccountAnnualSummaryRequest): CallHandler[Future[AmendSavingsAccountAnnualSummaryConnectorOutcome]] = {
       (connector.amendSavingsAccountAnnualSummary(_: AmendSavingsAccountAnnualSummaryRequest)(_: HeaderCarrier, _: ExecutionContext))
         .expects(amendSavingsAccountAnnualSummaryRequest, *, *)
+    }
+
+    def retrieveAnnualSummary(request: RetrieveSavingsAccountAnnualSummaryRequest): CallHandler[Future[RetrieveSavingsAccountAnnualSummaryConnectorOutcome]] = {
+      (connector.retrieveSavingsAccountAnnualSummary(_: RetrieveSavingsAccountAnnualSummaryRequest)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(request, *, *)
     }
   }
 

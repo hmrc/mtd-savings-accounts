@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package v2.models.domain
+package v2.models.des
 
-import play.api.libs.json.{JsValue, Json, Reads, Writes}
+import play.api.libs.json.{Json, Reads}
 
-case class SavingsAccountAnnualSummary(taxedUKInterest: Option[BigDecimal], untaxedUKInterest: Option[BigDecimal])
+case class DesRetrieveSavingsAccountAnnualIncomeResponse(savingsInterestAnnualIncome: Seq[DesSavingsInterestAnnualIncome])
 
-object SavingsAccountAnnualSummary {
-  implicit val reads: Reads[SavingsAccountAnnualSummary] = Json.reads[SavingsAccountAnnualSummary]
-  implicit val writes: Writes[SavingsAccountAnnualSummary] = Json.writes[SavingsAccountAnnualSummary]
+object DesRetrieveSavingsAccountAnnualIncomeResponse {
+  implicit val reads: Reads[DesRetrieveSavingsAccountAnnualIncomeResponse] = Json.reads[DesRetrieveSavingsAccountAnnualIncomeResponse]
 }
