@@ -36,7 +36,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
     with MockMtdIdLookupService
     with MockCreateSavingsAccountRequestDataParser
     with MockRetrieveAllSavingsAccountRequestDataParser
-    with MockRetrieveSavingsAccountRequestDataParser
+    with MockRetrieveSavingsAccountAnnualSummaryRequestDataParser
     with MockSavingsAccountsService {
 
     val hc = HeaderCarrier()
@@ -45,7 +45,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService,
       createSavingsAccountRequestDataParser = mockCreateSavingsAccountRequestDataParser,
-      retrieveAllSavingsAccountRequestDataParser = mockRetrieveAllSavingsAccountRequestDataParser,
+      retrieveAllSavingsAccountRequestDataParser = mockRetrieveSavingsAnnualSummaryRequestDataParser,
       retrieveSavingsAccountRequestDataParser = mockRetrieveSavingsAccountRequestDataParser,
       savingsAccountService = mockSavingsAccountService,
       cc = cc

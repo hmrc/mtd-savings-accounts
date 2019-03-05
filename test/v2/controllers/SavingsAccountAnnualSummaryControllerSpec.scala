@@ -36,6 +36,7 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
   trait Test extends MockEnrolmentsAuthService
     with MockMtdIdLookupService
     with MockAmendSavingsAccountAnnualSummaryRequestDataParser
+    with MockRetrieveSavingsAccountAnnualSummaryRequestDataParser
     with MockSavingsAccountAnnualSummaryService {
 
     val hc = HeaderCarrier()
@@ -44,6 +45,7 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService,
       amendSavingsAccountAnnualSummaryRequestDataParser = mockAmendSavingsAccountAnnualSummaryRequestDataParser,
+      retrieveSavingsAccountAnnualSummaryRequestDataParser = mockRetrieveSavingsAnnualSummaryRequestDataParser,
       savingsAccountAnnualSummaryService = mockSavingsAccountAnnualSummaryService,
       cc = cc
     )
@@ -170,5 +172,57 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
         header("X-CorrelationId", response) shouldBe Some(correlationId)
       }
     }
+  }
+
+  "amend" when {
+
+    val rawData = RetrieveSavingsAccountAnnualSummaryRawData(nino, taxYear, id)
+
+    val request = RetrieveSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear(taxYear), id)
+
+    val response = DesAmendSavingsAccountAnnualSummaryResponse("FIXME")
+
+
+    "passed a valid request" should {
+      "return a successful response with header X-CorrelationId" in new Test {
+
+        MockRetrieveSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
+          .returns(Right(request))
+
+//        MockSavingsAccountAnnualSummaryService.amend(request)
+//          .returns(Future.successful(Right(DesResponse(correlationId, response))))
+
+        val result: Future[Result] = controller.retrieve(nino, id, taxYear)
+        status(result) shouldBe NO_CONTENT
+        header("X-CorrelationId", result) shouldBe Some(correlationId)
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   }
 }

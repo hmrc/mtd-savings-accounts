@@ -22,19 +22,19 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContentAsJson, ControllerComponents}
-import v2.controllers.requestParsers.AmendSavingsAccountAnnualSummaryRequestDataParser
+import v2.controllers.requestParsers.{AmendSavingsAccountAnnualSummaryRequestDataParser, RetrieveSavingsAccountAnnualSummaryRequestDataParser}
 import v2.models.errors._
 import v2.models.requestData._
 import v2.services.{EnrolmentsAuthService, MtdIdLookupService, SavingsAccountAnnualSummaryService}
 
 import scala.concurrent.Future
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class SavingsAccountAnnualSummaryController @Inject()(val authService: EnrolmentsAuthService,
                                                       val lookupService: MtdIdLookupService,
                                                       amendSavingsAccountAnnualSummaryRequestDataParser: AmendSavingsAccountAnnualSummaryRequestDataParser,
+                                                      retrieveSavingsAccountAnnualSummaryRequestDataParser:RetrieveSavingsAccountAnnualSummaryRequestDataParser,
                                                       savingsAccountAnnualSummaryService: SavingsAccountAnnualSummaryService,
                                                       val cc: ControllerComponents
                                                      ) extends AuthorisedController(cc) {
