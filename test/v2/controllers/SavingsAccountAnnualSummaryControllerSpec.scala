@@ -174,13 +174,13 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
     }
   }
 
-  "amend" when {
+  "retrieve" when {
 
     val rawData = RetrieveSavingsAccountAnnualSummaryRawData(nino, taxYear, id)
 
     val request = RetrieveSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear(taxYear), id)
 
-    val response = DesAmendSavingsAccountAnnualSummaryResponse("FIXME")
+    val successRetrieveAnnualServiceResponse = SavingsAccountAnnualSummary(Some(5000.00), Some(5000.00))
 
 
     "passed a valid request" should {
@@ -189,12 +189,20 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
         MockRetrieveSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
           .returns(Right(request))
 
-//        MockSavingsAccountAnnualSummaryService.amend(request)
-//          .returns(Future.successful(Right(DesResponse(correlationId, response))))
+        MockSavingsAccountAnnualSummaryService.retrieve(request)
+          .returns(Future.successful(Right(DesResponse(correlationId, successRetrieveAnnualServiceResponse))))
 
-        val result: Future[Result] = controller.retrieve(nino, id, taxYear)
-        status(result) shouldBe NO_CONTENT
+        val result: Future[Result] = controller.retrieve(nino, id, taxYear)(fakeGetRequest)
+        println("////////////////////////////////////////////////////////////////")
+
+        println(result)
+
+        println("////////////////////////////////////////////////////////////////")
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe SavingsAccountsFixture.retrieveAnnualJsonResponse
         header("X-CorrelationId", result) shouldBe Some(correlationId)
+
       }
     }
 

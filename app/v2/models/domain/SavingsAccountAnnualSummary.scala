@@ -16,7 +16,7 @@
 
 package v2.models.domain
 
-import play.api.libs.json.{JsValue, Json, Reads, Writes}
+import play.api.libs.json.{Json, Reads, Writes}
 
 case class SavingsAccountAnnualSummary(taxedUKInterest: Option[BigDecimal], untaxedUKInterest: Option[BigDecimal])
 
