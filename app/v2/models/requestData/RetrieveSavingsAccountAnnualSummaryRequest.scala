@@ -18,4 +18,4 @@ package v2.models.requestData
 
 import uk.gov.hmrc.domain.Nino
 
-case class RetrieveSavingsAccountAnnualSummaryRequest(nino: Nino, desTaxYear: DesTaxYear, savingsAccountId: String) extends InputData
+case class RetrieveSavingsAccountAnnualSummaryRequest(nino: Nino, desTaxYear: DesTaxYear, savingsAccountId: String)
