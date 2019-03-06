@@ -26,7 +26,8 @@ class SavingsAccountsAuditDetailSpec extends UnitSpec {
   private val nino = "AA123456A"
   private val `X-CorrelationId` = "X-123"
   private val accountName = "myaccount"
-  private val response = AuditResponse(Status.BAD_REQUEST, Seq(AuditError("FORMAT_NINO")), Some("0123IS12334567890"))
+  private val responseSuccess = AuditResponse(Status.CREATED, None, Some("0123IS12334567890"))
+  private val responseFail = AuditResponse(Status.BAD_REQUEST, Some(Seq(AuditError("FORMAT_NINO"))), None)
   "writes" when {
     "passed a charitable giving audit model with all fields provided" should {
       "produce valid json" in {
@@ -40,13 +41,16 @@ class SavingsAccountsAuditDetailSpec extends UnitSpec {
              |    "accountName": "$accountName"
              |  },
              |  "X-CorrelationId": "X-123",
-             |  "response": ${Json.toJson(response)}
+             |  "response": {
+             |    "httpStatus": 201,
+             |    "savingsAccountId": "0123IS12334567890"
+             |  }
              |}
            """.stripMargin)
 
         val request = Json.obj("accountName" -> accountName)
 
-        val model = SavingsAccountsAuditDetail(userType, agentReferenceNumber, nino, request, `X-CorrelationId`, Some(response))
+        val model = SavingsAccountsAuditDetail(userType, agentReferenceNumber, nino, request, `X-CorrelationId`, responseSuccess)
 
         Json.toJson(model) shouldBe json
       }
@@ -62,13 +66,21 @@ class SavingsAccountsAuditDetailSpec extends UnitSpec {
              |  "request": {
              |    "accountName": "$accountName"
              |  },
-             |  "X-CorrelationId": "X-123"
+             |  "X-CorrelationId": "X-123",
+             |  "response": {
+             |    "httpStatus": 400,
+             |    "errors": [
+             |      {
+             |        "errorCode": "FORMAT_NINO"
+             |      }
+             |    ]
+             |  }
              |}
            """.stripMargin)
 
         val request = Json.obj("accountName" -> accountName)
 
-        val model = SavingsAccountsAuditDetail(userType, None, nino, request, `X-CorrelationId`, None)
+        val model = SavingsAccountsAuditDetail(userType, None, nino, request, `X-CorrelationId`, responseFail)
 
         Json.toJson(model) shouldBe json
       }

@@ -22,22 +22,26 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures._
 import v2.mocks.requestParsers._
-import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountsService}
+import v2.mocks.services.{MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountsService}
+import v2.models.audit.{AuditError, AuditEvent, AuditResponse, SavingsAccountsAuditDetail}
 import v2.models.domain._
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SavingsAccountsControllerSpec extends ControllerBaseSpec {
+class SavingsAccountsControllerSpec extends ControllerBaseSpec
+  with MockEnrolmentsAuthService
+  with MockMtdIdLookupService
+  with MockCreateSavingsAccountRequestDataParser
+  with MockRetrieveAllSavingsAccountRequestDataParser
+  with MockRetrieveSavingsAccountRequestDataParser
+  with MockSavingsAccountsService
+  with MockAuditService {
 
-  trait Test extends MockEnrolmentsAuthService
-    with MockMtdIdLookupService
-    with MockCreateSavingsAccountRequestDataParser
-    with MockRetrieveAllSavingsAccountRequestDataParser
-    with MockRetrieveSavingsAccountRequestDataParser
-    with MockSavingsAccountsService {
+  trait Test {
 
     val hc = HeaderCarrier()
 
@@ -48,6 +52,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
       retrieveAllSavingsAccountRequestDataParser = mockRetrieveAllSavingsAccountRequestDataParser,
       retrieveSavingsAccountRequestDataParser = mockRetrieveSavingsAccountRequestDataParser,
       savingsAccountService = mockSavingsAccountService,
+      auditService = mockAuditService,
       cc = cc
     )
 
@@ -79,6 +84,11 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
         status(result) shouldBe CREATED
         contentAsJson(result) shouldBe SavingsAccountsFixture.createJsonResponse(id)
         header("X-CorrelationId", result) shouldBe Some(correlationId)
+
+        val detail = SavingsAccountsAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123", AuditResponse(CREATED, None, Some(id)))
+        val event: AuditEvent[SavingsAccountsAuditDetail] = AuditEvent[SavingsAccountsAuditDetail]("addASavingsAccount",
+          "add-a-savings-account", detail)
+        MockedAuditService.verifyAuditEvent(event).once
       }
     }
 
@@ -92,6 +102,13 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
         val result: Future[Result] = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
         status(result) shouldBe BAD_REQUEST
         header("X-CorrelationId", result).nonEmpty shouldBe true
+
+        val detail = SavingsAccountsAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
+          AuditResponse(BAD_REQUEST, Some(Seq(AuditError(BadRequestError.code))), None))
+        val event: AuditEvent[SavingsAccountsAuditDetail] = AuditEvent[SavingsAccountsAuditDetail]("addASavingsAccount",
+          "add-a-savings-account", detail)
+
+        MockedAuditService.verifyAuditEvent(event.copy(detail = detail.copy(`X-CorrelationId` = header("X-CorrelationId", result).get))).once
       }
     }
 
@@ -135,6 +152,25 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
 
     }
 
+    "return a valid error response" when {
+      "multiple errors exist" in new Test() {
+        MockCreateSavingsAccountRequestDataParser.parse(
+          CreateSavingsAccountRawData(nino, AnyContentAsJson(SavingsAccountsFixture.createJson)))
+          .returns(Left(ErrorWrapper(None, BadRequestError, Some(Seq(Error("error 1", "message 1"), Error("error 2", "message 2"))))))
+
+        val result: Future[Result] = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
+        status(result) shouldBe BAD_REQUEST
+        header("X-CorrelationId", result).nonEmpty shouldBe true
+
+        val detail = SavingsAccountsAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
+          AuditResponse(BAD_REQUEST, Some(Seq(AuditError("error 1"), AuditError("error 2"))), None))
+        val event: AuditEvent[SavingsAccountsAuditDetail] = AuditEvent[SavingsAccountsAuditDetail]("addASavingsAccount",
+          "add-a-savings-account", detail)
+
+        MockedAuditService.verifyAuditEvent(event.copy(detail = detail.copy(`X-CorrelationId` = header("X-CorrelationId", result).get))).once
+      }
+    }
+
     def errorsFromCreateParserTester(error: Error, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the parser" in new Test {
 
@@ -149,6 +185,12 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
         status(response) shouldBe expectedStatus
         contentAsJson(response) shouldBe Json.toJson(error)
         header("X-CorrelationId", response) shouldBe Some(correlationId)
+
+        val detail = SavingsAccountsAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
+          AuditResponse(expectedStatus, Some(Seq(AuditError(error.code))), None))
+        val event: AuditEvent[SavingsAccountsAuditDetail] = AuditEvent[SavingsAccountsAuditDetail]("addASavingsAccount",
+          "add-a-savings-account", detail)
+        MockedAuditService.verifyAuditEvent(event).once
       }
     }
 
@@ -169,6 +211,12 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
         status(response) shouldBe expectedStatus
         contentAsJson(response) shouldBe Json.toJson(error)
         header("X-CorrelationId", response) shouldBe Some(correlationId)
+
+        val detail = SavingsAccountsAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
+          AuditResponse(expectedStatus, Some(Seq(AuditError(error.code))), None))
+        val event: AuditEvent[SavingsAccountsAuditDetail] = AuditEvent[SavingsAccountsAuditDetail]("addASavingsAccount",
+          "add-a-savings-account", detail)
+        MockedAuditService.verifyAuditEvent(event).once
       }
     }
   }

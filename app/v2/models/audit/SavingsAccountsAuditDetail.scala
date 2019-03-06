@@ -24,7 +24,7 @@ case class SavingsAccountsAuditDetail(
                                        nino: String,
                                        request: JsValue,
                                        `X-CorrelationId`: String,
-                                       response: Option[AuditResponse] = None
+                                       response: AuditResponse
                                       )
 
 object SavingsAccountsAuditDetail {
