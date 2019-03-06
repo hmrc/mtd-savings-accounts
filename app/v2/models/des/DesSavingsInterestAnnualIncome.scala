@@ -37,7 +37,7 @@ object DesSavingsInterestAnnualIncome {
     import savingsAccountAnnualSummary._
     DesSavingsInterestAnnualIncome(
       incomeSourceId = incomeSourceId,
-      taxedUkInterest = taxedUKInterest,
-      untaxedUkInterest = untaxedUKInterest)
+      taxedUkInterest = taxedUkInterest,
+      untaxedUkInterest = untaxedUkInterest)
   }
 }

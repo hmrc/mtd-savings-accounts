@@ -50,7 +50,7 @@ class AmendSavingsAccountAnnualSummaryValidator extends Validator[AmendSavingsAc
     val body = data.body.json.as[SavingsAccountAnnualSummary]
 
     List(
-      DefinedFieldValidation.validate(RuleIncorrectOrEmptyBodyError, body.taxedUKInterest, body.untaxedUKInterest)
+      DefinedFieldValidation.validate(RuleIncorrectOrEmptyBodyError, body.taxedUkInterest, body.untaxedUkInterest)
     )
   }
 
@@ -59,8 +59,8 @@ class AmendSavingsAccountAnnualSummaryValidator extends Validator[AmendSavingsAc
     val body = data.body.json.as[SavingsAccountAnnualSummary]
 
     List(
-      AmountValidation.validate(body.taxedUKInterest, TaxedInterestFormatError),
-      AmountValidation.validate(body.untaxedUKInterest, UnTaxedInterestFormatError)
+      AmountValidation.validate(body.taxedUkInterest, TaxedInterestFormatError),
+      AmountValidation.validate(body.untaxedUkInterest, UnTaxedInterestFormatError)
     )
   }
 

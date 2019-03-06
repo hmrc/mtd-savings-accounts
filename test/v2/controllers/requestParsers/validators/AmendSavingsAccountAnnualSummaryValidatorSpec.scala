@@ -29,8 +29,8 @@ class AmendSavingsAccountAnnualSummaryValidatorSpec extends UnitSpec {
   private val validAccountId = "SAVKB2UVwUTBQGJ"
   private val validJson =
     """{
-      |  "taxedUKInterest": 123.45,
-      |  "untaxedUKInterest": 543.21
+      |  "taxedUkInterest": 123.45,
+      |  "untaxedUkInterest": 543.21
       |}
     """.stripMargin
 
@@ -90,8 +90,8 @@ class AmendSavingsAccountAnnualSummaryValidatorSpec extends UnitSpec {
         val json =
           """
             |{
-            |  "taxedUKInterest": 123.4562342,
-            |  "untaxedUKInterest": 543.21
+            |  "taxedUkInterest": 123.4562342,
+            |  "untaxedUkInterest": 543.21
             |}
           """.stripMargin
 
@@ -108,8 +108,8 @@ class AmendSavingsAccountAnnualSummaryValidatorSpec extends UnitSpec {
         val json =
           """
             |{
-            |  "taxedUKInterest": 123.45,
-            |  "untaxedUKInterest": 543.213445
+            |  "taxedUkInterest": 123.45,
+            |  "untaxedUkInterest": 543.213445
             |}
           """.stripMargin
 
@@ -132,7 +132,7 @@ class AmendSavingsAccountAnnualSummaryValidatorSpec extends UnitSpec {
     "return no errors" when {
       "a only taxed interest is supplied" in {
         val json = """{
-                     |  "taxedUKInterest": 123.45
+                     |  "taxedUkInterest": 123.45
                      |}
                    """.stripMargin
 
@@ -143,7 +143,7 @@ class AmendSavingsAccountAnnualSummaryValidatorSpec extends UnitSpec {
 
       "a only untaxed interest is supplied" in {
         val json = """{
-                     |  "untaxedUKInterest": 123.45
+                     |  "untaxedUkInterest": 123.45
                      |}
                    """.stripMargin
 
