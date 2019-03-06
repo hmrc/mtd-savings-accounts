@@ -174,14 +174,39 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
     }
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   "retrieve" when {
 
     val rawData = RetrieveSavingsAccountAnnualSummaryRawData(nino, taxYear, id)
-
     val request = RetrieveSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear(taxYear), id)
-
     val successRetrieveAnnualServiceResponse = SavingsAccountAnnualSummary(Some(5000.00), Some(5000.00))
-
 
     "passed a valid request" should {
       "return a successful response with header X-CorrelationId" in new Test {
@@ -193,44 +218,100 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
           .returns(Future.successful(Right(DesResponse(correlationId, successRetrieveAnnualServiceResponse))))
 
         val result: Future[Result] = controller.retrieve(nino, id, taxYear)(fakeGetRequest)
-        println("////////////////////////////////////////////////////////////////")
-
-        println(result)
-
-        println("////////////////////////////////////////////////////////////////")
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe SavingsAccountsFixture.retrieveAnnualJsonResponse
+        contentAsJson(result) shouldBe SavingsAccountsFixture.retrieveAnnualJsonResponse("5000.00", "5000.00")
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
       }
     }
 
+    "the request received failed the validation" should {
+      "return single error response with status 400" in new Test() {
 
+        MockRetrieveSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
+          .returns(Left(ErrorWrapper(None, BadRequestError, None)))
 
+        val result: Future[Result] = controller.retrieve(nino, id, taxYear)(fakeGetRequest)
 
+        status(result) shouldBe BAD_REQUEST
+        header("X-CorrelationId", result).nonEmpty shouldBe true
+      }
+    }
 
+    "return a 400 Bad Request with a single error" when {
 
+      val badRequestErrorsFromParser = List(
+        BadRequestError,
+        NinoFormatError,
+        TaxYearFormatError,
+        RuleTaxYearNotSupportedError,
+        AccountIdFormatError
+      )
 
+      val badRequestErrorsFromService = List(
+        BadRequestError,
+        NinoFormatError,
+        TaxYearFormatError,
+        AccountIdFormatError
+      )
 
+      badRequestErrorsFromParser.foreach(errorsFromRetrieveParserTester(_, BAD_REQUEST))
+      badRequestErrorsFromService.foreach(errorsFromRetrieveServiceTester(_, BAD_REQUEST))
+    }
 
+    "return a 404 Not Found Error" when {
+      val notFoundErrors = List(
+        NotFoundError
+      )
 
+      notFoundErrors.foreach(errorsFromRetrieveServiceTester(_, NOT_FOUND))
+    }
 
+    "return a 500 Internal Server Error with a single error" when {
 
+      val internalServerErrorErrors = List(
+        DownstreamError
+      )
 
+      internalServerErrorErrors.foreach(errorsFromRetrieveParserTester(_, INTERNAL_SERVER_ERROR))
+      internalServerErrorErrors.foreach(errorsFromRetrieveServiceTester(_, INTERNAL_SERVER_ERROR))
 
+    }
 
+    def errorsFromRetrieveParserTester(error: Error, expectedStatus: Int): Unit = {
+      s"a ${error.code} error is returned from the parser" in new Test {
 
+        MockRetrieveSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
+          .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
 
+        val response: Future[Result] = controller.retrieve(nino, id, taxYear)(fakeGetRequest)
 
+        status(response) shouldBe expectedStatus
+        contentAsJson(response) shouldBe Json.toJson(error)
+        header("X-CorrelationId", response) shouldBe Some(correlationId)
+      }
+    }
 
+    def errorsFromRetrieveServiceTester(error: Error, expectedStatus: Int): Unit = {
+      s"a ${error.code} error is returned from the service" in new Test {
 
+        MockRetrieveSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
+          .returns(Right(request))
 
+        MockSavingsAccountAnnualSummaryService.retrieve(request)
+          .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
 
+        val response: Future[Result] = controller.retrieve(nino, id, taxYear)(fakeGetRequest)
 
-
-
-
-
+        status(response) shouldBe expectedStatus
+        contentAsJson(response) shouldBe Json.toJson(error)
+        header("X-CorrelationId", response) shouldBe Some(correlationId)
+      }
+    }
   }
+
+
+
+
 }

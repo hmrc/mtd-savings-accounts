@@ -85,8 +85,11 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
       amendErrorTest(Status.BAD_REQUEST, "INVALID_NINO", Status.BAD_REQUEST, NinoFormatError)
       amendErrorTest(Status.BAD_REQUEST, "INVALID_TAXYEAR", Status.BAD_REQUEST, TaxYearFormatError)
       amendErrorTest(Status.BAD_REQUEST, "INVALID_PAYLOAD", Status.BAD_REQUEST, BadRequestError)
-      amendErrorTest(Status.FORBIDDEN, "NOT_FOUND_INCOME_SOURCE", Status.NOT_FOUND, NotFoundError)
       amendErrorTest(Status.FORBIDDEN, "INVALID_ACCOUNTING_PERIOD", Status.BAD_REQUEST, RuleTaxYearNotSupportedError)
+    }
+
+    "return a 404 (Not Found)" when {
+      amendErrorTest(Status.FORBIDDEN, "NOT_FOUND_INCOME_SOURCE", Status.NOT_FOUND, NotFoundError)
     }
 
 
@@ -180,5 +183,134 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
        |        "reason": "des message"
        |      }
       """.stripMargin
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  "Calling the retrieve savings account annual summary endpoint" should {
+
+    trait RetrieveTest extends Test {
+      val accountId = "SAVKB2UVwUTBQGJ"
+      val taxYear = "2017-18"
+
+      def uri = s"/2.0/ni/$nino/savings-accounts/$accountId/$taxYear"
+    }
+
+    "return a 200 status code" when {
+
+      "any valid request is made" in new RetrieveTest {
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.retrieveAnnualSuccess(nino, accountId, DesTaxYear.fromMtd(taxYear))
+        }
+
+        val response: WSResponse = await(request().get())
+
+        println("sfdfgdfgdnfgfuidsfhgoiosdjofgodfdgdfg")
+        println(response)
+        println("sfdfgdfgdnfgfuidsfhgoiosdjofgodfdgdfg")
+
+        response.status shouldBe Status.OK
+
+        response.json shouldBe Json.parse(
+          s"""{
+             |"taxedUKInterest": 5000.00,
+             |"untaxedUKInterest": 5000.00
+             |}
+       """.stripMargin)
+      }
+    }
+
+    "return 400 (Bad Request)" when {
+      retrieveAnnualError(Status.BAD_REQUEST, "INVALID_NINO", Status.BAD_REQUEST, NinoFormatError)
+      retrieveAnnualError(Status.BAD_REQUEST, "INVALID_TAXYEAR", Status.BAD_REQUEST, TaxYearFormatError)
+      retrieveAnnualError(Status.BAD_REQUEST, "INVALID_INCOME_SOURCE", Status.BAD_REQUEST, AccountIdFormatError)
+
+    }
+
+    "return a 404 (Not Found)" when {
+      retrieveAnnualError(Status.NOT_FOUND, "NOT_FOUND_PERIOD", Status.NOT_FOUND, NotFoundError)
+      retrieveAnnualError(Status.NOT_FOUND, "NOT_FOUND_INCOME_SOURCE", Status.NOT_FOUND, NotFoundError)
+
+    }
+
+    "return 500 (Internal Server Error)" when {
+      retrieveAnnualError(Status.BAD_REQUEST, "INVALID_TYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      retrieveAnnualError(Status.INTERNAL_SERVER_ERROR, "SERVER_ERROR", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      retrieveAnnualError(Status.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+    }
+
+
+    def retrieveAnnualError(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
+      s"des returns an $desCode error" in new RetrieveTest {
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.retrieveAnnualError(nino, accountId, DesTaxYear.fromMtd(taxYear), desStatus, errorBody(desCode))
+        }
+
+        val response: WSResponse = await(request().get())
+        response.status shouldBe expectedStatus
+        response.json shouldBe Json.toJson(expectedBody)
+      }
+    }
+
+    "return 400 (Bad Request)" when {
+      retrieveRequestValidationErrorTest("BADNINO", "SAVKB2UVwUTBQGJ", "2017-18", Status.BAD_REQUEST, NinoFormatError)
+      retrieveRequestValidationErrorTest("AA123456A", "BADID", "2017-18", Status.BAD_REQUEST, AccountIdFormatError)
+      retrieveRequestValidationErrorTest("AA123456A", "SAVKB2UVwUTBQGJ", "ABCD", Status.BAD_REQUEST, TaxYearFormatError)
+    }
+
+    def retrieveRequestValidationErrorTest(
+                                         requestNino: String,
+                                         requestAccountId: String,
+                                         requestTaxYear: String,
+                                         expectedStatus: Int, expectedBody: Error): Unit = {
+      s"validation fails with ${expectedBody.code} error" in new RetrieveTest {
+
+        override val nino: String = requestNino
+        override val accountId: String = requestAccountId
+        override val taxYear: String = requestTaxYear
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+        }
+
+        val response: WSResponse = await(request().get())
+        response.status shouldBe expectedStatus
+        response.json shouldBe Json.toJson(expectedBody)
+      }
+    }
+  }
 
 }

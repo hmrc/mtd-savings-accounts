@@ -235,6 +235,16 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
   }
 
 
+
+
+
+
+
+
+
+
+
+
   "Calling the retrieve savings account endpoint" should {
 
     trait RetrieveTest extends Test {
@@ -269,7 +279,6 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       createErrorTest(Status.BAD_REQUEST, "INVALID_IDTYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
       createErrorTest(Status.BAD_REQUEST, "INVALID_INCOMESOURCETYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
       createErrorTest(Status.BAD_REQUEST, "INVALID_TAXYEAR", Status.INTERNAL_SERVER_ERROR, DownstreamError)
-      createErrorTest(Status.BAD_REQUEST, "INVALID_INCOMESOURCEID", Status.INTERNAL_SERVER_ERROR, DownstreamError)
       createErrorTest(Status.BAD_REQUEST, "INVALID_ENDDATE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
       createErrorTest(Status.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
       createErrorTest(Status.INTERNAL_SERVER_ERROR, "SERVER_ERROR", Status.INTERNAL_SERVER_ERROR, DownstreamError)
@@ -277,6 +286,8 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
     "return 400 (Bad Request)" when {
       createErrorTest(Status.BAD_REQUEST, "INVALID_IDVALUE", Status.BAD_REQUEST, NinoFormatError)
+      createErrorTest(Status.BAD_REQUEST, "INVALID_INCOMESOURCEID", Status.BAD_REQUEST, AccountIdFormatError)
+
     }
 
     "return 404 (Not Found)" when {

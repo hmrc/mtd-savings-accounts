@@ -73,11 +73,16 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
       case Right(retrieveRequest) => savingsAccountAnnualSummaryService.retrieve(retrieveRequest)
         .map {
           case Right(desResponse) =>
+            logger.info(s"[SavingsAccountAnnualSummaryController][retrieve] - Success response received with CorrelationId: ${desResponse.correlationId}")
             Ok(SavingsAccountAnnualSummary.writes.writes(desResponse.responseData))
               .withHeaders("X-CorrelationId" -> desResponse.correlationId)
-        }
-    }
 
+          case Left(errorWrapper) =>
+            processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
+        }
+      case Left(errorWrapper) =>
+        Future.successful(processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper)))
+    }
   }
 
   private def processError(errorWrapper: ErrorWrapper) = {
