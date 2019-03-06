@@ -34,13 +34,13 @@ class AmendSavingsAccountAnnualSummaryRequestDataParserSpec
   val json =
     """
       |{
-      |    "taxedUKInterest": 123.45,
-      |    "untaxedUKInterest": 543.21
+      |    "taxedUkInterest": 123.45,
+      |    "untaxedUkInterest": 543.21
       |}
     """.stripMargin
   val jsonBody = AnyContentAsJson(Json.parse(json))
 
-  val model = SavingsAccountAnnualSummary(taxedUKInterest = Some(123.45), untaxedUKInterest = Some(543.21))
+  val model = SavingsAccountAnnualSummary(taxedUkInterest = Some(123.45), untaxedUkInterest = Some(543.21))
 
 
   val requestData =

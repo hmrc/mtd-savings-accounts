@@ -18,7 +18,7 @@ package v2.models.domain
 
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 
-case class SavingsAccountAnnualSummary(taxedUKInterest: Option[BigDecimal], untaxedUKInterest: Option[BigDecimal])
+case class SavingsAccountAnnualSummary(taxedUkInterest: Option[BigDecimal], untaxedUkInterest: Option[BigDecimal])
 
 object SavingsAccountAnnualSummary {
   implicit val reads: Reads[SavingsAccountAnnualSummary] = Json.reads[SavingsAccountAnnualSummary]

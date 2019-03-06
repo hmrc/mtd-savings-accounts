@@ -25,8 +25,8 @@ class SavingsAccountAnnualSummarySpec  extends UnitSpec with JsonErrorValidators
   val json: JsValue = Json.parse(
     """
       |{
-      |   "taxedUKInterest": 2000.99,
-      |   "untaxedUKInterest": 5000.50
+      |   "taxedUkInterest": 2000.99,
+      |   "untaxedUkInterest": 5000.50
       |}
     """.stripMargin)
 
@@ -46,7 +46,7 @@ class SavingsAccountAnnualSummarySpec  extends UnitSpec with JsonErrorValidators
         val mtdJson: JsValue = Json.parse(
           """
             |{
-            |   "taxedUKInterest": 2000.99
+            |   "taxedUkInterest": 2000.99
             |}
           """.stripMargin)
         val model = SavingsAccountAnnualSummary(Some(2000.99), None)
@@ -61,7 +61,7 @@ class SavingsAccountAnnualSummarySpec  extends UnitSpec with JsonErrorValidators
         val mtdJson: JsValue = Json.parse(
           """
             |{
-            |   "untaxedUKInterest": 5000.50
+            |   "untaxedUkInterest": 5000.50
             |}
           """.stripMargin)
         val model = SavingsAccountAnnualSummary(None, Some(5000.50))
@@ -71,13 +71,13 @@ class SavingsAccountAnnualSummarySpec  extends UnitSpec with JsonErrorValidators
     }
 
     testPropertyType[SavingsAccountAnnualSummary](json)(
-      path = "/taxedUKInterest",
+      path = "/taxedUkInterest",
       replacement = "test".toJson,
       expectedError = JsonError.NUMBER_FORMAT_EXCEPTION
     )
 
     testPropertyType[SavingsAccountAnnualSummary](json)(
-      path = "/untaxedUKInterest",
+      path = "/untaxedUkInterest",
       replacement = "test".toJson,
       expectedError = JsonError.NUMBER_FORMAT_EXCEPTION
     )
@@ -89,8 +89,8 @@ class SavingsAccountAnnualSummarySpec  extends UnitSpec with JsonErrorValidators
         val json =
           """
             |{
-            |   "taxedUKInterest": 2000.99,
-            |   "untaxedUKInterest": 5000.50
+            |   "taxedUkInterest": 2000.99,
+            |   "untaxedUkInterest": 5000.50
             |}
           """.stripMargin
 
