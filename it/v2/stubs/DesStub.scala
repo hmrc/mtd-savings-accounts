@@ -116,11 +116,17 @@ object DesStub extends WireMockMethods {
     s"/income-tax/nino/$nino/income-source/savings/annual/${taxYear.value}"
 
   private val retrieveAnnualSuccessResponseBody = Json.parse(
-    s"""{
-       |"taxedUkInterest": 5000.00,
-       |"untaxedUkInterest": 5000.00
+    s"""
+       |{
+       |   "savingsInterestAnnualIncome":[
+       |      {
+       |         "incomeSourceId":"122784545874145",
+       |         "taxedUkInterest":5000.00,
+       |         "untaxedUkInterest":5000.00
+       |      }
+       |   ]
        |}
-     """.stripMargin
+       |""".stripMargin
   )
 
   def retrieveAnnualSuccess(nino: String, accountId: String, taxYear: DesTaxYear): StubMapping = {

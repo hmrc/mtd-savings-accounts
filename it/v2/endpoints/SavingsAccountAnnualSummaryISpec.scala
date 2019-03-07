@@ -184,32 +184,6 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
        |      }
       """.stripMargin
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   "Calling the retrieve savings account annual summary endpoint" should {
 
     trait RetrieveTest extends Test {
@@ -232,16 +206,14 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
 
         val response: WSResponse = await(request().get())
 
-        println("sfdfgdfgdnfgfuidsfhgoiosdjofgodfdgdfg/n")
-        println(response)
-        println("/nsfdfgdfgdnfgfuidsfhgoiosdjofgodfdgdfg")
-
         response.status shouldBe Status.OK
 
         response.json shouldBe Json.parse(
-          s"""{
-             |"taxedUKInterest": 5000.00,
-             |"untaxedUKInterest": 5000.00
+          s"""
+             |{
+             |  "taxedUkInterest":5000.00,
+             |  "untaxedUkInterest":5000.00
+
              |}
        """.stripMargin)
       }

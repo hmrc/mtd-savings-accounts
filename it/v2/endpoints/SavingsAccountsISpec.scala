@@ -234,17 +234,6 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
   "Calling the retrieve savings account endpoint" should {
 
     trait RetrieveTest extends Test {
