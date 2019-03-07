@@ -47,10 +47,10 @@ object Fixtures {
       ))
     )
 
-    val retrieveAnnualJsonResponse: (String, String) => JsValue = (taxedUKInterest, untaxedUKInterest) => Json.parse(
+    val retrieveAnnualJsonResponse: (String, String) => JsValue = (taxedUkInterest, untaxedUkInterest) => Json.parse(
       s"""{
-         |"taxedUkInterest": $taxedUKInterest,
-         |"untaxedUkInterest": $untaxedUKInterest
+         |"taxedUkInterest": $taxedUkInterest,
+         |"untaxedUkInterest": $untaxedUkInterest
          |}
       """.stripMargin
     )

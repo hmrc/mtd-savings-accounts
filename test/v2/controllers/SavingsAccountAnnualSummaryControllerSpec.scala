@@ -174,34 +174,6 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   "retrieve" when {
 
     val rawData = RetrieveSavingsAccountAnnualSummaryRawData(nino, taxYear, id)
@@ -242,7 +214,6 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
     "return a 400 Bad Request with a single error" when {
 
       val badRequestErrorsFromParser = List(
-        BadRequestError,
         NinoFormatError,
         TaxYearFormatError,
         RuleTaxYearNotSupportedError,
@@ -310,8 +281,4 @@ class SavingsAccountAnnualSummaryControllerSpec extends ControllerBaseSpec {
       }
     }
   }
-
-
-
-
 }
