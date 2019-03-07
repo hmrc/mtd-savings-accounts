@@ -21,20 +21,21 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContentAsJson, ControllerComponents}
-import v2.controllers.requestParsers.AmendSavingsAccountAnnualSummaryRequestDataParser
+import play.api.mvc.{Action, AnyContent, AnyContentAsJson, ControllerComponents}
+import v2.controllers.requestParsers.{AmendSavingsAccountAnnualSummaryRequestDataParser, RetrieveSavingsAccountAnnualSummaryRequestDataParser}
+import v2.models.domain.SavingsAccountAnnualSummary
 import v2.models.errors._
 import v2.models.requestData._
 import v2.services.{EnrolmentsAuthService, MtdIdLookupService, SavingsAccountAnnualSummaryService}
 
-import scala.concurrent.Future
-
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class SavingsAccountAnnualSummaryController @Inject()(val authService: EnrolmentsAuthService,
                                                       val lookupService: MtdIdLookupService,
                                                       amendSavingsAccountAnnualSummaryRequestDataParser: AmendSavingsAccountAnnualSummaryRequestDataParser,
+                                                      retrieveSavingsAccountAnnualSummaryRequestDataParser:RetrieveSavingsAccountAnnualSummaryRequestDataParser,
                                                       savingsAccountAnnualSummaryService: SavingsAccountAnnualSummaryService,
                                                       val cc: ControllerComponents
                                                      ) extends AuthorisedController(cc) {
@@ -62,6 +63,25 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
         Future.successful(
           processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
         )
+    }
+  }
+
+  def retrieve(nino: String, accountId: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
+    retrieveSavingsAccountAnnualSummaryRequestDataParser.parseRequest(
+      RetrieveSavingsAccountAnnualSummaryRawData(
+        nino, taxYear, accountId)) match {
+      case Right(retrieveRequest) => savingsAccountAnnualSummaryService.retrieve(retrieveRequest)
+        .map {
+          case Right(desResponse) =>
+            logger.info(s"[SavingsAccountAnnualSummaryController][retrieve] - Success response received with CorrelationId: ${desResponse.correlationId}")
+            Ok(SavingsAccountAnnualSummary.writes.writes(desResponse.responseData))
+              .withHeaders("X-CorrelationId" -> desResponse.correlationId)
+
+          case Left(errorWrapper) =>
+            processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
+        }
+      case Left(errorWrapper) =>
+        Future.successful(processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper)))
     }
   }
 

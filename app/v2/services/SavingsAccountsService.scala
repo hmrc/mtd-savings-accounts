@@ -94,7 +94,7 @@ class SavingsAccountsService @Inject()(connector: DesConnector) extends DesServi
     "INVALID_IDVALUE" -> NinoFormatError,
     "INVALID_INCOMESOURCETYPE" -> DownstreamError,
     "INVALID_TAXYEAR" -> DownstreamError,
-    "INVALID_INCOMESOURCEID" -> DownstreamError,
+    "INVALID_INCOMESOURCEID" -> AccountIdFormatError,
     "INVALID_ENDDATE" -> DownstreamError,
     "NOT_FOUND" -> NotFoundError,
     "SERVER_ERROR" -> DownstreamError,

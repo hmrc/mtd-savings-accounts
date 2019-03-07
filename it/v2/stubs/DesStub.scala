@@ -35,7 +35,7 @@ object DesStub extends WireMockMethods {
   private def getSavingsAccountsUrl(nino: String): String =
     s"/income-tax/income-sources/nino/$nino"
 
-  private def savingsAccountSummartUrl(nino: String, accountId: String, taxYear: DesTaxYear): String =
+  private def savingsAccountSummaryUrl(nino: String, accountId: String, taxYear: DesTaxYear): String =
     s"/income-tax/nino/$nino/income-source/savings/annual/${taxYear.value}"
 
   private def getSavingsAccountQueryParams(accountId: String) = Map("incomeSourceType" -> "interest-from-uk-banks", "incomeSourceId" -> accountId)
@@ -101,12 +101,41 @@ object DesStub extends WireMockMethods {
     """.stripMargin)
 
   def amendSuccess(nino: String, accountId: String, taxYear: DesTaxYear): StubMapping = {
-    when(method = POST, uri = savingsAccountSummartUrl(nino, accountId, taxYear))
+    when(method = POST, uri = savingsAccountSummaryUrl(nino, accountId, taxYear))
       .thenReturn(status = OK, amendSuccessResponseBody)
   }
 
   def amendError(nino: String, accountId: String, taxYear: DesTaxYear, errorStatus: Int, errorBody: String): StubMapping = {
-    when(method = POST, uri = savingsAccountSummartUrl(nino, accountId, taxYear))
+    when(method = POST, uri = savingsAccountSummaryUrl(nino, accountId, taxYear))
+      .thenReturn(status = errorStatus, errorBody)
+  }
+
+  private def getSavingsAccountAnnualQueryParams(accountId: String) = Map("incomeSourceId" -> accountId)
+
+  private def savingsAccountAnnualUrl(nino: String, taxYear: DesTaxYear): String =
+    s"/income-tax/nino/$nino/income-source/savings/annual/${taxYear.value}"
+
+  private val retrieveAnnualSuccessResponseBody = Json.parse(
+    s"""
+       |{
+       |   "savingsInterestAnnualIncome":[
+       |      {
+       |         "incomeSourceId":"122784545874145",
+       |         "taxedUkInterest":5000.00,
+       |         "untaxedUkInterest":5000.00
+       |      }
+       |   ]
+       |}
+       |""".stripMargin
+  )
+
+  def retrieveAnnualSuccess(nino: String, accountId: String, taxYear: DesTaxYear): StubMapping = {
+    when(method = GET, uri = savingsAccountAnnualUrl(nino, taxYear), queryParams = getSavingsAccountAnnualQueryParams(accountId))
+      .thenReturn(status = OK, retrieveAnnualSuccessResponseBody)
+  }
+
+  def retrieveAnnualError(nino: String, accountId: String, taxYear: DesTaxYear, errorStatus: Int, errorBody: String): StubMapping = {
+    when(method = GET, uri = savingsAccountAnnualUrl(nino, taxYear), queryParams = getSavingsAccountAnnualQueryParams(accountId))
       .thenReturn(status = errorStatus, errorBody)
   }
 }

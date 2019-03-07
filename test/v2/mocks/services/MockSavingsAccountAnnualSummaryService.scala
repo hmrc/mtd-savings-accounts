@@ -19,8 +19,8 @@ package v2.mocks.services
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.models.requestData.AmendSavingsAccountAnnualSummaryRequest
-import v2.services.{AmendSavingsAccountAnnualSummaryOutcome, SavingsAccountAnnualSummaryService}
+import v2.models.requestData.{AmendSavingsAccountAnnualSummaryRequest, RetrieveSavingsAccountAnnualSummaryRequest}
+import v2.services.{AmendSavingsAccountAnnualSummaryOutcome, RetrieveSavingsAccountAnnualSummaryOutcome, SavingsAccountAnnualSummaryService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,6 +31,11 @@ trait MockSavingsAccountAnnualSummaryService extends MockFactory {
   object MockSavingsAccountAnnualSummaryService {
     def amend(request: AmendSavingsAccountAnnualSummaryRequest): CallHandler[Future[AmendSavingsAccountAnnualSummaryOutcome]] = {
       (mockSavingsAccountAnnualSummaryService.amend(_: AmendSavingsAccountAnnualSummaryRequest)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(request, *, *)
+    }
+
+    def retrieve(request: RetrieveSavingsAccountAnnualSummaryRequest): CallHandler[Future[RetrieveSavingsAccountAnnualSummaryOutcome]] = {
+      (mockSavingsAccountAnnualSummaryService.retrieve(_: RetrieveSavingsAccountAnnualSummaryRequest)(_: HeaderCarrier, _: ExecutionContext))
         .expects(request, *, *)
     }
   }

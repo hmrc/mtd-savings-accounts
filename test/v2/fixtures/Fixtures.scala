@@ -47,6 +47,14 @@ object Fixtures {
       ))
     )
 
+    val retrieveAnnualJsonResponse: (String, String) => JsValue = (taxedUkInterest, untaxedUkInterest) => Json.parse(
+      s"""{
+         |"taxedUkInterest": $taxedUkInterest,
+         |"untaxedUkInterest": $untaxedUkInterest
+         |}
+      """.stripMargin
+    )
+
     val retrieveJsonReponse: String => JsValue = accountName => Json.obj(
       "accountName" -> accountName
     )
