@@ -21,9 +21,9 @@ import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures._
-import v2.mocks.requestParsers.{MockCreateSavingsAccountRequestDataParser, MockRetrieveAllSavingsAccountRequestDataParser, MockRetrieveSavingsAccountRequestDataParser}
+import v2.mocks.requestParsers._
 import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountsService}
-import v2.models.domain.{CreateSavingsAccountResponse, RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
+import v2.models.domain._
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData._
@@ -58,6 +58,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec {
   val nino = "AA123456A"
   val correlationId = "X-123"
   val id = "SAVKB2UVwUTBQGJ"
+  val taxYear = "2017-18"
   val accountName = "Main account name"
   val location = s"/self-assessment/ni/$nino/savings-accounts/$id"
 
