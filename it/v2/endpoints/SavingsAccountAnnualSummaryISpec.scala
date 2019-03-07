@@ -259,6 +259,8 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
       retrieveRequestValidationErrorTest("BADNINO", "SAVKB2UVwUTBQGJ", "2017-18", Status.BAD_REQUEST, NinoFormatError)
       retrieveRequestValidationErrorTest("AA123456A", "BADID", "2017-18", Status.BAD_REQUEST, AccountIdFormatError)
       retrieveRequestValidationErrorTest("AA123456A", "SAVKB2UVwUTBQGJ", "ABCD", Status.BAD_REQUEST, TaxYearFormatError)
+      retrieveRequestValidationErrorTest("AA123456A", "SAVKB2UVwUTBQGJ", "2016-17", Status.BAD_REQUEST, RuleTaxYearNotSupportedError)
+
     }
 
     def retrieveRequestValidationErrorTest(
