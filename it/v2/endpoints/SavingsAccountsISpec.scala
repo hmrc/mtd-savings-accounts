@@ -287,7 +287,6 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     "return 400 (Bad Request)" when {
       createErrorTest(Status.BAD_REQUEST, "INVALID_IDVALUE", Status.BAD_REQUEST, NinoFormatError)
       createErrorTest(Status.BAD_REQUEST, "INVALID_INCOMESOURCEID", Status.BAD_REQUEST, AccountIdFormatError)
-
     }
 
     "return 404 (Not Found)" when {

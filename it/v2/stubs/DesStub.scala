@@ -105,26 +105,31 @@ object DesStub extends WireMockMethods {
       .thenReturn(status = OK, amendSuccessResponseBody)
   }
 
-  def retrieveAnnualSuccess(nino: String, accountId: String, taxYear: DesTaxYear): StubMapping = {
-    when(method = GET, uri = savingsAccountSummaryUrl(nino, accountId, taxYear))
-      .thenReturn(status = OK, retrieveAnnualSuccessResponseBody)
-  }
-
-  private val retrieveAnnualSuccessResponseBody = Json.parse(
-    s"""{
-       |"taxedUKInterest": 5000.00,
-       |"untaxedUKInterest": 5000.00
-       |}
-      """.stripMargin
-  )
-
   def amendError(nino: String, accountId: String, taxYear: DesTaxYear, errorStatus: Int, errorBody: String): StubMapping = {
     when(method = POST, uri = savingsAccountSummaryUrl(nino, accountId, taxYear))
       .thenReturn(status = errorStatus, errorBody)
   }
 
+  private def getSavingsAccountAnnualQueryParams(accountId: String) = Map("incomeSourceId" -> accountId)
+
+  private def savingsAccountAnnualUrl(nino: String, taxYear: DesTaxYear): String =
+    s"/income-tax/nino/$nino/income-source/savings/annual/${taxYear.value}"
+
+  private val retrieveAnnualSuccessResponseBody = Json.parse(
+    s"""{
+       |"taxedUkInterest": 5000.00,
+       |"untaxedUkInterest": 5000.00
+       |}
+     """.stripMargin
+  )
+
+  def retrieveAnnualSuccess(nino: String, accountId: String, taxYear: DesTaxYear): StubMapping = {
+    when(method = GET, uri = savingsAccountAnnualUrl(nino, taxYear), queryParams = getSavingsAccountAnnualQueryParams(accountId))
+      .thenReturn(status = OK, retrieveAnnualSuccessResponseBody)
+  }
+
   def retrieveAnnualError(nino: String, accountId: String, taxYear: DesTaxYear, errorStatus: Int, errorBody: String): StubMapping = {
-    when(method = GET, uri = getSavingsAccountsUrl(nino), queryParams = getSavingsAccountQueryParams(accountId))
+    when(method = GET, uri = savingsAccountAnnualUrl(nino, taxYear), queryParams = getSavingsAccountAnnualQueryParams(accountId))
       .thenReturn(status = errorStatus, errorBody)
   }
 }
