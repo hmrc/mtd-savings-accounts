@@ -22,21 +22,25 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson, ControllerComponents}
+import uk.gov.hmrc.http.HeaderCarrier
 import v2.controllers.requestParsers.{AmendSavingsAccountAnnualSummaryRequestDataParser, RetrieveSavingsAccountAnnualSummaryRequestDataParser}
+import v2.models.audit._
+import v2.models.auth.UserDetails
 import v2.models.domain.SavingsAccountAnnualSummary
 import v2.models.errors._
 import v2.models.requestData._
-import v2.services.{EnrolmentsAuthService, MtdIdLookupService, SavingsAccountAnnualSummaryService}
+import v2.services.{AuditService, EnrolmentsAuthService, MtdIdLookupService, SavingsAccountAnnualSummaryService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SavingsAccountAnnualSummaryController @Inject()(val authService: EnrolmentsAuthService,
                                                       val lookupService: MtdIdLookupService,
                                                       amendSavingsAccountAnnualSummaryRequestDataParser: AmendSavingsAccountAnnualSummaryRequestDataParser,
-                                                      retrieveSavingsAccountAnnualSummaryRequestDataParser:RetrieveSavingsAccountAnnualSummaryRequestDataParser,
+                                                      retrieveSavingsAccountAnnualSummaryRequestDataParser: RetrieveSavingsAccountAnnualSummaryRequestDataParser,
                                                       savingsAccountAnnualSummaryService: SavingsAccountAnnualSummaryService,
+                                                      auditService: AuditService,
                                                       val cc: ControllerComponents
                                                      ) extends AuthorisedController(cc) {
 
@@ -53,16 +57,37 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
           .map {
             case Right(desResponse) =>
               logger.info(s"[SavingsAccountAnnualSummaryController][amend] - Success response received with CorrelationId: ${desResponse.correlationId}")
+
+              auditSubmission(createAuditDetails(
+                nino = nino, savingsAccountId = accountId, taxYear = taxYear,
+                statusCode = NO_CONTENT,
+                request = request.request.body, correlationId = desResponse.correlationId,
+                userDetails = request.userDetails))
+
               NoContent.withHeaders("X-CorrelationId" -> desResponse.correlationId)
 
             case Left(errorWrapper) =>
-              processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
+              val correlationId = getCorrelationId(errorWrapper)
+              val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
+              auditSubmission(details = createAuditDetails(
+                nino = nino, savingsAccountId = accountId, taxYear = taxYear,
+                statusCode = result.header.status,
+                request = request.request.body, correlationId = correlationId,
+                userDetails = request.userDetails, errorWrapper = Some(errorWrapper)))
+
+              result
           }
 
       case Left(errorWrapper) =>
-        Future.successful(
-          processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
-        )
+        val correlationId = getCorrelationId(errorWrapper)
+        val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
+        auditSubmission(createAuditDetails(
+          nino = nino, savingsAccountId = accountId, taxYear = taxYear,
+          statusCode = result.header.status,
+          request = request.request.body, correlationId = correlationId,
+          userDetails = request.userDetails, errorWrapper = Some(errorWrapper)))
+
+        Future.successful(result)
     }
   }
 
@@ -94,9 +119,9 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
            | RuleTaxYearNotSupportedError
            | TaxedInterestFormatError
            | UnTaxedInterestFormatError
-           | RuleIncorrectOrEmptyBodyError    => BadRequest(Json.toJson(errorWrapper))
-      case NotFoundError                      => NotFound(Json.toJson(errorWrapper))
-      case DownstreamError                    => InternalServerError(Json.toJson(errorWrapper))
+           | RuleIncorrectOrEmptyBodyError => BadRequest(Json.toJson(errorWrapper))
+      case NotFoundError => NotFound(Json.toJson(errorWrapper))
+      case DownstreamError => InternalServerError(Json.toJson(errorWrapper))
     }
   }
 
@@ -105,11 +130,45 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
       case Some(correlationId) => logger.info("[SavingsAccountAnnualSummaryController][getCorrelationId] - " +
         s"Error received from DES ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
         correlationId
-      case None                =>
+      case None =>
         val correlationId = UUID.randomUUID().toString
         logger.info("[SavingsAccountAnnualSummaryController][getCorrelationId] - " +
           s"Validation error: ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
         correlationId
     }
+  }
+
+  private def createAuditDetails(nino: String,
+                                 savingsAccountId: String,
+                                 taxYear: String,
+                                 statusCode: Int,
+                                 request: JsValue,
+                                 correlationId: String,
+                                 userDetails: UserDetails,
+                                 errorWrapper: Option[ErrorWrapper] = None
+                                ) = {
+    val response =
+      errorWrapper
+        .map { wrapper =>
+          AmendAnnualSummaryAuditResponse(statusCode, Some(wrapper.allErrors.map(error => AuditError(error.code))))
+        }
+        .getOrElse(AmendAnnualSummaryAuditResponse(statusCode, None))
+
+    AmendAnnualSummaryAuditDetail(
+      userType = userDetails.userType,
+      agentReferenceNumber = userDetails.agentReferenceNumber,
+      nino = nino,
+      savingsAccountId = savingsAccountId,
+      taxYear = taxYear,
+      request,
+      correlationId,
+      response)
+  }
+
+  private def auditSubmission(details: AmendAnnualSummaryAuditDetail)
+                             (implicit hc: HeaderCarrier,
+                              ec: ExecutionContext) = {
+    val event = AuditEvent("updateASavingsAccountAnnualSummary", "update-a-savings-account-annual-summary", details)
+    auditService.auditEvent(event)
   }
 }
