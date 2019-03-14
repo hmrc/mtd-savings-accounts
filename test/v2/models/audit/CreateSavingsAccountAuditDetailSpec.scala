@@ -21,6 +21,7 @@ import play.api.libs.json.Json
 import support.UnitSpec
 
 class CreateSavingsAccountAuditDetailSpec extends UnitSpec {
+
   private val userType = "Organisation"
   private val agentReferenceNumber = Some("012345678")
   private val nino = "AA123456A"
@@ -28,6 +29,7 @@ class CreateSavingsAccountAuditDetailSpec extends UnitSpec {
   private val accountName = "myaccount"
   private val responseSuccess = CreateSavingsAccountAuditResponse(Status.CREATED, None, Some("0123IS12334567890"))
   private val responseFail = CreateSavingsAccountAuditResponse(Status.BAD_REQUEST, Some(Seq(AuditError("FORMAT_NINO"))), None)
+
   "writes" when {
     "passed an audit model with all fields provided" should {
       "produce valid json" in {

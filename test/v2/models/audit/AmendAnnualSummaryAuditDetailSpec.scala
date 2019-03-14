@@ -21,6 +21,7 @@ import play.api.libs.json.Json
 import support.UnitSpec
 
 class AmendAnnualSummaryAuditDetailSpec extends UnitSpec {
+
   private val userType = "Organisation"
   private val agentReferenceNumber = Some("012345678")
   private val nino = "AA123456A"
@@ -30,6 +31,7 @@ class AmendAnnualSummaryAuditDetailSpec extends UnitSpec {
   private val accountName = "myaccount"
   private val responseSuccess = AmendAnnualSummaryAuditResponse(Status.CREATED, None)
   private val responseFail = AmendAnnualSummaryAuditResponse(Status.BAD_REQUEST, Some(Seq(AuditError("FORMAT_NINO"))))
+
   "writes" when {
     "passed an audit model with all fields provided" should {
       "produce valid json" in {

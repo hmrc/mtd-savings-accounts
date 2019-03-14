@@ -20,6 +20,7 @@ import play.api.libs.json.Json
 import support.UnitSpec
 
 class DesRetrieveSavingsAccountAnnualIncomeResponseSpec extends UnitSpec {
+
   "DesRetrieveSavingsAccountAnnualIncomeResponse reads" should {
     "parse from DES json response" in {
       val response = Json.parse(
