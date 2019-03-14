@@ -18,15 +18,15 @@ package v2.models.audit
 
 import play.api.libs.json.{JsValue, Json, OWrites}
 
-case class SavingsAccountsAuditDetail(
-                                       userType: String,
-                                       agentReferenceNumber: Option[String],
-                                       nino: String,
-                                       request: JsValue,
-                                       `X-CorrelationId`: String,
-                                       response: AuditResponse
-                                      )
+case class CreateSavingsAccountAuditDetail(
+                                            userType: String,
+                                            agentReferenceNumber: Option[String],
+                                            nino: String,
+                                            request: JsValue,
+                                            `X-CorrelationId`: String,
+                                            response: CreateSavingsAccountAuditResponse
+                                          )
 
-object SavingsAccountsAuditDetail {
-  implicit val writes: OWrites[SavingsAccountsAuditDetail] = Json.writes[SavingsAccountsAuditDetail]
+object CreateSavingsAccountAuditDetail {
+  implicit val writes: OWrites[CreateSavingsAccountAuditDetail] = Json.writes[CreateSavingsAccountAuditDetail]
 }

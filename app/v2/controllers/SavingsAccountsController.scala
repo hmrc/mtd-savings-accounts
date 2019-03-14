@@ -25,7 +25,7 @@ import play.api.mvc.{Action, AnyContent, AnyContentAsJson, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import v2.controllers.requestParsers._
-import v2.models.audit.{AuditError, AuditEvent, AuditResponse, SavingsAccountsAuditDetail}
+import v2.models.audit.{AuditError, AuditEvent, CreateSavingsAccountAuditResponse, CreateSavingsAccountAuditDetail}
 import v2.models.auth.UserDetails
 import v2.models.domain.{RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
 import v2.models.errors._
@@ -137,16 +137,16 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
                                  userDetails: UserDetails,
                                  savingsAccountId: Option[String],
                                  errorWrapper: Option[ErrorWrapper] = None
-                                ): SavingsAccountsAuditDetail = {
-    val auditResponse = errorWrapper.map {
+                                ): CreateSavingsAccountAuditDetail = {
+    val response = errorWrapper.map {
       wrapper =>
-        AuditResponse(statusCode, Some(wrapper.allErrors.map(error => AuditError(error.code))), None)
-    }.getOrElse(AuditResponse(statusCode, None, savingsAccountId))
+        CreateSavingsAccountAuditResponse(statusCode, Some(wrapper.allErrors.map(error => AuditError(error.code))), None)
+    }.getOrElse(CreateSavingsAccountAuditResponse(statusCode, None, savingsAccountId))
 
-    SavingsAccountsAuditDetail(userDetails.userType, userDetails.agentReferenceNumber, nino, request, correlationId, auditResponse)
+    CreateSavingsAccountAuditDetail(userDetails.userType, userDetails.agentReferenceNumber, nino, request, correlationId, response)
   }
 
-  private def auditSubmission(details: SavingsAccountsAuditDetail)
+  private def auditSubmission(details: CreateSavingsAccountAuditDetail)
                              (implicit hc: HeaderCarrier,
                               ec: ExecutionContext): Future[AuditResult] = {
     val event = AuditEvent("addASavingsAccount", "add-a-savings-account", details)

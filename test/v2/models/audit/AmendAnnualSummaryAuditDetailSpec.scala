@@ -20,16 +20,20 @@ import play.api.http.Status
 import play.api.libs.json.Json
 import support.UnitSpec
 
-class SavingsAccountsAuditDetailSpec extends UnitSpec {
+class AmendAnnualSummaryAuditDetailSpec extends UnitSpec {
+
   private val userType = "Organisation"
   private val agentReferenceNumber = Some("012345678")
   private val nino = "AA123456A"
+  private val accountId = "0123IS12334567890"
+  private val taxYear = "2017-18"
   private val `X-CorrelationId` = "X-123"
   private val accountName = "myaccount"
-  private val responseSuccess = AuditResponse(Status.CREATED, None, Some("0123IS12334567890"))
-  private val responseFail = AuditResponse(Status.BAD_REQUEST, Some(Seq(AuditError("FORMAT_NINO"))), None)
+  private val responseSuccess = AmendAnnualSummaryAuditResponse(Status.CREATED, None)
+  private val responseFail = AmendAnnualSummaryAuditResponse(Status.BAD_REQUEST, Some(Seq(AuditError("FORMAT_NINO"))))
+
   "writes" when {
-    "passed a charitable giving audit model with all fields provided" should {
+    "passed an audit model with all fields provided" should {
       "produce valid json" in {
         val json = Json.parse(
           s"""
@@ -37,32 +41,35 @@ class SavingsAccountsAuditDetailSpec extends UnitSpec {
              |  "userType": "Organisation",
              |  "agentReferenceNumber": "012345678",
              |  "nino": "AA123456A",
+             |  "savingsAccountId": "0123IS12334567890",
+             |  "taxYear": "2017-18",
              |  "request": {
              |    "accountName": "$accountName"
              |  },
              |  "X-CorrelationId": "X-123",
              |  "response": {
-             |    "httpStatus": 201,
-             |    "savingsAccountId": "0123IS12334567890"
+             |    "httpStatus": 201
              |  }
              |}
            """.stripMargin)
 
         val request = Json.obj("accountName" -> accountName)
 
-        val model = SavingsAccountsAuditDetail(userType, agentReferenceNumber, nino, request, `X-CorrelationId`, responseSuccess)
+        val model = AmendAnnualSummaryAuditDetail(userType, agentReferenceNumber, nino, accountId, taxYear, request, `X-CorrelationId`, responseSuccess)
 
         Json.toJson(model) shouldBe json
       }
     }
 
-    "passed a charitable giving audit model with only mandatory fields provided" should {
+    "passed an audit model with only mandatory fields provided" should {
       "produce valid json" in {
         val json = Json.parse(
           s"""
              |{
              |  "userType": "Organisation",
              |  "nino": "AA123456A",
+             |  "savingsAccountId": "0123IS12334567890",
+             |  "taxYear": "2017-18",
              |  "request": {
              |    "accountName": "$accountName"
              |  },
@@ -80,7 +87,7 @@ class SavingsAccountsAuditDetailSpec extends UnitSpec {
 
         val request = Json.obj("accountName" -> accountName)
 
-        val model = SavingsAccountsAuditDetail(userType, None, nino, request, `X-CorrelationId`, responseFail)
+        val model = AmendAnnualSummaryAuditDetail(userType, None, nino, accountId, taxYear, request, `X-CorrelationId`, responseFail)
 
         Json.toJson(model) shouldBe json
       }

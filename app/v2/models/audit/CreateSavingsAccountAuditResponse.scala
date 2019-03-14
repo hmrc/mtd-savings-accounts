@@ -18,8 +18,8 @@ package v2.models.audit
 
 import play.api.libs.json.{Json, OFormat}
 
-case class AuditResponse(httpStatus: Int, errors: Option[Seq[AuditError]], savingsAccountId: Option[String])
+case class CreateSavingsAccountAuditResponse(httpStatus: Int, errors: Option[Seq[AuditError]], savingsAccountId: Option[String])
 
-object AuditResponse {
-  implicit val format: OFormat[AuditResponse] = Json.format[AuditResponse]
+object CreateSavingsAccountAuditResponse {
+  implicit val format: OFormat[CreateSavingsAccountAuditResponse] = Json.format[CreateSavingsAccountAuditResponse]
 }
