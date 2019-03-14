@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures._
 import v2.mocks.requestParsers._
 import v2.mocks.services.{MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountsService}
-import v2.models.audit.{AuditError, AuditEvent, CreateAccountAuditResponse, CreateAccountAuditDetail}
+import v2.models.audit.{AuditError, AuditEvent, CreateSavingsAccountAuditResponse, CreateSavingsAccountAuditDetail}
 import v2.models.domain._
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
@@ -85,8 +85,8 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
         contentAsJson(result) shouldBe SavingsAccountsFixture.createJsonResponse(id)
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
-        val detail = CreateAccountAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123", CreateAccountAuditResponse(CREATED, None, Some(id)))
-        val event: AuditEvent[CreateAccountAuditDetail] = AuditEvent[CreateAccountAuditDetail]("addASavingsAccount",
+        val detail = CreateSavingsAccountAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123", CreateSavingsAccountAuditResponse(CREATED, None, Some(id)))
+        val event: AuditEvent[CreateSavingsAccountAuditDetail] = AuditEvent[CreateSavingsAccountAuditDetail]("addASavingsAccount",
           "add-a-savings-account", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }
@@ -103,9 +103,9 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
         status(result) shouldBe BAD_REQUEST
         header("X-CorrelationId", result).nonEmpty shouldBe true
 
-        val detail = CreateAccountAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
-          CreateAccountAuditResponse(BAD_REQUEST, Some(Seq(AuditError(BadRequestError.code))), None))
-        val event: AuditEvent[CreateAccountAuditDetail] = AuditEvent[CreateAccountAuditDetail]("addASavingsAccount",
+        val detail = CreateSavingsAccountAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
+          CreateSavingsAccountAuditResponse(BAD_REQUEST, Some(Seq(AuditError(BadRequestError.code))), None))
+        val event: AuditEvent[CreateSavingsAccountAuditDetail] = AuditEvent[CreateSavingsAccountAuditDetail]("addASavingsAccount",
           "add-a-savings-account", detail)
 
         MockedAuditService.verifyAuditEvent(event.copy(detail = detail.copy(`X-CorrelationId` = header("X-CorrelationId", result).get))).once
@@ -162,9 +162,9 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
         status(result) shouldBe BAD_REQUEST
         header("X-CorrelationId", result).nonEmpty shouldBe true
 
-        val detail = CreateAccountAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
-          CreateAccountAuditResponse(BAD_REQUEST, Some(Seq(AuditError("error 1"), AuditError("error 2"))), None))
-        val event: AuditEvent[CreateAccountAuditDetail] = AuditEvent[CreateAccountAuditDetail]("addASavingsAccount",
+        val detail = CreateSavingsAccountAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
+          CreateSavingsAccountAuditResponse(BAD_REQUEST, Some(Seq(AuditError("error 1"), AuditError("error 2"))), None))
+        val event: AuditEvent[CreateSavingsAccountAuditDetail] = AuditEvent[CreateSavingsAccountAuditDetail]("addASavingsAccount",
           "add-a-savings-account", detail)
 
         MockedAuditService.verifyAuditEvent(event.copy(detail = detail.copy(`X-CorrelationId` = header("X-CorrelationId", result).get))).once
@@ -186,9 +186,9 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
         contentAsJson(response) shouldBe Json.toJson(error)
         header("X-CorrelationId", response) shouldBe Some(correlationId)
 
-        val detail = CreateAccountAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
-          CreateAccountAuditResponse(expectedStatus, Some(Seq(AuditError(error.code))), None))
-        val event: AuditEvent[CreateAccountAuditDetail] = AuditEvent[CreateAccountAuditDetail]("addASavingsAccount",
+        val detail = CreateSavingsAccountAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
+          CreateSavingsAccountAuditResponse(expectedStatus, Some(Seq(AuditError(error.code))), None))
+        val event: AuditEvent[CreateSavingsAccountAuditDetail] = AuditEvent[CreateSavingsAccountAuditDetail]("addASavingsAccount",
           "add-a-savings-account", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }
@@ -212,9 +212,9 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
         contentAsJson(response) shouldBe Json.toJson(error)
         header("X-CorrelationId", response) shouldBe Some(correlationId)
 
-        val detail = CreateAccountAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
-          CreateAccountAuditResponse(expectedStatus, Some(Seq(AuditError(error.code))), None))
-        val event: AuditEvent[CreateAccountAuditDetail] = AuditEvent[CreateAccountAuditDetail]("addASavingsAccount",
+        val detail = CreateSavingsAccountAuditDetail("Individual", None, nino, SavingsAccountsFixture.createJson, "X-123",
+          CreateSavingsAccountAuditResponse(expectedStatus, Some(Seq(AuditError(error.code))), None))
+        val event: AuditEvent[CreateSavingsAccountAuditDetail] = AuditEvent[CreateSavingsAccountAuditDetail]("addASavingsAccount",
           "add-a-savings-account", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }

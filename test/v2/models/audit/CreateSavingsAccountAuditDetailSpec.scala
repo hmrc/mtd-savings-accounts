@@ -20,14 +20,14 @@ import play.api.http.Status
 import play.api.libs.json.Json
 import support.UnitSpec
 
-class CreateAccountAuditDetailSpec extends UnitSpec {
+class CreateSavingsAccountAuditDetailSpec extends UnitSpec {
   private val userType = "Organisation"
   private val agentReferenceNumber = Some("012345678")
   private val nino = "AA123456A"
   private val `X-CorrelationId` = "X-123"
   private val accountName = "myaccount"
-  private val responseSuccess = CreateAccountAuditResponse(Status.CREATED, None, Some("0123IS12334567890"))
-  private val responseFail = CreateAccountAuditResponse(Status.BAD_REQUEST, Some(Seq(AuditError("FORMAT_NINO"))), None)
+  private val responseSuccess = CreateSavingsAccountAuditResponse(Status.CREATED, None, Some("0123IS12334567890"))
+  private val responseFail = CreateSavingsAccountAuditResponse(Status.BAD_REQUEST, Some(Seq(AuditError("FORMAT_NINO"))), None)
   "writes" when {
     "passed an audit model with all fields provided" should {
       "produce valid json" in {
@@ -50,7 +50,7 @@ class CreateAccountAuditDetailSpec extends UnitSpec {
 
         val request = Json.obj("accountName" -> accountName)
 
-        val model = CreateAccountAuditDetail(userType, agentReferenceNumber, nino, request, `X-CorrelationId`, responseSuccess)
+        val model = CreateSavingsAccountAuditDetail(userType, agentReferenceNumber, nino, request, `X-CorrelationId`, responseSuccess)
 
         Json.toJson(model) shouldBe json
       }
@@ -80,7 +80,7 @@ class CreateAccountAuditDetailSpec extends UnitSpec {
 
         val request = Json.obj("accountName" -> accountName)
 
-        val model = CreateAccountAuditDetail(userType, None, nino, request, `X-CorrelationId`, responseFail)
+        val model = CreateSavingsAccountAuditDetail(userType, None, nino, request, `X-CorrelationId`, responseFail)
 
         Json.toJson(model) shouldBe json
       }
