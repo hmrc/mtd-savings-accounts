@@ -94,7 +94,7 @@ class SavingsAccountAnnualSummaryControllerSpec
 
         val detail = AmendAnnualSummaryAuditDetail(
           "Individual", None, nino, id, taxYear, SavingsAccountsFixture.amendRequestJson(), "X-123",
-          AmendAnnualSummaryAuditResponse(CREATED, None))
+          AmendAnnualSummaryAuditResponse(NO_CONTENT, None))
         val event = AuditEvent("updateASavingsAccountAnnualSummary", "update-a-savings-account-annual-summary", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }

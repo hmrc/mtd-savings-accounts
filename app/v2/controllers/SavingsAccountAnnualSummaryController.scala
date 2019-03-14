@@ -60,7 +60,7 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
 
               auditSubmission(createAuditDetails(
                 nino = nino, savingsAccountId = accountId, taxYear = taxYear,
-                statusCode = CREATED,
+                statusCode = NO_CONTENT,
                 request = request.request.body, correlationId = desResponse.correlationId,
                 userDetails = request.userDetails))
 
