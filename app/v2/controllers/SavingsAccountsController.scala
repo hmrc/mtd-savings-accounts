@@ -25,7 +25,7 @@ import play.api.mvc.{Action, AnyContent, AnyContentAsJson, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import v2.controllers.requestParsers._
-import v2.models.audit.{AuditError, AuditEvent, AuditResponse, SavingsAccountsAuditDetail}
+import v2.models.audit.{AuditError, AuditEvent, CreateAccountAuditResponse, CreateAccountAuditDetail}
 import v2.models.auth.UserDetails
 import v2.models.domain.{RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
 import v2.models.errors._
@@ -137,16 +137,16 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
                                  userDetails: UserDetails,
                                  savingsAccountId: Option[String],
                                  errorWrapper: Option[ErrorWrapper] = None
-                                ): SavingsAccountsAuditDetail = {
+                                ): CreateAccountAuditDetail = {
     val auditResponse = errorWrapper.map {
       wrapper =>
-        AuditResponse(statusCode, Some(wrapper.allErrors.map(error => AuditError(error.code))), None)
-    }.getOrElse(AuditResponse(statusCode, None, savingsAccountId))
+        CreateAccountAuditResponse(statusCode, Some(wrapper.allErrors.map(error => AuditError(error.code))), None)
+    }.getOrElse(CreateAccountAuditResponse(statusCode, None, savingsAccountId))
 
-    SavingsAccountsAuditDetail(userDetails.userType, userDetails.agentReferenceNumber, nino, request, correlationId, auditResponse)
+    CreateAccountAuditDetail(userDetails.userType, userDetails.agentReferenceNumber, nino, request, correlationId, auditResponse)
   }
 
-  private def auditSubmission(details: SavingsAccountsAuditDetail)
+  private def auditSubmission(details: CreateAccountAuditDetail)
                              (implicit hc: HeaderCarrier,
                               ec: ExecutionContext): Future[AuditResult] = {
     val event = AuditEvent("addASavingsAccount", "add-a-savings-account", details)
