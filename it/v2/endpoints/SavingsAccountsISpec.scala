@@ -32,6 +32,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     val nino: String = "AA123456A"
     val correlationId = "X-123"
 
+
     def setupStubs(): StubMapping
 
     def uri: String
@@ -43,6 +44,8 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
   }
 
   "Calling the create savings account endpoint" should {
+
+    val accountId = "SAVKB2UVwUTBQGJ"
 
     trait CreateTest extends Test {
       def uri = s"/2.0/ni/$nino/savings-accounts"
@@ -61,6 +64,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
         val response: WSResponse = await(request().post(SavingsAccountsFixture.createJson))
         response.status shouldBe Status.CREATED
+        response.header("Location") shouldBe Some(s"/self-assessment/ni/$nino/savings-accounts/$accountId")
       }
     }
 
