@@ -163,7 +163,7 @@ class SavingsAccountAnnualSummaryControllerSpec
       notFoundErrors.foreach(errorsFromAmendServiceTester(_, NOT_FOUND))
     }
 
-    def errorsFromAmendParserTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromAmendParserTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the parser" in new Test {
 
         MockAmendSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
@@ -183,7 +183,7 @@ class SavingsAccountAnnualSummaryControllerSpec
       }
     }
 
-    def errorsFromAmendServiceTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromAmendServiceTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the service" in new Test {
 
         MockAmendSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
@@ -283,7 +283,7 @@ class SavingsAccountAnnualSummaryControllerSpec
 
     }
 
-    def errorsFromRetrieveParserTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromRetrieveParserTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the parser" in new Test {
 
         MockRetrieveSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
@@ -297,7 +297,7 @@ class SavingsAccountAnnualSummaryControllerSpec
       }
     }
 
-    def errorsFromRetrieveServiceTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromRetrieveServiceTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the service" in new Test {
 
         MockRetrieveSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)

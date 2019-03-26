@@ -34,8 +34,8 @@ class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
   val taxYear = "2018-19"
   val transactionReference = "0000000000000001"
 
-  val deaTaxYearFormatError = Error("INVALID_TAXYEAR", "doesn't matter")
-  val desNinoFormatError = Error("INVALID_NINO", "doesn't matter")
+  val deaTaxYearFormatError = MtdError("INVALID_TAXYEAR", "doesn't matter")
+  val desNinoFormatError = MtdError("INVALID_NINO", "doesn't matter")
 
   trait Test extends MockDesConnector {
     lazy val service = new SavingsAccountAnnualSummaryService(connector)
@@ -66,7 +66,7 @@ class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
 
     "the connector returns an outbound error" should {
       "return that outbound error as-is" in new Test {
-        val fakeError = Error("doesn't matter", "really doesn't matter")
+        val fakeError = MtdError("doesn't matter", "really doesn't matter")
         val desResponse = DesResponse(correlationId, OutboundError(fakeError))
         val expected = DesResponse(correlationId, OutboundError(fakeError))
         MockedDesConnector.amendAnnualSummary(request).returns(Future.successful(Left(desResponse)))
@@ -102,7 +102,7 @@ class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
       case (desErrorCode, mtdError) =>
         s"DES returns a $desErrorCode error" should {
           s"return a ${mtdError.code} error" in new Test {
-            val desResponse = DesResponse(correlationId, SingleError(Error(desErrorCode, "doesn't matter")))
+            val desResponse = DesResponse(correlationId, SingleError(MtdError(desErrorCode, "doesn't matter")))
             val expected = ErrorWrapper(Some(correlationId), mtdError, None)
             MockedDesConnector.amendAnnualSummary(request).returns(Future.successful(Left(desResponse)))
             val result: AmendSavingsAccountAnnualSummaryOutcome = await(service.amend(request))
@@ -165,7 +165,7 @@ class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
 
     "the connector returns an outbound error" should {
       "return that outbound error as-is" in new Test {
-        val fakeError = Error("doesn't matter", "really doesn't matter")
+        val fakeError = MtdError("doesn't matter", "really doesn't matter")
         val desResponse = DesResponse(correlationId, OutboundError(fakeError))
 
         MockedDesConnector.retrieveAnnualSummary(request).returns(Future.successful(Left(desResponse)))
@@ -197,7 +197,7 @@ class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
       case (desErrorCode, mtdError) =>
         s"DES returns a $desErrorCode error" should {
           s"return a ${mtdError.code} error" in new Test {
-            val desResponse = DesResponse(correlationId, SingleError(Error(desErrorCode, "doesn't matter")))
+            val desResponse = DesResponse(correlationId, SingleError(MtdError(desErrorCode, "doesn't matter")))
             val expected = ErrorWrapper(Some(correlationId), mtdError, None)
             MockedDesConnector.retrieveAnnualSummary(request).returns(Future.successful(Left(desResponse)))
             val result = await(service.retrieve(request))

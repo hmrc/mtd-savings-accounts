@@ -93,7 +93,7 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
     }
 
 
-    def amendErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
+    def amendErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
       s"des returns an $desCode error" in new AmendTest {
 
         override def setupStubs(): StubMapping = {
@@ -119,7 +119,7 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
                                          requestNino: String,
                                          requestAccountId: String,
                                          requestTaxYear: String,
-                                         expectedStatus: Int, expectedBody: Error): Unit = {
+                                         expectedStatus: Int, expectedBody: MtdError): Unit = {
       s"validation fails with ${expectedBody.code} error" in new AmendTest {
 
         override val nino: String = requestNino
@@ -239,7 +239,7 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
     }
 
 
-    def retrieveAnnualError(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
+    def retrieveAnnualError(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
       s"des returns an $desCode error" in new RetrieveTest {
 
         override def setupStubs(): StubMapping = {
@@ -267,7 +267,7 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
                                          requestNino: String,
                                          requestAccountId: String,
                                          requestTaxYear: String,
-                                         expectedStatus: Int, expectedBody: Error): Unit = {
+                                         expectedStatus: Int, expectedBody: MtdError): Unit = {
       s"validation fails with ${expectedBody.code} error" in new RetrieveTest {
 
         override val nino: String = requestNino

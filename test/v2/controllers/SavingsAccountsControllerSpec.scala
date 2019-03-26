@@ -156,7 +156,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
       "multiple errors exist" in new Test() {
         MockCreateSavingsAccountRequestDataParser.parse(
           CreateSavingsAccountRawData(nino, AnyContentAsJson(SavingsAccountsFixture.createJson)))
-          .returns(Left(ErrorWrapper(None, BadRequestError, Some(Seq(Error("error 1", "message 1"), Error("error 2", "message 2"))))))
+          .returns(Left(ErrorWrapper(None, BadRequestError, Some(Seq(MtdError("error 1", "message 1"), MtdError("error 2", "message 2"))))))
 
         val result: Future[Result] = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
         status(result) shouldBe BAD_REQUEST
@@ -171,7 +171,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
       }
     }
 
-    def errorsFromCreateParserTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromCreateParserTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the parser" in new Test {
 
         val createSavingsAccountRawData =
@@ -194,7 +194,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
       }
     }
 
-    def errorsFromCreateServiceTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromCreateServiceTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the service" in new Test {
 
         val createSavingsAccountRawData =
@@ -292,7 +292,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
 
     }
 
-    def errorsFromRetrieveAllParserTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromRetrieveAllParserTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the parser" in new Test {
 
         val retrieveSavingsAccountRawData =
@@ -309,7 +309,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
       }
     }
 
-    def errorsFromRetrieveAllServiceTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromRetrieveAllServiceTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a $error error is returned from the service" in new Test {
 
         val retrieveSavingsAccountRawData =
@@ -398,7 +398,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
     }
 
 
-    def errorsFromRetrieveParserTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromRetrieveParserTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the parser" in new Test {
 
         val retrieveSavingsAccountRawData =
@@ -415,7 +415,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
       }
     }
 
-    def errorsFromRetrieveServiceTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromRetrieveServiceTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a $error error is returned from the service" in new Test {
 
         val retrieveSavingsAccountRawData =

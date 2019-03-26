@@ -16,16 +16,16 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.Error
+import v2.models.errors.MtdError
 
 object DefinedFieldValidation {
 
-  def validate(error: Error, fields: Option[_]*): List[Error] = {
+  def validate(error: MtdError, fields: Option[_]*): List[MtdError] = {
 
     if (fields.forall(_.isEmpty)) {
       List(error)
     } else {
-      NoValidationErrors
+      noValidationErrors
     }
   }
 

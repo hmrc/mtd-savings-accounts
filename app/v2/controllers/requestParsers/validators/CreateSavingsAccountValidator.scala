@@ -25,19 +25,19 @@ class CreateSavingsAccountValidator extends Validator[CreateSavingsAccountRawDat
 
   private val validationSet = List(parameterFormatValidation, requestRuleValidation, bodyFieldsFormatValidation)
 
-  private def parameterFormatValidation: CreateSavingsAccountRawData => List[List[Error]] = (data: CreateSavingsAccountRawData) => {
+  private def parameterFormatValidation: CreateSavingsAccountRawData => List[List[MtdError]] = (data: CreateSavingsAccountRawData) => {
     List(
       NinoValidation.validate(data.nino)
     )
   }
 
-  private def requestRuleValidation: CreateSavingsAccountRawData => List[List[Error]] = (data: CreateSavingsAccountRawData) => {
+  private def requestRuleValidation: CreateSavingsAccountRawData => List[List[MtdError]] = (data: CreateSavingsAccountRawData) => {
     List(
       JsonFormatValidation.validate[CreateSavingsAccountRequest](data.body, AccountNameMissingError)
     )
   }
 
-  private def bodyFieldsFormatValidation: CreateSavingsAccountRawData => List[List[Error]] = (data: CreateSavingsAccountRawData) => {
+  private def bodyFieldsFormatValidation: CreateSavingsAccountRawData => List[List[MtdError]] = (data: CreateSavingsAccountRawData) => {
 
     val createSavingsAccount = data.body.json.as[CreateSavingsAccountRequest]
     val accountNameRegex = "^[^\\*\\<\\>\\[\\]\\{\\}\\/\\:\\;\\?\\#\\`\\\"\\'\\%\\^\\~\\|\\$\\¬\\\\]{1,32}$"
@@ -46,7 +46,7 @@ class CreateSavingsAccountValidator extends Validator[CreateSavingsAccountRawDat
     )
   }
 
-  override def validate(data: CreateSavingsAccountRawData): List[Error] = {
+  override def validate(data: CreateSavingsAccountRawData): List[MtdError] = {
     run(validationSet, data).distinct
   }
 
