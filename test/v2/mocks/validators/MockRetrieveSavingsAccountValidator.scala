@@ -19,7 +19,7 @@ package v2.mocks.validators
 import org.scalamock.handlers.CallHandler1
 import org.scalamock.scalatest.MockFactory
 import v2.controllers.requestParsers.validators.RetrieveSavingsAccountValidator
-import v2.models.errors.MtdError
+import v2.models.errors.Error
 import v2.models.requestData.RetrieveSavingsAccountRawData
 
 class MockRetrieveSavingsAccountValidator extends MockFactory {
@@ -27,7 +27,7 @@ class MockRetrieveSavingsAccountValidator extends MockFactory {
   val mockValidator: RetrieveSavingsAccountValidator = mock[RetrieveSavingsAccountValidator]
 
   object MockedCreateSavingsAccountValidator {
-    def validate(data: RetrieveSavingsAccountRawData): CallHandler1[RetrieveSavingsAccountRawData, List[MtdError]] = {
+    def validate(data: RetrieveSavingsAccountRawData): CallHandler1[RetrieveSavingsAccountRawData, List[Error]] = {
       (mockValidator.validate(_: RetrieveSavingsAccountRawData))
         .expects(data)
     }

@@ -34,7 +34,7 @@ class RetrieveSavingsAccountValidatorSpec extends UnitSpec {
         val accountId = "SAVKB2UVwUTBQGJ"
         val inputData = RetrieveSavingsAccountRawData(validNino, accountId)
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result shouldBe List()
 

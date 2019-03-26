@@ -60,7 +60,7 @@ class SavingsAccountsService @Inject()(connector: DesConnector) extends DesServi
     }
   }
 
-  private def desErrorToMtdErrorCreate: Map[String, MtdError] = Map(
+  private def desErrorToMtdErrorCreate: Map[String, Error] = Map(
     "INVALID_IDTYPE" -> DownstreamError,
     "INVALID_IDVALUE" -> NinoFormatError,
     "MAX_ACCOUNTS_REACHED" -> MaximumSavingsAccountsLimitError,
@@ -74,7 +74,7 @@ class SavingsAccountsService @Inject()(connector: DesConnector) extends DesServi
   }
 
 
-  private def desErrorToMtdErrorRetrieveAll: Map[String, MtdError] = Map(
+  private def desErrorToMtdErrorRetrieveAll: Map[String, Error] = Map(
     "INVALID_IDTYPE" -> DownstreamError,
     "INVALID_IDVALUE" -> NinoFormatError,
     "INVALID_INCOMESOURCETYPE" -> DownstreamError,
@@ -89,7 +89,7 @@ class SavingsAccountsService @Inject()(connector: DesConnector) extends DesServi
     DownstreamError
   }
 
-  private def desErrorToMtdErrorRetrieve: Map[String, MtdError] = Map(
+  private def desErrorToMtdErrorRetrieve: Map[String, Error] = Map(
     "INVALID_IDTYPE" -> DownstreamError,
     "INVALID_IDVALUE" -> NinoFormatError,
     "INVALID_INCOMESOURCETYPE" -> DownstreamError,

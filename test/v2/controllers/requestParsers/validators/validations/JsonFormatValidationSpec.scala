@@ -19,7 +19,7 @@ package v2.controllers.requestParsers.validators.validations
 import play.api.libs.json.{Json, Reads}
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
-import v2.models.errors.{AccountNameMissingError, MtdError}
+import v2.models.errors.{AccountNameMissingError, Error}
 import v2.models.utils.JsonErrorValidators
 
 class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
@@ -28,7 +28,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
   implicit val testDataObjectReads: Reads[TestDataObject] = Json.reads[TestDataObject]
 
-  val dummyError = MtdError("DUMMY_CODE", "dummy message")
+  val dummyError = Error("DUMMY_CODE", "dummy message")
 
   "validate" should {
     "return no errors" when {

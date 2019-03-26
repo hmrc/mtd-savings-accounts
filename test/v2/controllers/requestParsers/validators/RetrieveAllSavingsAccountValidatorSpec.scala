@@ -34,7 +34,7 @@ class RetrieveAllSavingsAccountValidatorSpec extends UnitSpec {
       "return no errors" in new Test {
         val inputData = RetrieveAllSavingsAccountRawData(validNino)
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result shouldBe List()
 

@@ -18,8 +18,8 @@ package v2.models.errors
 
 import play.api.libs.json.{JsValue, Json, Writes}
 
-case class ErrorWrapper(correlationId: Option[String], error: MtdError, errors: Option[Seq[MtdError]]) {
-  def allErrors: Seq[MtdError] = errors match {
+case class ErrorWrapper(correlationId: Option[String], error: Error, errors: Option[Seq[Error]]) {
+  def allErrors: Seq[Error] = errors match {
     case Some(seq) => seq
     case None => Seq(error)
   }

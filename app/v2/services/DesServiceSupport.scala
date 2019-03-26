@@ -18,7 +18,7 @@ package v2.services
 
 import play.api.Logger
 import v2.connectors.DesConnectorOutcome
-import v2.models.errors.{BadRequestError, DownstreamError, MtdError, ErrorWrapper, MultipleErrors, OutboundError, SingleError}
+import v2.models.errors.{BadRequestError, DownstreamError, Error, ErrorWrapper, MultipleErrors, OutboundError, SingleError}
 import v2.models.outcomes.DesResponse
 
 trait DesServiceSupport {
@@ -49,7 +49,7 @@ trait DesServiceSupport {
     * @return the function to map outcomes
     */
   final def mapToVendor[D, V](endpointName: String,
-                              errorMap: String => MtdError)(
+                              errorMap: String => Error)(
                                success: DesResponse[D] => VendorOutcome[V]): DesConnectorOutcome[D] => VendorOutcome[V] = {
 
     case Right(desResponse) => success(desResponse)
@@ -83,7 +83,7 @@ trait DesServiceSupport {
     * @return the function to map outcomes
     */
   final def mapToVendorDirect[D](endpointName: String,
-                                 errorMap: String => MtdError): DesConnectorOutcome[D] => VendorOutcome[D] =
+                                 errorMap: String => Error): DesConnectorOutcome[D] => VendorOutcome[D] =
     mapToVendor(endpointName, errorMap) {
       desResponse => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
     }

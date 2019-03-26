@@ -84,7 +84,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       createErrorTest(Status.CONFLICT, "ALREADY_EXISTS", Status.FORBIDDEN, AccountNameDuplicateError)
     }
 
-    def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
+    def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
       s"des returns an $desCode error" in new CreateTest {
 
         override def setupStubs(): StubMapping = {
@@ -104,7 +104,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       createRequestValidationErrorTest("AA1123A", Status.BAD_REQUEST, NinoFormatError)
     }
 
-    def createRequestValidationErrorTest(requestNino: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
+    def createRequestValidationErrorTest(requestNino: String, expectedStatus: Int, expectedBody: Error): Unit = {
       s"validation fails with ${expectedBody.code} error" in new CreateTest {
 
         override val nino: String = requestNino
@@ -199,7 +199,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       createErrorTest(Status.NOT_FOUND, "NOT_FOUND", Status.NOT_FOUND, NotFoundError)
     }
 
-    def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
+    def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
       s"des returns an $desCode error" in new RetrieveAllTest {
 
         override def setupStubs(): StubMapping = {
@@ -219,7 +219,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       createRequestValidationErrorTest("AA1123A", Status.BAD_REQUEST, NinoFormatError)
     }
 
-    def createRequestValidationErrorTest(requestNino: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
+    def createRequestValidationErrorTest(requestNino: String, expectedStatus: Int, expectedBody: Error): Unit = {
       s"validation fails with ${expectedBody.code} error" in new RetrieveAllTest {
 
         override val nino: String = requestNino
@@ -284,7 +284,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       createErrorTest(Status.NOT_FOUND, "NOT_FOUND", Status.NOT_FOUND, NotFoundError)
     }
 
-    def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
+    def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
       s"des returns an $desCode error" in new RetrieveTest {
 
         override def setupStubs(): StubMapping = {
@@ -305,7 +305,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
       createRequestValidationErrorTest("AA123456A", "BADID", Status.BAD_REQUEST, AccountIdFormatError)
     }
 
-    def createRequestValidationErrorTest(requestNino: String, requestAccountId: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
+    def createRequestValidationErrorTest(requestNino: String, requestAccountId: String, expectedStatus: Int, expectedBody: Error): Unit = {
       s"validation fails with ${expectedBody.code} error" in new RetrieveTest {
         override val accountId: String = requestAccountId
         override val nino: String = requestNino

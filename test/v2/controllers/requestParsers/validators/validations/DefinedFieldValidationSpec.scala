@@ -17,12 +17,12 @@
 package v2.controllers.requestParsers.validators.validations
 
 import support.UnitSpec
-import v2.models.errors.MtdError
+import v2.models.errors.Error
 import v2.models.utils.JsonErrorValidators
 
 class DefinedFieldValidationSpec extends UnitSpec with JsonErrorValidators {
 
-  val dummyError = MtdError("DUMMY_CODE", "dummy message")
+  val dummyError = Error("DUMMY_CODE", "dummy message")
 
   "validate" should {
     "return no errors" when {

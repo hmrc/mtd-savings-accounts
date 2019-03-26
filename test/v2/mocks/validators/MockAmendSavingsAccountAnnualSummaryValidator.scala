@@ -19,7 +19,7 @@ package v2.mocks.validators
 import org.scalamock.handlers.CallHandler1
 import org.scalamock.scalatest.MockFactory
 import v2.controllers.requestParsers.validators.AmendSavingsAccountAnnualSummaryValidator
-import v2.models.errors.MtdError
+import v2.models.errors.Error
 import v2.models.requestData.AmendSavingsAccountAnnualSummaryRawData
 
 trait MockAmendSavingsAccountAnnualSummaryValidator extends MockFactory {
@@ -27,7 +27,7 @@ trait MockAmendSavingsAccountAnnualSummaryValidator extends MockFactory {
   val mockValidator: AmendSavingsAccountAnnualSummaryValidator = mock[AmendSavingsAccountAnnualSummaryValidator]
 
   object MockAmendSavingsAccountAnnualSummaryValidator {
-    def validate(data: AmendSavingsAccountAnnualSummaryRawData): CallHandler1[AmendSavingsAccountAnnualSummaryRawData, List[MtdError]] =
+    def validate(data: AmendSavingsAccountAnnualSummaryRawData): CallHandler1[AmendSavingsAccountAnnualSummaryRawData, List[Error]] =
       (mockValidator.validate _).expects(data)
   }
 

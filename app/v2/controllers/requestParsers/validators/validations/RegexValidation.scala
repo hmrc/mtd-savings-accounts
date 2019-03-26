@@ -16,11 +16,11 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.MtdError
+import v2.models.errors.Error
 
 object RegexValidation {
 
-  def validate(error: MtdError, value: String, regexFormat: String): List[MtdError] = {
-    if (value.matches(regexFormat)) noValidationErrors else List(error)
+  def validate(error: Error, value: String, regexFormat: String): List[Error] = {
+    if (value.matches(regexFormat)) NoValidationErrors else List(error)
   }
 }
