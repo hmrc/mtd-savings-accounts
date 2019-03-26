@@ -18,7 +18,7 @@ package v2.controllers.requestParsers.validators
 
 import v2.controllers.requestParsers.validators.validations.{MtdTaxYearValidation, NinoValidation, RegexValidation, TaxYearValidation}
 import v2.models.errors
-import v2.models.errors.{AccountIdFormatError, Error, RuleTaxYearNotSupportedError}
+import v2.models.errors.{AccountIdFormatError, MtdError, RuleTaxYearNotSupportedError}
 import v2.models.requestData.RetrieveSavingsAccountAnnualSummaryRawData
 
 class RetrieveSavingsAccountAnnualSummaryValidator extends Validator[RetrieveSavingsAccountAnnualSummaryRawData] {
@@ -27,11 +27,11 @@ class RetrieveSavingsAccountAnnualSummaryValidator extends Validator[RetrieveSav
     parameterFormatValidation,
     parameterRuleValidation)
 
-  override def validate(data: RetrieveSavingsAccountAnnualSummaryRawData): List[errors.Error] = {
+  override def validate(data: RetrieveSavingsAccountAnnualSummaryRawData): List[errors.MtdError] = {
     run(validationSet, data).distinct
   }
 
-  private def parameterFormatValidation: RetrieveSavingsAccountAnnualSummaryRawData => List[List[Error]] = { data =>
+  private def parameterFormatValidation: RetrieveSavingsAccountAnnualSummaryRawData => List[List[MtdError]] = { data =>
     val accountIdRegex = "^[A-Za-z0-9]{15}$"
     List(
       NinoValidation.validate(data.nino),
@@ -40,7 +40,7 @@ class RetrieveSavingsAccountAnnualSummaryValidator extends Validator[RetrieveSav
     )
   }
 
-  private def parameterRuleValidation: RetrieveSavingsAccountAnnualSummaryRawData => List[List[Error]] = { data =>
+  private def parameterRuleValidation: RetrieveSavingsAccountAnnualSummaryRawData => List[List[MtdError]] = { data =>
     List(
       MtdTaxYearValidation.validate(data.taxYear, RuleTaxYearNotSupportedError)
     )

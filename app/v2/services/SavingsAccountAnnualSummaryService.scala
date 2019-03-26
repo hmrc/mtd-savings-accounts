@@ -52,7 +52,7 @@ class SavingsAccountAnnualSummaryService @Inject()(connector: DesConnector) exte
       })
   }
 
-  private def desErrorToMtdErrorAmend: Map[String, Error] = Map(
+  private def desErrorToMtdErrorAmend: Map[String, MtdError] = Map(
     "INVALID_TYPE" -> DownstreamError,
     "INVALID_NINO" -> NinoFormatError,
     "INVALID_TAXYEAR" -> TaxYearFormatError,
@@ -70,7 +70,7 @@ class SavingsAccountAnnualSummaryService @Inject()(connector: DesConnector) exte
     DownstreamError
   }
 
-  private def desErrorToMtdErrorRetrieve: Map[String, Error] = Map(
+  private def desErrorToMtdErrorRetrieve: Map[String, MtdError] = Map(
     "INVALID_TYPE" -> DownstreamError,
     "INVALID_NINO" -> NinoFormatError,
     "INVALID_TAXYEAR" -> TaxYearFormatError,

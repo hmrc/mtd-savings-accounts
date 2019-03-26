@@ -17,28 +17,28 @@
 package v2.models.errors
 
 // Nino Errors
-object NinoFormatError extends Error("FORMAT_NINO", "The provided NINO is invalid")
+object NinoFormatError extends MtdError("FORMAT_NINO", "The provided NINO is invalid")
 
 // Format Errors
-object TaxYearFormatError extends Error("FORMAT_TAX_YEAR", "The provided tax year is invalid")
-object AccountIdFormatError extends Error("FORMAT_SAVINGS_ACCOUNT_ID", "The provided savings account ID is invalid")
-object AccountNameFormatError extends Error("FORMAT_ACCOUNT_NAME", "The provided account name is invalid")
-object AccountNameMissingError extends Error("MISSING_ACCOUNT_NAME", "Account name field is required")
-object TaxedInterestFormatError extends Error("FORMAT_TAXED_INTEREST", "The provided taxed interest amount is invalid")
-object UnTaxedInterestFormatError extends Error("FORMAT_UNTAXED_INTEREST", "The provided untaxed UK interest amount is invalid")
+object TaxYearFormatError extends MtdError("FORMAT_TAX_YEAR", "The provided tax year is invalid")
+object AccountIdFormatError extends MtdError("FORMAT_SAVINGS_ACCOUNT_ID", "The provided savings account ID is invalid")
+object AccountNameFormatError extends MtdError("FORMAT_ACCOUNT_NAME", "The provided account name is invalid")
+object AccountNameMissingError extends MtdError("MISSING_ACCOUNT_NAME", "Account name field is required")
+object TaxedInterestFormatError extends MtdError("FORMAT_TAXED_INTEREST", "The provided taxed interest amount is invalid")
+object UnTaxedInterestFormatError extends MtdError("FORMAT_UNTAXED_INTEREST", "The provided untaxed UK interest amount is invalid")
 
 // Rule Errors
-object RuleTaxYearNotSupportedError extends Error("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
-object AccountNameDuplicateError extends Error("RULE_DUPLICATE_ACCOUNT_NAME", "Duplicate account name given for supplied NINO")
-object MaximumSavingsAccountsLimitError extends Error("RULE_MAXIMUM_SAVINGS_ACCOUNTS_LIMIT", "The 1000 savings account limit exceeded")
-object RuleIncorrectOrEmptyBodyError extends Error("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
+object RuleTaxYearNotSupportedError extends MtdError("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
+object AccountNameDuplicateError extends MtdError("RULE_DUPLICATE_ACCOUNT_NAME", "Duplicate account name given for supplied NINO")
+object MaximumSavingsAccountsLimitError extends MtdError("RULE_MAXIMUM_SAVINGS_ACCOUNTS_LIMIT", "The 1000 savings account limit exceeded")
+object RuleIncorrectOrEmptyBodyError extends MtdError("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
 
 //Standard Errors
-object DownstreamError extends Error("INTERNAL_SERVER_ERROR", "An internal server error occurred")
-object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
-object BadRequestError extends Error("INVALID_REQUEST", "Invalid request")
-object BvrError extends Error("BUSINESS_ERROR", "Business validation error")
-object ServiceUnavailableError extends Error("SERVICE_UNAVAILABLE", "Internal server error")
+object DownstreamError extends MtdError("INTERNAL_SERVER_ERROR", "An internal server error occurred")
+object NotFoundError extends MtdError("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
+object BadRequestError extends MtdError("INVALID_REQUEST", "Invalid request")
+object BvrError extends MtdError("BUSINESS_ERROR", "Business validation error")
+object ServiceUnavailableError extends MtdError("SERVICE_UNAVAILABLE", "Internal server error")
 
 //Authorisation Errors
-object UnauthorisedError extends Error("CLIENT_OR_AGENT_NOT_AUTHORISED", "The client and/or agent is not authorised.")
+object UnauthorisedError extends MtdError("CLIENT_OR_AGENT_NOT_AUTHORISED", "The client and/or agent is not authorised.")

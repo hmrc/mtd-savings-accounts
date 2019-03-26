@@ -24,7 +24,7 @@ class RetrieveSavingsAccountValidator extends Validator[RetrieveSavingsAccountRa
 
   private val validationSet = List(parameterFormatValidation)
 
-  private def parameterFormatValidation: RetrieveSavingsAccountRawData => List[List[Error]] = (data: RetrieveSavingsAccountRawData) => {
+  private def parameterFormatValidation: RetrieveSavingsAccountRawData => List[List[MtdError]] = (data: RetrieveSavingsAccountRawData) => {
     val accountIdRegex = "^[A-Za-z0-9]{15}$"
     List(
       NinoValidation.validate(data.nino),
@@ -32,7 +32,7 @@ class RetrieveSavingsAccountValidator extends Validator[RetrieveSavingsAccountRa
     )
   }
 
-  override def validate(data: RetrieveSavingsAccountRawData): List[Error] = {
+  override def validate(data: RetrieveSavingsAccountRawData): List[MtdError] = {
     run(validationSet, data).distinct
   }
 

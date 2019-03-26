@@ -34,11 +34,11 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
   val accountName = "Main account name"
   val duplicateAccountName = "Main account name dupe"
 
-  val maxAccountsReachedError = Error("MAX_ACCOUNTS_REACHED", "doesn't matter")
-  val alreadyExistsError = Error("ALREADY_EXISTS", "doesn't matter")
-  val serviceUnavailableError = Error("SERVICE_UNAVAILABLE", "doesn't matter")
-  val ninoFormatError = Error("INVALID_IDVALUE", "doesn't matter")
-  val matchingResourceNotFoundError = Error("NOT_FOUND", "doesn't matter")
+  val maxAccountsReachedError = MtdError("MAX_ACCOUNTS_REACHED", "doesn't matter")
+  val alreadyExistsError = MtdError("ALREADY_EXISTS", "doesn't matter")
+  val serviceUnavailableError = MtdError("SERVICE_UNAVAILABLE", "doesn't matter")
+  val ninoFormatError = MtdError("INVALID_IDVALUE", "doesn't matter")
+  val matchingResourceNotFoundError = MtdError("NOT_FOUND", "doesn't matter")
 
   trait Test extends MockDesConnector {
     lazy val service = new SavingsAccountsService(connector)
@@ -68,7 +68,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
 
     "the connector returns an outbound error" should {
       "return that outbound error as-is" in new Test {
-        val fakeError = Error("doesn't matter", "really doesn't matter")
+        val fakeError = MtdError("doesn't matter", "really doesn't matter")
         val desResponse = DesResponse(correlationId, OutboundError(fakeError))
         val expected = DesResponse(correlationId, OutboundError(fakeError))
         MockedDesConnector.create(invalidRequest).returns(Future.successful(Left(desResponse)))
@@ -100,7 +100,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
         s"DES returns a $k error" should {
           s"return a ${v.code} error" in new Test {
             val input = CreateSavingsAccountRequestData(Nino(nino), CreateSavingsAccountRequest("doesn't matter"))
-            val desResponse = DesResponse(correlationId, SingleError(Error(k, "doesn't matter")))
+            val desResponse = DesResponse(correlationId, SingleError(MtdError(k, "doesn't matter")))
             val expected = ErrorWrapper(Some(correlationId), v, None)
             MockedDesConnector.create(input).returns(Future.successful(Left(desResponse)))
             val result = await(service.create(input))
@@ -135,7 +135,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
 
     "the connector returns an outbound error" should {
       "return that outbound error as-is" in new Test {
-        val fakeError = Error("doesn't matter", "really doesn't matter")
+        val fakeError = MtdError("doesn't matter", "really doesn't matter")
         val desResponse = DesResponse(correlationId, OutboundError(fakeError))
         val expected = DesResponse(correlationId, OutboundError(fakeError))
         MockedDesConnector.retrieveAll(invalidRequest).returns(Future.successful(Left(desResponse)))
@@ -169,7 +169,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
         s"DES returns a $k error" should {
           s"return a ${v.code} error" in new Test {
             val input = RetrieveAllSavingsAccountRequest(Nino(ninoForInvalidCases))
-            val desResponse = DesResponse(correlationId, SingleError(Error(k, "doesn't matter")))
+            val desResponse = DesResponse(correlationId, SingleError(MtdError(k, "doesn't matter")))
             val expected = ErrorWrapper(Some(correlationId), v, None)
             MockedDesConnector.retrieveAll(input).returns(Future.successful(Left(desResponse)))
             val result = await(service.retrieveAll(input))
@@ -221,7 +221,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
 
     "the connector returns an outbound error" should {
       "return that outbound error as-is" in new Test {
-        val fakeError = Error("doesn't matter", "really doesn't matter")
+        val fakeError = MtdError("doesn't matter", "really doesn't matter")
         val desResponse = DesResponse(correlationId, OutboundError(fakeError))
         MockedDesConnector.retrieve(invalidRequest).returns(Future.successful(Left(desResponse)))
         val result: RetrieveSavingsAccountsOutcome = await(service.retrieve(invalidRequest))
@@ -254,7 +254,7 @@ class SavingsAccountsServiceSpec extends ServiceSpec {
         s"DES returns a $k error" should {
           s"return a ${v.code} error" in new Test {
             val input = RetrieveSavingsAccountRequest(Nino(ninoForInvalidCases), incomeSourceId)
-            val desResponse = DesResponse(correlationId, SingleError(Error(k, "doesn't matter")))
+            val desResponse = DesResponse(correlationId, SingleError(MtdError(k, "doesn't matter")))
             val expected = ErrorWrapper(Some(correlationId), v, None)
             MockedDesConnector.retrieve(input).returns(Future.successful(Left(desResponse)))
             val result = await(service.retrieve(input))

@@ -44,7 +44,7 @@ class CreateSavingsAccountValidatorSpec extends UnitSpec {
       "the uri is valid and the JSON payload is Valid with all fields" in new Test {
         val inputData = CreateSavingsAccountRawData(validNino, validJsonBody)
 
-        val result: Seq[Error] = validator.validate(inputData)
+        val result: Seq[MtdError] = validator.validate(inputData)
 
         result shouldBe List()
 

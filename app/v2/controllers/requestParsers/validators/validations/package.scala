@@ -18,6 +18,6 @@ package v2.controllers.requestParsers.validators
 
 package object validations {
 
-  val NoValidationErrors = List()
+  val noValidationErrors = List()
 
 }
