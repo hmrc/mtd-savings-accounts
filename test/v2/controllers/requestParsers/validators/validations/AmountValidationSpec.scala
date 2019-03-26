@@ -17,12 +17,12 @@
 package v2.controllers.requestParsers.validators.validations
 
 import support.UnitSpec
-import v2.models.errors.{MtdError, TaxedInterestFormatError, UnTaxedInterestFormatError}
+import v2.models.errors.{Error, TaxedInterestFormatError, UnTaxedInterestFormatError}
 import v2.models.utils.JsonErrorValidators
 
 class AmountValidationSpec extends UnitSpec with JsonErrorValidators {
 
-  val dummyError = MtdError("DUMMY_ERROR", "For testing only")
+  val dummyError = Error("DUMMY_ERROR", "For testing only")
 
   "validate" should {
     "return no errors" when {

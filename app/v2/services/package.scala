@@ -19,12 +19,12 @@ package v2
 import v2.models.auth.UserDetails
 import v2.models.des.DesAmendSavingsAccountAnnualSummaryResponse
 import v2.models.domain._
-import v2.models.errors.{MtdError, ErrorWrapper}
+import v2.models.errors.{Error, ErrorWrapper}
 import v2.models.outcomes.DesResponse
 
 package object services {
 
-  type AuthOutcome = Either[MtdError, UserDetails]
+  type AuthOutcome = Either[Error, UserDetails]
 
   type CreateSavingsAccountOutcome = Either[ErrorWrapper, DesResponse[CreateSavingsAccountResponse]]
   type RetrieveAllSavingsAccountsOutcome = Either[ErrorWrapper, DesResponse[List[RetrieveAllSavingsAccountResponse]]]

@@ -24,7 +24,7 @@ import v2.models.requestData.AmendSavingsAccountAnnualSummaryRawData
 
 class AmendSavingsAccountAnnualSummaryValidator extends Validator[AmendSavingsAccountAnnualSummaryRawData] {
 
-  private def parameterFormatValidation: AmendSavingsAccountAnnualSummaryRawData => List[List[MtdError]] = { data =>
+  private def parameterFormatValidation: AmendSavingsAccountAnnualSummaryRawData => List[List[Error]] = { data =>
     val accountIdRegex = "^[A-Za-z0-9]{15}$"
     List(
       NinoValidation.validate(data.nino),
@@ -33,20 +33,20 @@ class AmendSavingsAccountAnnualSummaryValidator extends Validator[AmendSavingsAc
     )
   }
 
-  private def parameterRuleValidation: AmendSavingsAccountAnnualSummaryRawData => List[List[MtdError]] = { data =>
+  private def parameterRuleValidation: AmendSavingsAccountAnnualSummaryRawData => List[List[Error]] = { data =>
     List(
       MtdTaxYearValidation.validate(data.taxYear, RuleTaxYearNotSupportedError)
     )
   }
 
-  private def bodyFormatValidator: AmendSavingsAccountAnnualSummaryRawData => List[List[MtdError]] = { data =>
+  private def bodyFormatValidator: AmendSavingsAccountAnnualSummaryRawData => List[List[Error]] = { data =>
     List(
       JsonFormatValidation.validate[SavingsAccountAnnualSummary](data.body, RuleIncorrectOrEmptyBodyError)
     )
   }
 
 
-  private def bodyRuleValidator: AmendSavingsAccountAnnualSummaryRawData => List[List[MtdError]] = { data =>
+  private def bodyRuleValidator: AmendSavingsAccountAnnualSummaryRawData => List[List[Error]] = { data =>
     val body = data.body.json.as[SavingsAccountAnnualSummary]
 
     List(
@@ -54,7 +54,7 @@ class AmendSavingsAccountAnnualSummaryValidator extends Validator[AmendSavingsAc
     )
   }
 
-  private def bodyFieldsValidator: AmendSavingsAccountAnnualSummaryRawData => List[List[MtdError]] = { data =>
+  private def bodyFieldsValidator: AmendSavingsAccountAnnualSummaryRawData => List[List[Error]] = { data =>
 
     val body = data.body.json.as[SavingsAccountAnnualSummary]
 
@@ -71,7 +71,7 @@ class AmendSavingsAccountAnnualSummaryValidator extends Validator[AmendSavingsAc
     bodyRuleValidator,
     bodyFieldsValidator)
 
-  override def validate(data: AmendSavingsAccountAnnualSummaryRawData): List[errors.MtdError] = {
+  override def validate(data: AmendSavingsAccountAnnualSummaryRawData): List[errors.Error] = {
     run(validationSet, data).distinct
   }
 }

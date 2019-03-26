@@ -18,14 +18,14 @@ package v2.controllers.requestParsers.validators.validations
 
 import play.api.libs.json._
 import play.api.mvc.AnyContentAsJson
-import v2.models.errors.{AccountNameMissingError, MtdError}
+import v2.models.errors.{AccountNameMissingError, Error}
 
 object JsonFormatValidation {
 
-  def validate[A](data: AnyContentAsJson, error: MtdError)(implicit reads: Reads[A]): List[MtdError] = {
+  def validate[A](data: AnyContentAsJson, error: Error)(implicit reads: Reads[A]): List[Error] = {
 
     data.json.validate[A] match {
-      case JsSuccess(_, _) => noValidationErrors
+      case JsSuccess(_, _) => NoValidationErrors
       case _               => List(error)
     }
 
