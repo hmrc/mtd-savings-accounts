@@ -16,4 +16,4 @@
 
 package v2.models.requestData
 
-case class RetrieveSavingsAccountAnnualSummaryRawData(nino: String, taxYear: String, savingsAccountId: String) extends InputData
+case class RetrieveSavingsAccountAnnualSummaryRawData(nino: String, taxYear: String, savingsAccountId: String) extends RawData
