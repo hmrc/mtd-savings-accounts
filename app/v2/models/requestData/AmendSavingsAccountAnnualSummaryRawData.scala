@@ -19,4 +19,4 @@ package v2.models.requestData
 import play.api.mvc.AnyContentAsJson
 
 case class AmendSavingsAccountAnnualSummaryRawData(nino: String, taxYear: String, savingsAccountId: String,
-                                                   body: AnyContentAsJson) extends InputData
+                                                   body: AnyContentAsJson) extends RawData

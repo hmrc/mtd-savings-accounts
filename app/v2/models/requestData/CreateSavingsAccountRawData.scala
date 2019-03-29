@@ -18,4 +18,4 @@ package v2.models.requestData
 
 import play.api.mvc.AnyContentAsJson
 
-case class CreateSavingsAccountRawData(nino: String, body: AnyContentAsJson) extends InputData
+case class CreateSavingsAccountRawData(nino: String, body: AnyContentAsJson) extends RawData
