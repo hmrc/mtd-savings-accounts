@@ -124,7 +124,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     s"incorrect body is supplied" in new CreateTest {
       val requestBody: JsValue = Json.parse(
         s"""{
-           | "accountName": "1*"
+           | "accountName": "1!"
            |}""".stripMargin
       )
 
