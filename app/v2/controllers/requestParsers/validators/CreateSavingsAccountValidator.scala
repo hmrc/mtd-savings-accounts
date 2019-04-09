@@ -40,7 +40,7 @@ class CreateSavingsAccountValidator extends Validator[CreateSavingsAccountRawDat
   private def bodyFieldsFormatValidation: CreateSavingsAccountRawData => List[List[Error]] = (data: CreateSavingsAccountRawData) => {
 
     val createSavingsAccount = data.body.json.as[CreateSavingsAccountRequest]
-    val accountNameRegex = "^[^\\*\\<\\>\\[\\]\\{\\}\\/\\:\\;\\?\\#\\`\\\"\\'\\%\\^\\~\\|\\$\\¬\\\\]{1,32}$"
+    val accountNameRegex = "^[A-Za-z0-9 &'\\(\\)\\*,\\-\\./@£]{1,32}$"
     List(
       RegexValidation.validate(AccountNameFormatError, createSavingsAccount.accountName, accountNameRegex)
     )
