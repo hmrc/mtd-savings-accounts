@@ -41,7 +41,7 @@ class AmendSavingsAccountAnnualSummaryValidator extends Validator[AmendSavingsAc
 
   private def bodyFormatValidator: AmendSavingsAccountAnnualSummaryRawData => List[List[Error]] = { data =>
     List(
-      JsonFormatValidation.validate[SavingsAccountAnnualSummary](data.body, RuleIncorrectOrEmptyBodyError)
+      JsonFormatValidation.validate[SavingsAccountAnnualSummary](data.body)
     )
   }
 

@@ -19,6 +19,7 @@ package v2.controllers.requestParsers.validators
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
+import v2.controllers.requestParsers.validators.validations.JsonFormatValidation
 import v2.models.errors._
 import v2.models.requestData.CreateSavingsAccountRawData
 
@@ -66,7 +67,7 @@ class CreateSavingsAccountValidatorSpec extends UnitSpec {
     "return bad request error" when {
       "empty body is supplied" in {
         val nino = "AA123456A"
-        val expectedData = List(AccountNameMissingError)
+        val expectedData = List(Error(JsonFormatValidation.JSON_FIELD_MISSING, "/accountName is missing"))
         val emptyJson =
           """
             |{

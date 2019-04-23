@@ -20,9 +20,10 @@ import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
 import uk.gov.hmrc.domain.Nino
+import v2.controllers.requestParsers.validators.validations.JsonFormatValidation
 import v2.mocks.validators.MockCreateSavingsAccountValidator
 import v2.models.domain.CreateSavingsAccountRequest
-import v2.models.errors.{AccountNameDuplicateError, BadRequestError, ErrorWrapper, NinoFormatError}
+import v2.models.errors._
 import v2.models.requestData.{CreateSavingsAccountRawData, CreateSavingsAccountRequestData}
 
 class CreateSavingsAccountRequestDataParserSpec extends UnitSpec {
@@ -94,6 +95,20 @@ class CreateSavingsAccountRequestDataParserSpec extends UnitSpec {
 
         parser.parseRequest(createSavingsAccountRequestData) shouldBe Left(multipleErrorWrapper)
       }
+
+      "return a JSON validation error" when {
+        "the supplied JSON fails validation" in new Test {
+          val createSavingsAccountRawData = CreateSavingsAccountRawData(validNino, validJsonBody)
+          private val expectedError = Error(JsonFormatValidation.JSON_NUMBER_EXPECTED, "/fieldName should be a valid JSON number")
+
+          MockedCreateSavingsAccountValidator.validate(createSavingsAccountRawData)
+            .returns(List(expectedError))
+          private val result = parser.parseRequest(createSavingsAccountRawData)
+
+          result shouldBe Left(ErrorWrapper(None, BadRequestError, Some(List(expectedError))))
+        }
+      }
+
     }
 
   }

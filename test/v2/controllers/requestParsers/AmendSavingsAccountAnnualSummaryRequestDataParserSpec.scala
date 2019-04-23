@@ -20,13 +20,14 @@ import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
 import uk.gov.hmrc.domain.Nino
+import v2.controllers.requestParsers.validators.validations.JsonFormatValidation
 import v2.mocks.validators.MockAmendSavingsAccountAnnualSummaryValidator
 import v2.models.domain.SavingsAccountAnnualSummary
-import v2.models.errors.{AccountNameDuplicateError, BadRequestError, ErrorWrapper, NinoFormatError}
+import v2.models.errors._
 import v2.models.requestData.{AmendSavingsAccountAnnualSummaryRawData, AmendSavingsAccountAnnualSummaryRequest, DesTaxYear}
 
 class AmendSavingsAccountAnnualSummaryRequestDataParserSpec
-  extends UnitSpec  {
+  extends UnitSpec {
 
   val nino = "AA123456A"
   val taxYear = "2018-19"
@@ -80,6 +81,21 @@ class AmendSavingsAccountAnnualSummaryRequestDataParserSpec
 
         parser.parseRequest(requestData) shouldBe Left(
           ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, AccountNameDuplicateError))))
+      }
+
+
+      "return a JSON validation error" when {
+        "the supplied JSON fails validation" in new Test {
+
+          private val expectedError = Error(JsonFormatValidation.JSON_NUMBER_EXPECTED, "/fieldName should be a valid JSON number")
+
+          MockAmendSavingsAccountAnnualSummaryValidator.validate(requestData)
+            .returns(List(expectedError))
+
+          private val result = parser.parseRequest(requestData)
+
+          result shouldBe Left(ErrorWrapper(None, BadRequestError, Some(List(expectedError))))
+        }
       }
     }
 

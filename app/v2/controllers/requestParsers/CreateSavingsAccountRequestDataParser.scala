@@ -27,9 +27,8 @@ class CreateSavingsAccountRequestDataParser @Inject()(validator: CreateSavingsAc
 
   def parseRequest(data: CreateSavingsAccountRawData): Either[ErrorWrapper, CreateSavingsAccountRequestData] = {
     validator.validate(data) match {
-      case List() =>
-        //Validation passed.  Request data is ok to transform.
-        Right(CreateSavingsAccountRequestData(Nino(data.nino), data.body.json.as[CreateSavingsAccountRequest]))
+      case Nil => Right(CreateSavingsAccountRequestData(Nino(data.nino), data.body.json.as[CreateSavingsAccountRequest]))
+      case err :: Nil if err.code.startsWith("JSON") => Left(ErrorWrapper(None, BadRequestError, Some(List(err))))
       case err :: Nil => Left(ErrorWrapper(None, err, None))
       case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }

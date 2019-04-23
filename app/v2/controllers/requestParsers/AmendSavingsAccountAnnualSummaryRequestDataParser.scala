@@ -31,14 +31,17 @@ class AmendSavingsAccountAnnualSummaryRequestDataParser @Inject()(validator: Ame
     validator.validate(data) match {
       case Nil =>
         //Validation passed.  Request data is ok to transform.
-        Right(AmendSavingsAccountAnnualSummaryRequest(
-          nino = Nino(data.nino),
-          desTaxYear = DesTaxYear.fromMtd(data.taxYear),
-          savingsAccountId = data.savingsAccountId,
-          data.body.json.as[SavingsAccountAnnualSummary]))
-
+        Right(
+          AmendSavingsAccountAnnualSummaryRequest(
+            nino = Nino(data.nino),
+            desTaxYear = DesTaxYear.fromMtd(data.taxYear),
+            savingsAccountId = data.savingsAccountId,
+            data.body.json.as[SavingsAccountAnnualSummary]
+          )
+        )
+      case err :: Nil if err.code.startsWith("JSON") => Left(ErrorWrapper(None, BadRequestError, Some(List(err))))
       case err :: Nil => Left(ErrorWrapper(None, err, None))
-      case errs       => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
+      case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }
   }
 }

@@ -21,6 +21,7 @@ import play.api.http.Status
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
+import v2.controllers.requestParsers.validators.validations.JsonFormatValidation
 import v2.fixtures.Fixtures.SavingsAccountsFixture
 import v2.models.errors._
 import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
@@ -140,11 +141,8 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
     }
 
     s"empty body is supplied" in new CreateTest {
-      val requestBody: JsValue = Json.parse(
-        s"""{
-           |
-           |}""".stripMargin
-      )
+      val requestBody: JsValue = Json.parse("{}")
+      val expectedError = Error(JsonFormatValidation.JSON_FIELD_MISSING, "/accountName is missing")
 
       override def setupStubs(): StubMapping = {
         AuditStub.audit()
@@ -154,7 +152,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
       val response: WSResponse = await(request().post(requestBody))
       response.status shouldBe Status.BAD_REQUEST
-      response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameMissingError, None))
+      response.json shouldBe Json.toJson(ErrorWrapper(None, BadRequestError, Some(List(expectedError))))
     }
   }
 
