@@ -29,6 +29,7 @@ object UnTaxedInterestFormatError extends Error("FORMAT_UNTAXED_INTEREST", "The 
 
 // Rule Errors
 object RuleTaxYearNotSupportedError extends Error("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
+object RuleTaxYearRangeExceededError extends Error("RULE_TAX_YEAR_RANGE_EXCEEDED", "Tax year range exceeded. A tax year range of one year is required.")
 object AccountNameDuplicateError extends Error("RULE_DUPLICATE_ACCOUNT_NAME", "Duplicate account name given for supplied NINO")
 object MaximumSavingsAccountsLimitError extends Error("RULE_MAXIMUM_SAVINGS_ACCOUNTS_LIMIT", "The 1000 savings account limit exceeded")
 object RuleIncorrectOrEmptyBodyError extends Error("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
