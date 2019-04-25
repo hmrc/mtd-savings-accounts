@@ -117,6 +117,7 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
            | AccountIdFormatError
            | TaxYearFormatError
            | RuleTaxYearNotSupportedError
+           | RuleTaxYearRangeExceededError
            | TaxedInterestFormatError
            | UnTaxedInterestFormatError
            | RuleIncorrectOrEmptyBodyError => BadRequest(Json.toJson(errorWrapper))
