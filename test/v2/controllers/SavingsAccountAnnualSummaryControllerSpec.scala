@@ -136,8 +136,7 @@ class SavingsAccountAnnualSummaryControllerSpec
       val badRequestErrorsFromService = List(
         NinoFormatError,
         BadRequestError,
-        TaxYearFormatError,
-        RuleTaxYearNotSupportedError
+        TaxYearFormatError
       )
 
       badRequestErrorsFromParser.foreach(errorsFromAmendParserTester(_, BAD_REQUEST))
@@ -251,6 +250,7 @@ class SavingsAccountAnnualSummaryControllerSpec
         NinoFormatError,
         TaxYearFormatError,
         RuleTaxYearNotSupportedError,
+        RuleTaxYearRangeExceededError,
         AccountIdFormatError
       )
 
