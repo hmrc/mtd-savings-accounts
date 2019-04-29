@@ -126,6 +126,7 @@ class SavingsAccountAnnualSummaryControllerSpec
         NinoFormatError,
         TaxYearFormatError,
         RuleTaxYearNotSupportedError,
+        RuleTaxYearRangeExceededError,
         TaxedInterestFormatError,
         UnTaxedInterestFormatError,
         AccountIdFormatError,
@@ -250,6 +251,7 @@ class SavingsAccountAnnualSummaryControllerSpec
         NinoFormatError,
         TaxYearFormatError,
         RuleTaxYearNotSupportedError,
+        RuleTaxYearRangeExceededError,
         AccountIdFormatError
       )
 
