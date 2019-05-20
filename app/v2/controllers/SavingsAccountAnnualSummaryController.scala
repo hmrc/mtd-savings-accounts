@@ -31,7 +31,6 @@ import v2.models.errors._
 import v2.models.requestData._
 import v2.services.{AuditService, EnrolmentsAuthService, MtdIdLookupService, SavingsAccountAnnualSummaryService}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -42,7 +41,7 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
                                                       savingsAccountAnnualSummaryService: SavingsAccountAnnualSummaryService,
                                                       auditService: AuditService,
                                                       val cc: ControllerComponents
-                                                     ) extends AuthorisedController(cc) {
+                                                     ) (implicit ec: ExecutionContext) extends AuthorisedController(cc) {
 
   val logger: Logger = Logger(this.getClass)
 

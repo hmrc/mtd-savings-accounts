@@ -25,14 +25,13 @@ import play.api.mvc.{Action, AnyContent, AnyContentAsJson, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import v2.controllers.requestParsers._
-import v2.models.audit.{AuditError, AuditEvent, CreateSavingsAccountAuditResponse, CreateSavingsAccountAuditDetail}
+import v2.models.audit.{AuditError, AuditEvent, CreateSavingsAccountAuditDetail, CreateSavingsAccountAuditResponse}
 import v2.models.auth.UserDetails
 import v2.models.domain.{RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
 import v2.models.errors._
 import v2.models.requestData._
 import v2.services.{AuditService, EnrolmentsAuthService, MtdIdLookupService, SavingsAccountsService}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -44,7 +43,7 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
                                           savingsAccountService: SavingsAccountsService,
                                           auditService: AuditService,
                                           val cc: ControllerComponents
-                                         ) extends AuthorisedController(cc) {
+                                         )(implicit ec: ExecutionContext) extends AuthorisedController(cc) {
 
   val logger: Logger = Logger(this.getClass)
 
