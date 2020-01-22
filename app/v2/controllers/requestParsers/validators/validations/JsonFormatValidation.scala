@@ -18,7 +18,7 @@ package v2.controllers.requestParsers.validators.validations
 
 import play.api.libs.json._
 import play.api.mvc.AnyContentAsJson
-import v2.models.errors.{AccountNameMissingError, Error}
+import v2.models.errors.Error
 
 object JsonFormatValidation {
 
