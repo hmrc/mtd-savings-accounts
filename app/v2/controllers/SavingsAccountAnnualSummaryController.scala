@@ -110,7 +110,7 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
   }
 
   private def processError(errorWrapper: ErrorWrapper) = {
-    errorWrapper.error match {
+    (errorWrapper.error: @unchecked) match {
       case BadRequestError
            | NinoFormatError
            | AccountIdFormatError
