@@ -19,7 +19,7 @@ package v2.controllers.requestParsers.validators.validations
 import play.api.libs.json.{Json, Reads}
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
-import v2.models.errors.{AccountNameMissingError, Error}
+import v2.models.errors.Error
 import v2.models.utils.JsonErrorValidators
 
 class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
