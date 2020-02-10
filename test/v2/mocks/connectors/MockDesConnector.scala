@@ -21,7 +21,6 @@ import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors._
 import v2.models.requestData._
-import v2.services.AmendSavingsAccountAnnualSummaryOutcome
 
 import scala.concurrent.{ExecutionContext, Future}
 
