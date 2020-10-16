@@ -54,7 +54,7 @@ class StandardDesHttpParserSpec extends UnitSpec  {
     "the HTTP response status is 200" should {
       "return a Right DES response containing the model object if the response json corresponds to a model object" in {
 
-        val httpResponse = HttpResponse(OK, Some(desExpectedJson), Map("CorrelationId" -> Seq(correlationId)))
+        val httpResponse = HttpResponse(OK, desExpectedJson.toString(), Map("CorrelationId" -> Seq(correlationId)))
 
         val result = httpReads.read(method, url, httpResponse)
         result shouldBe Right(desResponse)
@@ -63,7 +63,7 @@ class StandardDesHttpParserSpec extends UnitSpec  {
       "return an outbound error if a model object cannot be read from the response json" in {
 
         val badFieldTypeJson: JsValue = Json.obj("incomeSourceId" -> 1234, "incomeSourceName" -> 1234)
-        val httpResponse = HttpResponse(OK, Some(badFieldTypeJson), Map("CorrelationId" -> Seq(correlationId)))
+        val httpResponse = HttpResponse(OK, badFieldTypeJson.toString(), Map("CorrelationId" -> Seq(correlationId)))
         val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
         val result = httpReads.read(method, url, httpResponse)
@@ -85,7 +85,7 @@ class StandardDesHttpParserSpec extends UnitSpec  {
               """.stripMargin)
             val expected = DesResponse(correlationId, SingleError(Error("TEST_CODE", "some reason")))
 
-            val httpResponse = HttpResponse(response, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+            val httpResponse = HttpResponse(response, errorResponseJson.toString(), Map("CorrelationId" -> Seq(correlationId)))
             val result = httpReads.read(method, url, httpResponse)
             result shouldBe Left(expected)
           }
@@ -108,7 +108,7 @@ class StandardDesHttpParserSpec extends UnitSpec  {
               """.stripMargin)
             val expected = DesResponse(correlationId, MultipleErrors(Seq(Error("TEST_CODE_1", "some reason"), Error("TEST_CODE_2", "some reason"))))
 
-            val httpResponse = HttpResponse(response, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+            val httpResponse = HttpResponse(response, errorResponseJson.toString(), Map("CorrelationId" -> Seq(correlationId)))
             val result = httpReads.read(method, url, httpResponse)
             result shouldBe Left(expected)
           }
@@ -123,7 +123,7 @@ class StandardDesHttpParserSpec extends UnitSpec  {
               """.stripMargin)
             val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
-            val httpResponse = HttpResponse(response, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+            val httpResponse = HttpResponse(response, errorResponseJson.toString(), Map("CorrelationId" -> Seq(correlationId)))
             val result = httpReads.read(method, url, httpResponse)
             result shouldBe Left(expected)
           }
@@ -143,7 +143,7 @@ class StandardDesHttpParserSpec extends UnitSpec  {
               """.stripMargin)
             val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
-            val httpResponse = HttpResponse(response, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+            val httpResponse = HttpResponse(response, errorResponseJson.toString(), Map("CorrelationId" -> Seq(correlationId)))
             val result = httpReads.read(method, url, httpResponse)
             result shouldBe Left(expected)
           }
@@ -158,7 +158,7 @@ class StandardDesHttpParserSpec extends UnitSpec  {
               """.stripMargin)
             val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
-            val httpResponse = HttpResponse(response, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+            val httpResponse = HttpResponse(response, errorResponseJson.toString(), Map("CorrelationId" -> Seq(correlationId)))
             val result = httpReads.read(method, url, httpResponse)
             result shouldBe Left(expected)
           }
@@ -179,7 +179,7 @@ class StandardDesHttpParserSpec extends UnitSpec  {
           """.stripMargin)
         val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
-        val httpResponse = HttpResponse(status, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+        val httpResponse = HttpResponse(status, errorResponseJson.toString(), Map("CorrelationId" -> Seq(correlationId)))
         val result = httpReads.read(method, url, httpResponse)
         result shouldBe Left(expected)
       }
@@ -194,7 +194,7 @@ class StandardDesHttpParserSpec extends UnitSpec  {
           """.stripMargin)
         val expected = DesResponse(correlationId, OutboundError(DownstreamError))
 
-        val httpResponse = HttpResponse(status, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+        val httpResponse = HttpResponse(status, errorResponseJson.toString(), Map("CorrelationId" -> Seq(correlationId)))
         val result = httpReads.read(method, url, httpResponse)
         result shouldBe Left(expected)
       }
