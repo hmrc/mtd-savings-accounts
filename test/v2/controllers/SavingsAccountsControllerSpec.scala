@@ -20,10 +20,11 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
+import v1.mocks.MockIdGenerator
 import v2.fixtures.Fixtures._
 import v2.mocks.requestParsers._
 import v2.mocks.services.{MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountsService}
-import v2.models.audit.{AuditError, AuditEvent, CreateSavingsAccountAuditResponse, CreateSavingsAccountAuditDetail}
+import v2.models.audit.{AuditError, AuditEvent, CreateSavingsAccountAuditDetail, CreateSavingsAccountAuditResponse}
 import v2.models.domain._
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
@@ -39,6 +40,7 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
   with MockRetrieveAllSavingsAccountRequestDataParser
   with MockRetrieveSavingsAccountRequestDataParser
   with MockSavingsAccountsService
+  with MockIdGenerator
   with MockAuditService {
 
   trait Test {
@@ -53,9 +55,11 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
       retrieveSavingsAccountRequestDataParser = mockRetrieveSavingsAccountRequestDataParser,
       savingsAccountService = mockSavingsAccountService,
       auditService = mockAuditService,
+      idGenerator = mockIdGenerator,
       cc = cc
     )
 
+    MockIdGenerator.getCorrelationId.returns(correlationId)
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
     MockedEnrolmentsAuthService.authoriseUser()
   }
@@ -79,6 +83,8 @@ class SavingsAccountsControllerSpec extends ControllerBaseSpec
 
         MockSavingsAccountService.create(createSavingsAccountRequest)
           .returns(Future.successful(Right(DesResponse(correlationId, CreateSavingsAccountResponse(id)))))
+
+        MockIdGenerator.getCorrelationId.returns(correlationId)
 
         val result = controller.create(nino)(fakePostRequest(SavingsAccountsFixture.createJson))
         status(result) shouldBe CREATED

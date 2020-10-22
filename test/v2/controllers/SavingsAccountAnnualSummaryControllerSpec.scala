@@ -21,6 +21,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
+import v1.mocks.MockIdGenerator
 import v2.fixtures.Fixtures._
 import v2.mocks.requestParsers._
 import v2.mocks.services.{MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountAnnualSummaryService}
@@ -42,6 +43,7 @@ class SavingsAccountAnnualSummaryControllerSpec
     with MockRetrieveSavingsAccountAnnualSummaryRequestDataParser
     with MockSavingsAccountAnnualSummaryService
     with MockAuditService
+    with MockIdGenerator
     with OneInstancePerTest {
 
   trait Test {
@@ -55,9 +57,11 @@ class SavingsAccountAnnualSummaryControllerSpec
       retrieveSavingsAccountAnnualSummaryRequestDataParser = mockRetrieveSavingsAnnualSummaryRequestDataParser,
       savingsAccountAnnualSummaryService = mockSavingsAccountAnnualSummaryService,
       auditService = mockAuditService,
+      idGenerator = mockIdGenerator,
       cc = cc
     )
 
+    MockIdGenerator.getCorrelationId.returns(correlationId)
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
     MockedEnrolmentsAuthService.authoriseUser()
   }

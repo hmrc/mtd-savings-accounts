@@ -31,6 +31,7 @@ import v2.models.domain.{RetrieveAllSavingsAccountResponse, RetrieveSavingsAccou
 import v2.models.errors._
 import v2.models.requestData._
 import v2.services.{AuditService, EnrolmentsAuthService, MtdIdLookupService, SavingsAccountsService}
+import v2.utils.IdGenerator
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,14 +43,17 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
                                           retrieveSavingsAccountRequestDataParser: RetrieveSavingsAccountRequestDataParser,
                                           savingsAccountService: SavingsAccountsService,
                                           auditService: AuditService,
+                                          idGenerator: IdGenerator,
                                           val cc: ControllerComponents
                                          )(implicit ec: ExecutionContext) extends AuthorisedController(cc) {
 
   val logger: Logger = Logger(this.getClass)
 
+  val correlationId = idGenerator.getCorrelationId
+
   def create(nino: String): Action[JsValue] = authorisedAction(nino).async(parse.json) { implicit request =>
     createSavingsAccountRequestDataParser.parseRequest(CreateSavingsAccountRawData(nino, AnyContentAsJson(request.body))) match {
-      case Right(createSavingsAccountRequest) => savingsAccountService.create(createSavingsAccountRequest).map {
+      case Right(createSavingsAccountRequest) => savingsAccountService.create(createSavingsAccountRequest)(addCorrelationId(correlationId), ec).map {
         case Right(desResponse) =>
           auditSubmission(createAuditDetails(nino, CREATED, request.request.body, desResponse.correlationId,
             request.userDetails, Some(desResponse.responseData.incomeSourceId)))
@@ -57,16 +61,16 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
           Created(Json.toJson(desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId,
             "Location" -> s"/self-assessment/ni/$nino/savings-accounts/${desResponse.responseData.incomeSourceId}")
         case Left(errorWrapper) =>
-          val correlationId = getCorrelationId(errorWrapper)
-          val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-          auditSubmission(createAuditDetails(nino, result.header.status, request.request.body, correlationId,
+          val returnedCorrelationId = errorWrapper.correlationId.getOrElse(correlationId)
+          val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> returnedCorrelationId)
+          auditSubmission(createAuditDetails(nino, result.header.status, request.request.body, returnedCorrelationId,
             request.userDetails, None, Some(errorWrapper)))
           result
       }
       case Left(errorWrapper) =>
-        val correlationId = getCorrelationId(errorWrapper)
-        val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-        auditSubmission(createAuditDetails(nino, result.header.status, request.request.body, correlationId,
+        val returnedCorrelationId = errorWrapper.correlationId.getOrElse(correlationId)
+        val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> returnedCorrelationId)
+        auditSubmission(createAuditDetails(nino, result.header.status, request.request.body, returnedCorrelationId,
           request.userDetails, None, Some(errorWrapper)))
         Future.successful(result)
     }
@@ -74,30 +78,30 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
 
   def retrieveAll(nino: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
     retrieveAllSavingsAccountRequestDataParser.parseRequest(RetrieveAllSavingsAccountRawData(nino)) match {
-      case Right(retrieveSavingsAccountRequest) => savingsAccountService.retrieveAll(retrieveSavingsAccountRequest).map {
+      case Right(retrieveSavingsAccountRequest) => savingsAccountService.retrieveAll(retrieveSavingsAccountRequest)(addCorrelationId(correlationId), ec).map {
         case Right(desResponse) =>
           logger.info(s"[SavingsAccountsController][retrieveAll] - Success response received with CorrelationId: ${desResponse.correlationId}")
           Ok(RetrieveAllSavingsAccountResponse.writesList.writes(desResponse.responseData))
             .withHeaders("X-CorrelationId" -> desResponse.correlationId)
-        case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
+        case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId.getOrElse(correlationId))
       }
       case Left(errorWrapper) => Future.successful(
-        processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
+        processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId.getOrElse(correlationId))
       )
     }
   }
 
   def retrieve(nino: String, accountId: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
     retrieveSavingsAccountRequestDataParser.parseRequest(RetrieveSavingsAccountRawData(nino, accountId)) match {
-      case Right(retrieveSavingsAccountRequest) => savingsAccountService.retrieve(retrieveSavingsAccountRequest).map {
+      case Right(retrieveSavingsAccountRequest) => savingsAccountService.retrieve(retrieveSavingsAccountRequest)(addCorrelationId(correlationId), ec).map {
         case Right(desResponse) =>
           logger.info(s"[SavingsAccountsController][retrieve] - Success response received with CorrelationId: ${desResponse.correlationId}")
           Ok(RetrieveSavingsAccountResponse.vendorWrites.writes(desResponse.responseData))
             .withHeaders("X-CorrelationId" -> desResponse.correlationId)
-        case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
+        case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId.getOrElse(correlationId))
       }
       case Left(errorWrapper) => Future.successful(
-        processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
+        processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId.getOrElse(correlationId))
       )
     }
   }
@@ -116,18 +120,8 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
     }
   }
 
-  private def getCorrelationId(errorWrapper: ErrorWrapper): String = {
-    errorWrapper.correlationId match {
-      case Some(correlationId) => logger.info("[SavingsAccountsController][getCorrelationId] - " +
-        s"Error received from DES ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
-        correlationId
-      case None =>
-        val correlationId = UUID.randomUUID().toString
-        logger.info("[SavingsAccountsController][getCorrelationId] - " +
-          s"Validation error: ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
-        correlationId
-    }
-  }
+  private def addCorrelationId(correlationId: String)(implicit hc: HeaderCarrier): HeaderCarrier =
+    hc.withExtraHeaders(("CorrelationId", correlationId))
 
   private def createAuditDetails(nino: String,
                                  statusCode: Int,
