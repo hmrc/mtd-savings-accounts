@@ -155,7 +155,7 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
 
       val response: WSResponse = await(request().put(requestBody))
       response.status shouldBe Status.BAD_REQUEST
-      response.json shouldBe Json.toJson(ErrorWrapper(None, RuleIncorrectOrEmptyBodyError, None))
+      response.json shouldBe Json.toJson(ErrorWrapper(correlationId, RuleIncorrectOrEmptyBodyError, None))
     }
 
     s"empty body is supplied" in new AmendTest {
@@ -173,7 +173,7 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
 
       val response: WSResponse = await(request().put(requestBody))
       response.status shouldBe Status.BAD_REQUEST
-      response.json shouldBe Json.toJson(ErrorWrapper(None, RuleIncorrectOrEmptyBodyError, None))
+      response.json shouldBe Json.toJson(ErrorWrapper(correlationId, RuleIncorrectOrEmptyBodyError, None))
     }
   }
 

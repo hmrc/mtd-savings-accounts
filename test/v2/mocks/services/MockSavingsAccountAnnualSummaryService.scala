@@ -30,13 +30,15 @@ trait MockSavingsAccountAnnualSummaryService extends MockFactory {
 
   object MockSavingsAccountAnnualSummaryService {
     def amend(request: AmendSavingsAccountAnnualSummaryRequest): CallHandler[Future[AmendSavingsAccountAnnualSummaryOutcome]] = {
-      (mockSavingsAccountAnnualSummaryService.amend(_: AmendSavingsAccountAnnualSummaryRequest)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(request, *, *)
+      (mockSavingsAccountAnnualSummaryService.amend(_: AmendSavingsAccountAnnualSummaryRequest)
+      (_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(request, *, *, *)
     }
 
     def retrieve(request: RetrieveSavingsAccountAnnualSummaryRequest): CallHandler[Future[RetrieveSavingsAccountAnnualSummaryOutcome]] = {
-      (mockSavingsAccountAnnualSummaryService.retrieve(_: RetrieveSavingsAccountAnnualSummaryRequest)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(request, *, *)
+      (mockSavingsAccountAnnualSummaryService.retrieve(_: RetrieveSavingsAccountAnnualSummaryRequest)
+      (_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(request, *, *, *)
     }
   }
 

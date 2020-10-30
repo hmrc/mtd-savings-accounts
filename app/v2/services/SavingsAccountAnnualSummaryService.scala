@@ -32,22 +32,24 @@ class SavingsAccountAnnualSummaryService @Inject()(connector: DesConnector) exte
 
   def amend(request: AmendSavingsAccountAnnualSummaryRequest)
            (implicit hc: HeaderCarrier,
-            ec: ExecutionContext): Future[AmendSavingsAccountAnnualSummaryOutcome] = {
+            ec: ExecutionContext,
+            correlationId: String): Future[AmendSavingsAccountAnnualSummaryOutcome] = {
     connector.amendSavingsAccountAnnualSummary(request)
       .map(mapToVendorDirect("AMEND", desErrorToMtdErrorAmend))
   }
 
   def retrieve(request: RetrieveSavingsAccountAnnualSummaryRequest)(implicit hc: HeaderCarrier,
-                                                                    ec: ExecutionContext): Future[RetrieveSavingsAccountAnnualSummaryOutcome] = {
+                                                                    ec: ExecutionContext,
+                                                                    correlationId: String): Future[RetrieveSavingsAccountAnnualSummaryOutcome] = {
     connector.retrieveSavingsAccountAnnualSummary(request)
       .map(mapToVendor("RETRIEVE", desErrorToMtdErrorRetrieve) { desResponse =>
         desResponse.responseData match {
           case DesRetrieveSavingsAccountAnnualIncomeResponse(x :: Nil) => Right(DesResponse(desResponse.correlationId, x.toMtd))
-          case DesRetrieveSavingsAccountAnnualIncomeResponse(Nil)      => Left(ErrorWrapper(Some(desResponse.correlationId), NotFoundError, None))
+          case DesRetrieveSavingsAccountAnnualIncomeResponse(Nil)      => Left(ErrorWrapper(desResponse.correlationId, NotFoundError, None))
           case _                                                       =>
             logger.info(s"[SavingsAccountAnnualSummaryService] [retrieve] [CorrelationId - ${desResponse.correlationId}] - " +
               "More than one matching account found")
-            Left(ErrorWrapper(Some(desResponse.correlationId), DownstreamError, None))
+            Left(ErrorWrapper(desResponse.correlationId, DownstreamError, None))
         }
       })
   }

@@ -21,8 +21,8 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import v1.mocks.MockIdGenerator
 import v2.fixtures.Fixtures._
+import v2.mocks.MockIdGenerator
 import v2.mocks.requestParsers._
 import v2.mocks.services.{MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountAnnualSummaryService}
 import v2.models.audit._
@@ -46,9 +46,16 @@ class SavingsAccountAnnualSummaryControllerSpec
     with MockIdGenerator
     with OneInstancePerTest {
 
+  val nino = "AA123456A"
+  val correlationId = "X-123"
+  val id = "SAVKB2UVwUTBQGJ"
+  val taxYear = "2017-18"
+  val accountName = "Main account name"
+  val location = s"/self-assessment/ni/$nino/savings-accounts/$id"
+
   trait Test {
 
-    val hc = HeaderCarrier()
+    val hc: HeaderCarrier = HeaderCarrier()
 
     val controller = new SavingsAccountAnnualSummaryController(
       authService = mockEnrolmentsAuthService,
@@ -65,13 +72,6 @@ class SavingsAccountAnnualSummaryControllerSpec
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
     MockedEnrolmentsAuthService.authoriseUser()
   }
-
-  val nino = "AA123456A"
-  val correlationId = "X-123"
-  val id = "SAVKB2UVwUTBQGJ"
-  val taxYear = "2017-18"
-  val accountName = "Main account name"
-  val location = s"/self-assessment/ni/$nino/savings-accounts/$id"
 
   "amend" when {
 
@@ -96,10 +96,10 @@ class SavingsAccountAnnualSummaryControllerSpec
         status(result) shouldBe NO_CONTENT
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
-        val detail = AmendAnnualSummaryAuditDetail(
+        val detail: AmendAnnualSummaryAuditDetail = AmendAnnualSummaryAuditDetail(
           "Individual", None, nino, id, taxYear, SavingsAccountsFixture.amendRequestJson(), "X-123",
           AmendAnnualSummaryAuditResponse(NO_CONTENT, None))
-        val event = AuditEvent("updateASavingsAccountAnnualSummary", "update-a-savings-account-annual-summary", detail)
+        val event: AuditEvent[AmendAnnualSummaryAuditDetail] = AuditEvent("updateASavingsAccountAnnualSummary", "update-a-savings-account-annual-summary", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }
     }
@@ -108,16 +108,16 @@ class SavingsAccountAnnualSummaryControllerSpec
       "the request received failed the validation" in new Test() {
 
         MockAmendSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
-          .returns(Left(ErrorWrapper(None, BadRequestError, None)))
+          .returns(Left(ErrorWrapper(correlationId, BadRequestError, None)))
 
         val result: Future[Result] = controller.amend(nino, id, taxYear)(fakePutRequest(SavingsAccountsFixture.amendRequestJson()))
         status(result) shouldBe BAD_REQUEST
         header("X-CorrelationId", result).nonEmpty shouldBe true
 
-        val detail = AmendAnnualSummaryAuditDetail("Individual", None, nino, id, taxYear,
+        val detail: AmendAnnualSummaryAuditDetail = AmendAnnualSummaryAuditDetail("Individual", None, nino, id, taxYear,
           SavingsAccountsFixture.amendRequestJson(), header("X-CorrelationId", result).get,
           AmendAnnualSummaryAuditResponse(BAD_REQUEST, Some(Seq(AuditError(BadRequestError.code)))))
-        val event = AuditEvent("updateASavingsAccountAnnualSummary", "update-a-savings-account-annual-summary", detail)
+        val event: AuditEvent[AmendAnnualSummaryAuditDetail] = AuditEvent("updateASavingsAccountAnnualSummary", "update-a-savings-account-annual-summary", detail)
 
         MockedAuditService.verifyAuditEvent(event).once
       }
@@ -172,7 +172,7 @@ class SavingsAccountAnnualSummaryControllerSpec
       s"a ${error.code} error is returned from the parser" in new Test {
 
         MockAmendSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
-          .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
+          .returns(Left(ErrorWrapper(correlationId, error, None)))
 
         val response: Future[Result] = controller.amend(nino, id, taxYear)(fakePutRequest(SavingsAccountsFixture.amendRequestJson()))
 
@@ -180,9 +180,10 @@ class SavingsAccountAnnualSummaryControllerSpec
         contentAsJson(response) shouldBe Json.toJson(error)
         header("X-CorrelationId", response) shouldBe Some(correlationId)
 
-        val detail = AmendAnnualSummaryAuditDetail("Individual", None, nino, id, taxYear, SavingsAccountsFixture.amendRequestJson(), "X-123",
+        val detail: AmendAnnualSummaryAuditDetail = AmendAnnualSummaryAuditDetail("Individual", None, nino, id, taxYear,
+          SavingsAccountsFixture.amendRequestJson(), "X-123",
           AmendAnnualSummaryAuditResponse(expectedStatus, Some(Seq(AuditError(error.code)))))
-        val event = AuditEvent("updateASavingsAccountAnnualSummary",
+        val event: AuditEvent[AmendAnnualSummaryAuditDetail] = AuditEvent("updateASavingsAccountAnnualSummary",
           "update-a-savings-account-annual-summary", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }
@@ -195,7 +196,7 @@ class SavingsAccountAnnualSummaryControllerSpec
           .returns(Right(request))
 
         MockSavingsAccountAnnualSummaryService.amend(request)
-          .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+          .returns(Future.successful(Left(ErrorWrapper(correlationId, error, None))))
 
         val response: Future[Result] = controller.amend(nino, id, taxYear)(fakePutRequest(SavingsAccountsFixture.amendRequestJson()))
 
@@ -203,9 +204,10 @@ class SavingsAccountAnnualSummaryControllerSpec
         contentAsJson(response) shouldBe Json.toJson(error)
         header("X-CorrelationId", response) shouldBe Some(correlationId)
 
-        val detail = AmendAnnualSummaryAuditDetail("Individual", None, nino, id, taxYear, SavingsAccountsFixture.amendRequestJson(), "X-123",
+        val detail: AmendAnnualSummaryAuditDetail = AmendAnnualSummaryAuditDetail("Individual", None, nino, id, taxYear,
+          SavingsAccountsFixture.amendRequestJson(), "X-123",
           AmendAnnualSummaryAuditResponse(expectedStatus, Some(Seq(AuditError(error.code)))))
-        val event = AuditEvent("updateASavingsAccountAnnualSummary",
+        val event: AuditEvent[AmendAnnualSummaryAuditDetail] = AuditEvent("updateASavingsAccountAnnualSummary",
           "update-a-savings-account-annual-summary", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }
@@ -240,7 +242,7 @@ class SavingsAccountAnnualSummaryControllerSpec
       "return single error response with status 400" in new Test() {
 
         MockRetrieveSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
-          .returns(Left(ErrorWrapper(None, BadRequestError, None)))
+          .returns(Left(ErrorWrapper(correlationId, BadRequestError, None)))
 
         val result: Future[Result] = controller.retrieve(nino, id, taxYear)(fakeGetRequest)
 
@@ -293,7 +295,7 @@ class SavingsAccountAnnualSummaryControllerSpec
       s"a ${error.code} error is returned from the parser" in new Test {
 
         MockRetrieveSavingsAccountAnnualSummaryRequestDataParser.parse(rawData)
-          .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
+          .returns(Left(ErrorWrapper(correlationId, error, None)))
 
         val response: Future[Result] = controller.retrieve(nino, id, taxYear)(fakeGetRequest)
 
@@ -310,7 +312,7 @@ class SavingsAccountAnnualSummaryControllerSpec
           .returns(Right(request))
 
         MockSavingsAccountAnnualSummaryService.retrieve(request)
-          .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+          .returns(Future.successful(Left(ErrorWrapper(correlationId, error, None))))
 
         val response: Future[Result] = controller.retrieve(nino, id, taxYear)(fakeGetRequest)
 

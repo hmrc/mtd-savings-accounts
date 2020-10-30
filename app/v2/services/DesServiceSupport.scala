@@ -59,13 +59,13 @@ trait DesServiceSupport {
       if (mtdErrors.contains(DownstreamError)) {
         logger.info(s"[$serviceName] [$endpointName] [CorrelationId - $correlationId]" +
           s" - downstream returned ${errors.map(_.code).mkString(",")}. Revert to ISE")
-        Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
+        Left(ErrorWrapper(correlationId, DownstreamError, None))
       } else {
-        Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
+        Left(ErrorWrapper(correlationId, BadRequestError, Some(mtdErrors)))
       }
 
-    case Left(DesResponse(correlationId, SingleError(error)))   => Left(ErrorWrapper(Some(correlationId), errorMap(error.code), None))
-    case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
+    case Left(DesResponse(correlationId, SingleError(error)))   => Left(ErrorWrapper(correlationId, errorMap(error.code), None))
+    case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(correlationId, error, None))
   }
 
 

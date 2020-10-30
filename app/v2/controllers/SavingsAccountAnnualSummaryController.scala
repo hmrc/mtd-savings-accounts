@@ -16,8 +16,6 @@
 
 package v2.controllers
 
-import java.util.UUID
-
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
@@ -35,42 +33,47 @@ import v2.utils.IdGenerator
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SavingsAccountAnnualSummaryController @Inject()(val authService: EnrolmentsAuthService,
-                                                      val lookupService: MtdIdLookupService,
-                                                      amendSavingsAccountAnnualSummaryRequestDataParser: AmendSavingsAccountAnnualSummaryRequestDataParser,
-                                                      retrieveSavingsAccountAnnualSummaryRequestDataParser: RetrieveSavingsAccountAnnualSummaryRequestDataParser,
-                                                      savingsAccountAnnualSummaryService: SavingsAccountAnnualSummaryService,
-                                                      auditService: AuditService,
-                                                      val idGenerator: IdGenerator,
-                                                      val cc: ControllerComponents
-                                                     ) (implicit ec: ExecutionContext) extends AuthorisedController(cc) {
+class SavingsAccountAnnualSummaryController @Inject()(
+                                                    val authService: EnrolmentsAuthService,
+                                                    val lookupService: MtdIdLookupService,
+                                                    amendSavingsAccountAnnualSummaryRequestDataParser: AmendSavingsAccountAnnualSummaryRequestDataParser,
+                                                    retrieveSavingsAccountAnnualSummaryRequestDataParser: RetrieveSavingsAccountAnnualSummaryRequestDataParser,
+                                                    savingsAccountAnnualSummaryService: SavingsAccountAnnualSummaryService,
+                                                    auditService: AuditService,
+                                                    val idGenerator: IdGenerator,
+                                                    val cc: ControllerComponents
+                                                   ) (implicit ec: ExecutionContext) extends AuthorisedController(cc) {
 
   val logger: Logger = Logger(this.getClass)
 
-  val correlationId = idGenerator.getCorrelationId
-
   def amend(nino: String, accountId: String, taxYear: String): Action[JsValue] = authorisedAction(nino).async(parse.json) { implicit request =>
+    implicit val endpointLogContext: EndpointLogContext =
+      EndpointLogContext(controllerName = "SavingsAccountAnnualSummaryController", endpointName = "Amend savings account annual summary")
+    implicit val correlationId: String = idGenerator.getCorrelationId
+    logger.info(message = s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] " +
+      s"with correlationId : $correlationId")
     amendSavingsAccountAnnualSummaryRequestDataParser.parseRequest(
       AmendSavingsAccountAnnualSummaryRawData(
         nino, taxYear, accountId,
         AnyContentAsJson(request.body))) match {
       case Right(amendRequest) =>
-        savingsAccountAnnualSummaryService.amend(amendRequest)(addCorrelationId(correlationId), ec)
+        savingsAccountAnnualSummaryService.amend(amendRequest)
           .map {
             case Right(desResponse) =>
-              logger.info(s"[SavingsAccountAnnualSummaryController][amend] - Success response received with CorrelationId: ${desResponse.correlationId}")
-
+              logger.info(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}]" +
+                s" - Success response received with CorrelationId: ${desResponse.correlationId}")
               auditSubmission(createAuditDetails(
                 nino = nino, savingsAccountId = accountId, taxYear = taxYear,
                 statusCode = NO_CONTENT,
                 request = request.request.body, correlationId = desResponse.correlationId,
                 userDetails = request.userDetails))
-
               NoContent.withHeaders("X-CorrelationId" -> desResponse.correlationId)
-
             case Left(errorWrapper) =>
-              val returnedCorrelationId = errorWrapper.correlationId.getOrElse(correlationId)
+              val returnedCorrelationId = errorWrapper.correlationId
               val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> returnedCorrelationId)
+              logger.info(
+                s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+                  s"Error response received with CorrelationId: $returnedCorrelationId")
               auditSubmission(details = createAuditDetails(
                 nino = nino, savingsAccountId = accountId, taxYear = taxYear,
                 statusCode = result.header.status,
@@ -79,14 +82,16 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
 
               result
           }
-
       case Left(errorWrapper) =>
-        val returnedCorrelation = errorWrapper.correlationId.getOrElse(correlationId)
-        val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> returnedCorrelation)
+        val returnedCorrelationId = errorWrapper.correlationId
+        val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> returnedCorrelationId)
+        logger.info(
+          s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+            s"Error response received with CorrelationId: $returnedCorrelationId")
         auditSubmission(createAuditDetails(
           nino = nino, savingsAccountId = accountId, taxYear = taxYear,
           statusCode = result.header.status,
-          request = request.request.body, correlationId = returnedCorrelation,
+          request = request.request.body, correlationId = returnedCorrelationId,
           userDetails = request.userDetails, errorWrapper = Some(errorWrapper)))
 
         Future.successful(result)
@@ -94,21 +99,32 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
   }
 
   def retrieve(nino: String, accountId: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
+    implicit val endpointLogContext: EndpointLogContext =
+      EndpointLogContext(controllerName = "SavingsAccountAnnualSummaryController", endpointName = "Retrieve savings account annual summary")
+    implicit val correlationId: String = idGenerator.getCorrelationId
+    logger.info(message = s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] " +
+      s"with correlationId : $correlationId")
+
     retrieveSavingsAccountAnnualSummaryRequestDataParser.parseRequest(
       RetrieveSavingsAccountAnnualSummaryRawData(
         nino, taxYear, accountId)) match {
-      case Right(retrieveRequest) => savingsAccountAnnualSummaryService.retrieve(retrieveRequest)(addCorrelationId(correlationId), ec)
+      case Right(retrieveRequest) => savingsAccountAnnualSummaryService.retrieve(retrieveRequest)
         .map {
           case Right(desResponse) =>
-            logger.info(s"[SavingsAccountAnnualSummaryController][retrieve] - Success response received with CorrelationId: ${desResponse.correlationId}")
+            logger.info(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}]" +
+              s" - Success response received with CorrelationId: ${desResponse.correlationId}")
             Ok(SavingsAccountAnnualSummary.writes.writes(desResponse.responseData))
               .withHeaders("X-CorrelationId" -> desResponse.correlationId)
 
-          case Left(errorWrapper) =>
-            processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId.getOrElse(correlationId))
+          case Left(errorWrapper) => logger.info(
+            s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+              s"Error response received with CorrelationId: ${errorWrapper.correlationId}")
+            processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId)
         }
-      case Left(errorWrapper) =>
-        Future.successful(processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId.getOrElse(correlationId)))
+      case Left(errorWrapper) => logger.info(
+        s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+          s"Error response received with CorrelationId: ${errorWrapper.correlationId}")
+        Future.successful(processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId))
     }
   }
 
@@ -127,9 +143,6 @@ class SavingsAccountAnnualSummaryController @Inject()(val authService: Enrolment
       case DownstreamError => InternalServerError(Json.toJson(errorWrapper))
     }
   }
-
-  private def addCorrelationId(correlationId: String)(implicit hc: HeaderCarrier): HeaderCarrier =
-    hc.withExtraHeaders(("CorrelationId", correlationId))
 
   private def createAuditDetails(nino: String,
                                  savingsAccountId: String,

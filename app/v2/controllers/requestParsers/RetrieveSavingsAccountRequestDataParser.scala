@@ -17,6 +17,7 @@
 package v2.controllers.requestParsers
 
 import javax.inject.Inject
+import play.api.Logger
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.RetrieveSavingsAccountValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper}
@@ -24,13 +25,22 @@ import v2.models.requestData.{RetrieveSavingsAccountRawData, RetrieveSavingsAcco
 
 class RetrieveSavingsAccountRequestDataParser @Inject()(validator: RetrieveSavingsAccountValidator) {
 
-  def parseRequest(data: RetrieveSavingsAccountRawData): Either[ErrorWrapper, RetrieveSavingsAccountRequest] = {
+  val logger: Logger = Logger(this.getClass)
+
+  def parseRequest(data: RetrieveSavingsAccountRawData)(implicit correlationId: String) : Either[ErrorWrapper, RetrieveSavingsAccountRequest] = {
     validator.validate(data) match {
       case List() =>
-        //Validation passed.  Request data is ok to transform.
+        logger.info(message = "[RequestParser][parseRequest] " +
+          s"Validation successful for the request with correlationId : $correlationId")
         Right(RetrieveSavingsAccountRequest(Nino(data.nino), data.accountId))
-      case err :: Nil => Left(ErrorWrapper(None, err, None))
-      case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
+      case err :: Nil =>
+        logger.info(message = "[RequestParser][parseRequest] " +
+          s"Validation failed with ${err.code} error for the request with correlationId : $correlationId")
+        Left(ErrorWrapper(correlationId, err, None))
+      case errs =>
+        logger.info("[RequestParser][parseRequest] " +
+          s"Validation failed with ${errs.map(_.code).mkString(",")} error for the request with correlationId : $correlationId")
+        Left(ErrorWrapper(correlationId, BadRequestError, Some(errs)))
     }
   }
 }

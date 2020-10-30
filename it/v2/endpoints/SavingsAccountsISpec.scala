@@ -47,7 +47,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
   "Calling the create savings account endpoint" should {
 
     trait CreateTest extends Test {
-      def uri = s"/2.0/ni/$nino/savings-accounts"
+      def uri: String = s"/2.0/ni/$nino/savings-accounts"
     }
 
     "return a 201 status code" when {
@@ -136,7 +136,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
       val response: WSResponse = await(request().post(requestBody))
       response.status shouldBe Status.BAD_REQUEST
-      response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameFormatError, None))
+      response.json shouldBe Json.toJson(ErrorWrapper(correlationId, AccountNameFormatError, None))
     }
 
     s"empty body is supplied" in new CreateTest {
@@ -154,14 +154,14 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
       val response: WSResponse = await(request().post(requestBody))
       response.status shouldBe Status.BAD_REQUEST
-      response.json shouldBe Json.toJson(ErrorWrapper(None, AccountNameMissingError, None))
+      response.json shouldBe Json.toJson(ErrorWrapper(correlationId, AccountNameMissingError, None))
     }
   }
 
   "Calling the retrieve all savings account endpoint" should {
 
     trait RetrieveAllTest extends Test {
-      def uri = s"/2.0/ni/$nino/savings-accounts"
+      def uri: String = s"/2.0/ni/$nino/savings-accounts"
     }
 
     "return a 200 status code" when {
@@ -241,7 +241,7 @@ class SavingsAccountsISpec extends IntegrationBaseSpec {
 
     trait RetrieveTest extends Test {
 
-      def uri = s"/2.0/ni/$nino/savings-accounts/$accountId"
+      def uri: String = s"/2.0/ni/$nino/savings-accounts/$accountId"
     }
 
     "return a 200 status code" when {

@@ -31,22 +31,23 @@ class AmendSavingsAccountAnnualSummaryRequestDataParserSpec
   val nino = "AA123456A"
   val taxYear = "2018-19"
   val accountId = "SAVKB2UVwUTBQGJ"
-  val json =
+  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
+  val json: String =
     """
       |{
       |    "taxedUkInterest": 123.45,
       |    "untaxedUkInterest": 543.21
       |}
     """.stripMargin
-  val jsonBody = AnyContentAsJson(Json.parse(json))
+  val jsonBody: AnyContentAsJson = AnyContentAsJson(Json.parse(json))
 
-  val model = SavingsAccountAnnualSummary(taxedUkInterest = Some(123.45), untaxedUkInterest = Some(543.21))
+  val model: SavingsAccountAnnualSummary = SavingsAccountAnnualSummary(taxedUkInterest = Some(123.45), untaxedUkInterest = Some(543.21))
 
 
-  val requestData =
+  val requestData: AmendSavingsAccountAnnualSummaryRawData =
     AmendSavingsAccountAnnualSummaryRawData(nino, taxYear, accountId, jsonBody)
 
-  val request =
+  val request: AmendSavingsAccountAnnualSummaryRequest =
     AmendSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear.fromMtd(taxYear), accountId, model)
 
   trait Test extends MockAmendSavingsAccountAnnualSummaryValidator {
@@ -70,7 +71,7 @@ class AmendSavingsAccountAnnualSummaryRequestDataParserSpec
           .returns(List(NinoFormatError))
 
         parser.parseRequest(requestData) shouldBe Left(
-          ErrorWrapper(None, NinoFormatError, None))
+          ErrorWrapper(correlationId, NinoFormatError, None))
       }
 
       "multiple validation errors occur" in new Test {
@@ -79,7 +80,7 @@ class AmendSavingsAccountAnnualSummaryRequestDataParserSpec
 
 
         parser.parseRequest(requestData) shouldBe Left(
-          ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, AccountNameDuplicateError))))
+          ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, AccountNameDuplicateError))))
       }
     }
 

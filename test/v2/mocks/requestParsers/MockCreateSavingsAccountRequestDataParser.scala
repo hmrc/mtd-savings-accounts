@@ -28,7 +28,7 @@ trait MockCreateSavingsAccountRequestDataParser extends MockFactory {
 
   object MockCreateSavingsAccountRequestDataParser {
     def parse(data: CreateSavingsAccountRawData): CallHandler[Either[ErrorWrapper, CreateSavingsAccountRequestData]] = {
-      (mockCreateSavingsAccountRequestDataParser.parseRequest(_:CreateSavingsAccountRawData)).expects(data)
+      (mockCreateSavingsAccountRequestDataParser.parseRequest(_:CreateSavingsAccountRawData)(_: String)).expects(data, *)
     }
   }
 }

@@ -25,8 +25,8 @@ import v2.models.requestData.{RetrieveSavingsAccountRawData, RetrieveSavingsAcco
 class RetrieveSavingsAccountRequestDataParserSpec extends UnitSpec {
 
   val validNino = "AA123456A"
-  val correlationId = "X-123"
   val accountId = "SAVKB2UVwUTBQGJ"
+  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
 
   trait Test extends MockRetrieveSavingsAccountValidator {
     lazy val parser = new RetrieveSavingsAccountRequestDataParser(mockValidator)
@@ -38,10 +38,10 @@ class RetrieveSavingsAccountRequestDataParserSpec extends UnitSpec {
     "return a retrieve savings account request object" when {
       "valid request data is supplied" in new Test {
 
-        val retrieveSavingsAccountRawData =
+        val retrieveSavingsAccountRawData: RetrieveSavingsAccountRawData =
           RetrieveSavingsAccountRawData(validNino, accountId)
 
-        val retrieveSavingsAccountRequest =
+        val retrieveSavingsAccountRequest: RetrieveSavingsAccountRequest =
           RetrieveSavingsAccountRequest(Nino(validNino), accountId)
 
         MockedCreateSavingsAccountValidator.validate(retrieveSavingsAccountRawData)
@@ -56,11 +56,11 @@ class RetrieveSavingsAccountRequestDataParserSpec extends UnitSpec {
       val invalidNino = "AA112A"
 
       "a single validation error occurs" in new Test {
-        val retrieveSavingsAccountRawData =
+        val retrieveSavingsAccountRawData: RetrieveSavingsAccountRawData =
           RetrieveSavingsAccountRawData(invalidNino, accountId)
 
-        val expectedResponse =
-          ErrorWrapper(None, NinoFormatError, None)
+        val expectedResponse: ErrorWrapper =
+          ErrorWrapper(correlationId, NinoFormatError, None)
 
         MockedCreateSavingsAccountValidator.validate(retrieveSavingsAccountRawData)
           .returns(List(NinoFormatError))
@@ -69,11 +69,11 @@ class RetrieveSavingsAccountRequestDataParserSpec extends UnitSpec {
       }
 
       "multiple validation errors occur" in new Test {
-        val retrieveSavingsAccountRawData =
+        val retrieveSavingsAccountRawData: RetrieveSavingsAccountRawData =
           RetrieveSavingsAccountRawData(validNino, accountId)
 
-        val multipleErrorWrapper =
-          ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, AccountIdFormatError)))
+        val multipleErrorWrapper: ErrorWrapper =
+          ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, AccountIdFormatError)))
 
         MockedCreateSavingsAccountValidator.validate(retrieveSavingsAccountRawData)
           .returns(List(NinoFormatError, AccountIdFormatError))

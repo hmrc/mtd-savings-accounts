@@ -59,7 +59,7 @@ object Fixtures {
       "accountName" -> accountName
     )
 
-    def amendRequestJson(taxedUkInterest: BigDecimal  = 123.45, untaxedUkInterest: BigDecimal = 543.21) = Json.parse(
+    def amendRequestJson(taxedUkInterest: BigDecimal  = 123.45, untaxedUkInterest: BigDecimal = 543.21): JsValue = Json.parse(
       s"""{
         |"taxedUkInterest": $taxedUkInterest,
         |"untaxedUkInterest": $untaxedUkInterest
@@ -67,14 +67,14 @@ object Fixtures {
       """.stripMargin)
 
     val multipleErrorsFromParserJson: String => JsValue = correlationId => Json.toJson(
-      ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(AccountNameMissingError, AccountNameFormatError)))
+      ErrorWrapper(correlationId, BadRequestError, Some(Seq(AccountNameMissingError, AccountNameFormatError)))
     )
     val multipleErrorsFromServerJson: String => JsValue = correlationId => Json.toJson(
-      Json.toJson(ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(AccountNameDuplicateError, MaximumSavingsAccountsLimitError))))
+      Json.toJson(ErrorWrapper(correlationId, BadRequestError, Some(Seq(AccountNameDuplicateError, MaximumSavingsAccountsLimitError))))
     )
     val downstreamErrorJson: JsValue = Json.toJson(DownstreamError)
 
-    val createSavingsAccountRequestModel = CreateSavingsAccountRequest("Main account name")
+    val createSavingsAccountRequestModel: CreateSavingsAccountRequest = CreateSavingsAccountRequest("Main account name")
   }
 
 }

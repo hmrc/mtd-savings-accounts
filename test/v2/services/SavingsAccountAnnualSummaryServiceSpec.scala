@@ -29,13 +29,12 @@ import scala.concurrent.Future
 class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
 
   val incomeSourceId = "ZZIS12345678901"
-  val correlationId = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
   val nino = "AA123456A"
   val taxYear = "2018-19"
   val transactionReference = "0000000000000001"
 
-  val deaTaxYearFormatError = Error("INVALID_TAXYEAR", "doesn't matter")
-  val desNinoFormatError = Error("INVALID_NINO", "doesn't matter")
+  val deaTaxYearFormatError: Error = Error("INVALID_TAXYEAR", "doesn't matter")
+  val desNinoFormatError: Error = Error("INVALID_NINO", "doesn't matter")
 
   trait Test extends MockDesConnector {
     lazy val service = new SavingsAccountAnnualSummaryService(connector)
@@ -47,7 +46,8 @@ class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
 
     "valid data is passed" should {
       "return a valid response" in new Test {
-        val expected = DesResponse(correlationId, DesAmendSavingsAccountAnnualSummaryResponse(incomeSourceId))
+        val expected: DesResponse[DesAmendSavingsAccountAnnualSummaryResponse] =
+          DesResponse(correlationId, DesAmendSavingsAccountAnnualSummaryResponse(incomeSourceId))
         MockedDesConnector.amendAnnualSummary(request).returns(Future.successful(Right(expected)))
         val result: AmendSavingsAccountAnnualSummaryOutcome = await(service.amend(request))
         result shouldBe Right(expected)
@@ -56,31 +56,31 @@ class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
 
     "DES returns multiple errors" should {
       "return multiple errors" in new Test {
-        val expected = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, TaxYearFormatError)))
-        val desResponse = DesResponse(correlationId, MultipleErrors(Seq(desNinoFormatError, deaTaxYearFormatError)))
+        val expected: DesResponse[MultipleErrors] = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, TaxYearFormatError)))
+        val desResponse: DesResponse[MultipleErrors] = DesResponse(correlationId, MultipleErrors(Seq(desNinoFormatError, deaTaxYearFormatError)))
         MockedDesConnector.amendAnnualSummary(request).returns(Future.successful(Left(desResponse)))
         val result: AmendSavingsAccountAnnualSummaryOutcome = await(service.amend(request))
-        result shouldBe Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(expected.responseData.errors)))
+        result shouldBe Left(ErrorWrapper(correlationId, BadRequestError, Some(expected.responseData.errors)))
       }
     }
 
     "the connector returns an outbound error" should {
       "return that outbound error as-is" in new Test {
-        val fakeError = Error("doesn't matter", "really doesn't matter")
-        val desResponse = DesResponse(correlationId, OutboundError(fakeError))
-        val expected = DesResponse(correlationId, OutboundError(fakeError))
+        val fakeError: Error = Error("doesn't matter", "really doesn't matter")
+        val desResponse: DesResponse[OutboundError] = DesResponse(correlationId, OutboundError(fakeError))
+        val expected: DesResponse[OutboundError] = DesResponse(correlationId, OutboundError(fakeError))
         MockedDesConnector.amendAnnualSummary(request).returns(Future.successful(Left(desResponse)))
         val result: AmendSavingsAccountAnnualSummaryOutcome = await(service.amend(request))
-        result shouldBe Left(ErrorWrapper(Some(correlationId), expected.responseData.error, None))
+        result shouldBe Left(ErrorWrapper(correlationId, expected.responseData.error, None))
       }
     }
 
     "one of the errors from DES is a DownstreamError" should {
       "return a single error if there are multiple errors" in new Test {
-        val expected = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, DownstreamError)))
+        val expected: DesResponse[MultipleErrors] = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, DownstreamError)))
         MockedDesConnector.amendAnnualSummary(request).returns(Future.successful(Left(expected)))
         val result: AmendSavingsAccountAnnualSummaryOutcome = await(service.amend(request))
-        result shouldBe Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
+        result shouldBe Left(ErrorWrapper(correlationId, DownstreamError, None))
       }
     }
 
@@ -102,8 +102,8 @@ class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
       case (desErrorCode, mtdError) =>
         s"DES returns a $desErrorCode error" should {
           s"return a ${mtdError.code} error" in new Test {
-            val desResponse = DesResponse(correlationId, SingleError(Error(desErrorCode, "doesn't matter")))
-            val expected = ErrorWrapper(Some(correlationId), mtdError, None)
+            val desResponse: DesResponse[SingleError] = DesResponse(correlationId, SingleError(Error(desErrorCode, "doesn't matter")))
+            val expected: ErrorWrapper = ErrorWrapper(correlationId, mtdError, None)
             MockedDesConnector.amendAnnualSummary(request).returns(Future.successful(Left(desResponse)))
             val result: AmendSavingsAccountAnnualSummaryOutcome = await(service.amend(request))
             result shouldBe Left(expected)
@@ -116,71 +116,73 @@ class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
     val request = RetrieveSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear.fromMtd(taxYear), incomeSourceId)
     "valid data is passed" should {
       "return a valid response" in new Test {
-        val desResponse = DesResponse(correlationId, DesRetrieveSavingsAccountAnnualIncomeResponse(Seq(
+        val desResponse: DesResponse[DesRetrieveSavingsAccountAnnualIncomeResponse] =
+          DesResponse(correlationId, DesRetrieveSavingsAccountAnnualIncomeResponse(Seq(
           DesSavingsInterestAnnualIncome(incomeSourceId, Some(2000.99), Some(5000.50))
         )))
 
         MockedDesConnector.retrieveAnnualSummary(request).returns(Future.successful(Right(desResponse)))
 
-        val result = await(service.retrieve(request))
+        val result: RetrieveSavingsAccountAnnualSummaryOutcome = await(service.retrieve(request))
         result shouldBe Right(DesResponse(correlationId, SavingsAccountAnnualSummary(Some(2000.99), Some(5000.50))))
       }
     }
 
     "no accounts are returned" should {
       "return 404 with error code MATCHING_RESOURCE_NOT_FOUND" in new Test {
-        val expected = DesResponse(correlationId, DesRetrieveSavingsAccountAnnualIncomeResponse(Nil))
+        val expected: DesResponse[DesRetrieveSavingsAccountAnnualIncomeResponse] =
+          DesResponse(correlationId, DesRetrieveSavingsAccountAnnualIncomeResponse(Nil))
 
         MockedDesConnector.retrieveAnnualSummary(request).returns(Future.successful(Right(expected)))
 
-        val result = await(service.retrieve(request))
-        result shouldBe Left(ErrorWrapper(Some(correlationId), NotFoundError, None))
+        val result: RetrieveSavingsAccountAnnualSummaryOutcome = await(service.retrieve(request))
+        result shouldBe Left(ErrorWrapper(correlationId, NotFoundError, None))
       }
     }
 
     "multiple accounts are returned" should {
       "return error" in new Test {
-        val expected = DesResponse(correlationId, DesRetrieveSavingsAccountAnnualIncomeResponse(Seq(
+        val expected: DesResponse[DesRetrieveSavingsAccountAnnualIncomeResponse] = DesResponse(correlationId, DesRetrieveSavingsAccountAnnualIncomeResponse(Seq(
           DesSavingsInterestAnnualIncome(incomeSourceId, Some(2000.99), Some(5000.50)),
           DesSavingsInterestAnnualIncome(incomeSourceId, Some(123.45), Some(543.21))
         )))
 
         MockedDesConnector.retrieveAnnualSummary(request).returns(Future.successful(Right(expected)))
 
-        val result = await(service.retrieve(request))
-        result shouldBe Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
+        val result: RetrieveSavingsAccountAnnualSummaryOutcome = await(service.retrieve(request))
+        result shouldBe Left(ErrorWrapper(correlationId, DownstreamError, None))
       }
     }
 
     "DES returns multiple errors" should {
       "return multiple errors" in new Test {
-        val desResponse = DesResponse(correlationId, MultipleErrors(Seq(desNinoFormatError, deaTaxYearFormatError)))
+        val desResponse: DesResponse[MultipleErrors] = DesResponse(correlationId, MultipleErrors(Seq(desNinoFormatError, deaTaxYearFormatError)))
 
         MockedDesConnector.retrieveAnnualSummary(request).returns(Future.successful(Left(desResponse)))
 
-        val result = await(service.retrieve(request))
-        result shouldBe Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
+        val result: RetrieveSavingsAccountAnnualSummaryOutcome = await(service.retrieve(request))
+        result shouldBe Left(ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
       }
     }
 
     "the connector returns an outbound error" should {
       "return that outbound error as-is" in new Test {
-        val fakeError = Error("doesn't matter", "really doesn't matter")
-        val desResponse = DesResponse(correlationId, OutboundError(fakeError))
+        val fakeError: Error = Error("doesn't matter", "really doesn't matter")
+        val desResponse: DesResponse[OutboundError] = DesResponse(correlationId, OutboundError(fakeError))
 
         MockedDesConnector.retrieveAnnualSummary(request).returns(Future.successful(Left(desResponse)))
 
-        val result = await(service.retrieve(request))
-        result shouldBe Left(ErrorWrapper(Some(correlationId), fakeError, None))
+        val result: RetrieveSavingsAccountAnnualSummaryOutcome = await(service.retrieve(request))
+        result shouldBe Left(ErrorWrapper(correlationId, fakeError, None))
       }
     }
 
     "one of the errors from DES is a DownstreamError" should {
       "return a single error if there are multiple errors" in new Test {
-        val expected = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, DownstreamError)))
+        val expected: DesResponse[MultipleErrors] = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, DownstreamError)))
         MockedDesConnector.retrieveAnnualSummary(request).returns(Future.successful(Left(expected)))
-        val result = await(service.retrieve(request))
-        result shouldBe Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
+        val result: RetrieveSavingsAccountAnnualSummaryOutcome = await(service.retrieve(request))
+        result shouldBe Left(ErrorWrapper(correlationId, DownstreamError, None))
       }
     }
 
@@ -197,10 +199,10 @@ class SavingsAccountAnnualSummaryServiceSpec extends ServiceSpec {
       case (desErrorCode, mtdError) =>
         s"DES returns a $desErrorCode error" should {
           s"return a ${mtdError.code} error" in new Test {
-            val desResponse = DesResponse(correlationId, SingleError(Error(desErrorCode, "doesn't matter")))
-            val expected = ErrorWrapper(Some(correlationId), mtdError, None)
+            val desResponse: DesResponse[SingleError] = DesResponse(correlationId, SingleError(Error(desErrorCode, "doesn't matter")))
+            val expected: ErrorWrapper = ErrorWrapper(correlationId, mtdError, None)
             MockedDesConnector.retrieveAnnualSummary(request).returns(Future.successful(Left(desResponse)))
-            val result = await(service.retrieve(request))
+            val result: RetrieveSavingsAccountAnnualSummaryOutcome = await(service.retrieve(request))
             result shouldBe Left(expected)
           }
         }

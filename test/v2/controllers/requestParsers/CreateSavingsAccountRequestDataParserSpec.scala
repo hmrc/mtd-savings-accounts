@@ -28,16 +28,16 @@ import v2.models.requestData.{CreateSavingsAccountRawData, CreateSavingsAccountR
 class CreateSavingsAccountRequestDataParserSpec extends UnitSpec {
 
   val validNino = "AA123456A"
-  val json =
+  val json: String =
     """
       |{
       |    "accountName": "Main account name"
       |}
     """.stripMargin
-  val validJsonBody = AnyContentAsJson(Json.parse(json))
-  val correlationId = "X-123"
+  val validJsonBody: AnyContentAsJson = AnyContentAsJson(Json.parse(json))
+  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
 
-  val model = CreateSavingsAccountRequest(accountName = "Main account name")
+  val model: CreateSavingsAccountRequest = CreateSavingsAccountRequest(accountName = "Main account name")
 
   trait Test extends MockCreateSavingsAccountValidator {
     lazy val parser = new CreateSavingsAccountRequestDataParser(mockValidator)
@@ -49,10 +49,10 @@ class CreateSavingsAccountRequestDataParserSpec extends UnitSpec {
     "return an create savings account request object" when {
       "valid request data is supplied" in new Test {
 
-        val createSavingsAccountRequestData =
+        val createSavingsAccountRequestData: CreateSavingsAccountRawData =
           CreateSavingsAccountRawData(validNino, validJsonBody)
 
-        val createSavingsAccountRequest =
+        val createSavingsAccountRequest: CreateSavingsAccountRequestData =
           CreateSavingsAccountRequestData(Nino(validNino), model)
 
         MockedCreateSavingsAccountValidator.validate(createSavingsAccountRequestData)
@@ -67,26 +67,26 @@ class CreateSavingsAccountRequestDataParserSpec extends UnitSpec {
       val invalidNino = "AA112A"
 
       "a single validation error occurs" in new Test {
-        val createSavingsAccountRequestData =
+        val createSavingsAccountRequestData: CreateSavingsAccountRawData =
           CreateSavingsAccountRawData(invalidNino, validJsonBody)
 
-        val expectedResponse =
-          ErrorWrapper(None, NinoFormatError, None)
+        val expectedResponse: ErrorWrapper =
+          ErrorWrapper(correlationId, NinoFormatError, None)
 
         MockedCreateSavingsAccountValidator.validate(createSavingsAccountRequestData)
           .returns(List(NinoFormatError))
 
-        val receivedResponse = parser.parseRequest(createSavingsAccountRequestData)
+        val receivedResponse: Either[ErrorWrapper, CreateSavingsAccountRequestData] = parser.parseRequest(createSavingsAccountRequestData)
         expectedResponse.copy()
         receivedResponse shouldBe Left(expectedResponse)
       }
 
       "multiple validation errors occur" in new Test {
-        val createSavingsAccountRequestData =
+        val createSavingsAccountRequestData: CreateSavingsAccountRawData =
           CreateSavingsAccountRawData(validNino, validJsonBody)
 
-        val multipleErrorWrapper =
-          ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, AccountNameDuplicateError)))
+        val multipleErrorWrapper: ErrorWrapper =
+          ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, AccountNameDuplicateError)))
 
         MockedCreateSavingsAccountValidator.validate(createSavingsAccountRequestData)
           .returns(List(NinoFormatError, AccountNameDuplicateError))
