@@ -28,7 +28,7 @@ trait MockRetrieveSavingsAccountAnnualSummaryRequestDataParser extends MockFacto
 
   object MockRetrieveSavingsAccountAnnualSummaryRequestDataParser {
     def parse(data: RetrieveSavingsAccountAnnualSummaryRawData): CallHandler[Either[ErrorWrapper, RetrieveSavingsAccountAnnualSummaryRequest]] = {
-      (mockRetrieveSavingsAnnualSummaryRequestDataParser.parseRequest(_:RetrieveSavingsAccountAnnualSummaryRawData)).expects(data)
+      (mockRetrieveSavingsAnnualSummaryRequestDataParser.parseRequest(_:RetrieveSavingsAccountAnnualSummaryRawData)(_: String)).expects(data, *)
     }
   }
 }

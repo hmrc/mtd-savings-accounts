@@ -30,19 +30,19 @@ trait MockSavingsAccountsService extends MockFactory {
 
   object MockSavingsAccountService {
     def create(savingsAccountRequest: CreateSavingsAccountRequestData): CallHandler[Future[CreateSavingsAccountOutcome]] = {
-      (mockSavingsAccountService.create(_: CreateSavingsAccountRequestData)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(savingsAccountRequest, *, *)
+      (mockSavingsAccountService.create(_: CreateSavingsAccountRequestData)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(savingsAccountRequest, *, *, *)
     }
 
     def retrieveAll(savingsAccountRequest: RetrieveAllSavingsAccountRequest): CallHandler[Future[RetrieveAllSavingsAccountsOutcome]] = {
-      (mockSavingsAccountService.retrieveAll(_: RetrieveAllSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(savingsAccountRequest, *, *)
+      (mockSavingsAccountService.retrieveAll(_: RetrieveAllSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(savingsAccountRequest, *, *, *)
     }
 
 
     def retrieve(savingsAccountRequest: RetrieveSavingsAccountRequest): CallHandler[Future[RetrieveSavingsAccountsOutcome]] = {
-      (mockSavingsAccountService.retrieve(_: RetrieveSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(savingsAccountRequest, *, *)
+      (mockSavingsAccountService.retrieve(_: RetrieveSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(savingsAccountRequest, *, *, *)
     }
   }
 

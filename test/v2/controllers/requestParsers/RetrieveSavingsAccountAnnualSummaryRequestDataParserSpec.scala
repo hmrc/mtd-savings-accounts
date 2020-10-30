@@ -28,41 +28,43 @@ class RetrieveSavingsAccountAnnualSummaryRequestDataParserSpec extends UnitSpec 
     val parser = new RetrieveSavingsAccountAnnualSummaryRequestDataParser(mockValidator)
   }
 
+  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
   val nino = "AA123456A"
   val invalidNino = "AA123A"
   val taxYear = "2018-19"
   val invalidTaxYear = "2018-2019"
   val savingsAccountId = "ASDFKLM123WQR13"
-  val requestRawData = RetrieveSavingsAccountAnnualSummaryRawData(nino, taxYear, savingsAccountId)
+  val requestRawData: RetrieveSavingsAccountAnnualSummaryRawData = RetrieveSavingsAccountAnnualSummaryRawData(nino, taxYear, savingsAccountId)
 
   "parse request" should {
     "return a valid request details object" when {
       "a valid request details is supplied" in new Test{
-        val validRequest = RetrieveSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear.fromMtd(taxYear), savingsAccountId)
+        val validRequest: RetrieveSavingsAccountAnnualSummaryRequest =
+          RetrieveSavingsAccountAnnualSummaryRequest(Nino(nino), DesTaxYear.fromMtd(taxYear), savingsAccountId)
         MockRetrieveSavingsAccountAnnualSummaryValidator.validate(requestRawData).returns(Nil)
 
-        val result = parser.parseRequest(requestRawData)
+        val result: Either[ErrorWrapper, RetrieveSavingsAccountAnnualSummaryRequest] = parser.parseRequest(requestRawData)
         result shouldBe Right(validRequest)
       }
     }
 
     "return a single error" when {
       "invalid nino is supplied" in new Test {
-        val invalidRequestRawData = requestRawData.copy(nino = invalidNino)
+        val invalidRequestRawData: RetrieveSavingsAccountAnnualSummaryRawData = requestRawData.copy(nino = invalidNino)
         MockRetrieveSavingsAccountAnnualSummaryValidator.validate(invalidRequestRawData).returns(List(NinoFormatError))
 
-        val result = parser.parseRequest(invalidRequestRawData)
-        result shouldBe Left(ErrorWrapper(None, NinoFormatError, None))
+        val result: Either[ErrorWrapper, RetrieveSavingsAccountAnnualSummaryRequest] = parser.parseRequest(invalidRequestRawData)
+        result shouldBe Left(ErrorWrapper(correlationId, NinoFormatError, None))
       }
     }
 
     "return multiple errors" when {
       "invalid nino and invalid tax year is supplied" in new Test{
-        val invalidRequestRawData = requestRawData.copy(nino = invalidNino, taxYear = invalidTaxYear)
+        val invalidRequestRawData: RetrieveSavingsAccountAnnualSummaryRawData = requestRawData.copy(nino = invalidNino, taxYear = invalidTaxYear)
         MockRetrieveSavingsAccountAnnualSummaryValidator.validate(invalidRequestRawData).returns(List(NinoFormatError, TaxYearFormatError))
 
-        val result = parser.parseRequest(invalidRequestRawData)
-        result shouldBe Left(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
+        val result: Either[ErrorWrapper, RetrieveSavingsAccountAnnualSummaryRequest] = parser.parseRequest(invalidRequestRawData)
+        result shouldBe Left(ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
       }
     }
 

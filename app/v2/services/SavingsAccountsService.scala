@@ -31,30 +31,33 @@ class SavingsAccountsService @Inject()(connector: DesConnector) extends DesServi
 
   def create(request: CreateSavingsAccountRequestData)
             (implicit hc: HeaderCarrier,
-             ec: ExecutionContext): Future[CreateSavingsAccountOutcome] = {
+             ec: ExecutionContext,
+             correlationId: String): Future[CreateSavingsAccountOutcome] = {
     connector.createSavingsAccount(request)
       .map(mapToVendorDirect("create", desErrorToMtdErrorCreate))
   }
 
   def retrieveAll(request: RetrieveAllSavingsAccountRequest)
                  (implicit hc: HeaderCarrier,
-                  ec: ExecutionContext): Future[RetrieveAllSavingsAccountsOutcome] = {
+                  ec: ExecutionContext,
+                  correlationId: String): Future[RetrieveAllSavingsAccountsOutcome] = {
     connector.retrieveAllSavingsAccounts(request)
       .map(mapToVendorDirect("retrieveAll", desErrorToMtdErrorRetrieveAll))
   }
 
   def retrieve(request: RetrieveSavingsAccountRequest)(implicit hc: HeaderCarrier,
-                                                       ec: ExecutionContext): Future[RetrieveSavingsAccountsOutcome] = {
+                                                       ec: ExecutionContext,
+                                                       correlationId: String): Future[RetrieveSavingsAccountsOutcome] = {
     connector.retrieveSavingsAccount(request).map {
       mapToVendor("retrieve", desErrorToMtdErrorRetrieve) {
         desResponse =>
           desResponse.responseData match {
             case ac :: Nil => Right(DesResponse(desResponse.correlationId, ac))
-            case Nil       => Left(ErrorWrapper(Some(desResponse.correlationId), NotFoundError, None))
+            case Nil       => Left(ErrorWrapper(desResponse.correlationId, NotFoundError, None))
             case _         =>
               logger.info(s"[SavingsAccountsService] [retrieve] [CorrelationId - ${desResponse.correlationId}] - " +
                 "More than one matching account found")
-              Left(ErrorWrapper(Some(desResponse.correlationId), DownstreamError, None))
+              Left(ErrorWrapper(desResponse.correlationId, DownstreamError, None))
           }
       }
     }

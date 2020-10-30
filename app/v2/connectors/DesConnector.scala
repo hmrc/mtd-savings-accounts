@@ -33,16 +33,17 @@ import scala.concurrent.{ExecutionContext, Future}
 class DesConnector @Inject()(http: HttpClient,
                              appConfig: AppConfig) {
 
-  val logger = Logger(this.getClass)
+  val logger: Logger = Logger(this.getClass)
 
   import v2.httpparsers.StandardDesHttpParser._
 
-  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = hc
+  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier, correlationId: String): HeaderCarrier = hc
     .copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
-    .withExtraHeaders("Environment" -> appConfig.desEnv)
+    .withExtraHeaders("Environment" -> appConfig.desEnv, "CorrelationId" -> correlationId)
 
   def createSavingsAccount(createSavingsAccountRequestData: CreateSavingsAccountRequestData)
-                          (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CreateSavingsAccountConnectorOutcome] = {
+                          (implicit hc: HeaderCarrier, ec: ExecutionContext,
+                           correlationId: String): Future[CreateSavingsAccountConnectorOutcome] = {
 
     import CreateSavingsAccountRequest.writes
     val nino = createSavingsAccountRequestData.nino.nino
@@ -56,7 +57,8 @@ class DesConnector @Inject()(http: HttpClient,
   }
 
   def retrieveAllSavingsAccounts(retrieveAllSavingsAccountRequest: RetrieveAllSavingsAccountRequest)
-                                (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveAllSavingsAccountsConnectorOutcome] = {
+                                (implicit hc: HeaderCarrier, ec: ExecutionContext,
+                                 correlationId: String): Future[RetrieveAllSavingsAccountsConnectorOutcome] = {
 
     val nino = retrieveAllSavingsAccountRequest.nino.nino
 
@@ -67,7 +69,8 @@ class DesConnector @Inject()(http: HttpClient,
   }
 
   def retrieveSavingsAccount(request: RetrieveSavingsAccountRequest)
-                            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[DesConnectorOutcome[List[RetrieveSavingsAccountResponse]]] = {
+                            (implicit hc: HeaderCarrier, ec: ExecutionContext,
+                             correlationId: String): Future[DesConnectorOutcome[List[RetrieveSavingsAccountResponse]]] = {
 
     val nino = request.nino.nino
     val incomeSourceId = request.accountId
@@ -79,7 +82,8 @@ class DesConnector @Inject()(http: HttpClient,
   }
 
   def amendSavingsAccountAnnualSummary(amendSavingsAccountAnnualSummaryRequest: AmendSavingsAccountAnnualSummaryRequest)
-                                      (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmendSavingsAccountAnnualSummaryConnectorOutcome] = {
+                                      (implicit hc: HeaderCarrier, ec: ExecutionContext,
+                                       correlationId: String): Future[AmendSavingsAccountAnnualSummaryConnectorOutcome] = {
 
     val nino = amendSavingsAccountAnnualSummaryRequest.nino.nino
     val desTaxYear = amendSavingsAccountAnnualSummaryRequest.desTaxYear.toString
@@ -96,7 +100,8 @@ class DesConnector @Inject()(http: HttpClient,
   }
 
   def retrieveSavingsAccountAnnualSummary(retrieveSavingsAccountAnnualSummaryRequest: RetrieveSavingsAccountAnnualSummaryRequest)
-                                      (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveSavingsAccountAnnualSummaryConnectorOutcome] = {
+                                      (implicit hc: HeaderCarrier, ec: ExecutionContext,
+                                       correlationId: String): Future[RetrieveSavingsAccountAnnualSummaryConnectorOutcome] = {
 
     val nino = retrieveSavingsAccountAnnualSummaryRequest.nino.nino
     val desTaxYear = retrieveSavingsAccountAnnualSummaryRequest.desTaxYear

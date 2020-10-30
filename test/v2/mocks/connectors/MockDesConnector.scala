@@ -30,29 +30,29 @@ trait MockDesConnector extends MockFactory {
 
   object MockedDesConnector {
     def create(createSavingsAccountRequestData: CreateSavingsAccountRequestData): CallHandler[Future[CreateSavingsAccountConnectorOutcome]] = {
-      (connector.createSavingsAccount(_: CreateSavingsAccountRequestData)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(createSavingsAccountRequestData, *, *)
+      (connector.createSavingsAccount(_: CreateSavingsAccountRequestData)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(createSavingsAccountRequestData, *, *, *)
     }
 
     def retrieveAll(retrieveSavingsAccountRequest: RetrieveAllSavingsAccountRequest): CallHandler[Future[RetrieveAllSavingsAccountsConnectorOutcome]] = {
-      (connector.retrieveAllSavingsAccounts(_: RetrieveAllSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(retrieveSavingsAccountRequest, *, *)
+      (connector.retrieveAllSavingsAccounts(_: RetrieveAllSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(retrieveSavingsAccountRequest, *, *, *)
     }
 
     def retrieve(retrieveSavingsAccountRequest: RetrieveSavingsAccountRequest): CallHandler[Future[RetrieveSavingsAccountConnectorOutcome]] = {
-      (connector.retrieveSavingsAccount(_: RetrieveSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(retrieveSavingsAccountRequest, *, *)
+      (connector.retrieveSavingsAccount(_: RetrieveSavingsAccountRequest)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(retrieveSavingsAccountRequest, *, *, *)
     }
 
     def amendAnnualSummary(amendSavingsAccountAnnualSummaryRequest:
                            AmendSavingsAccountAnnualSummaryRequest): CallHandler[Future[AmendSavingsAccountAnnualSummaryConnectorOutcome]] = {
-      (connector.amendSavingsAccountAnnualSummary(_: AmendSavingsAccountAnnualSummaryRequest)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(amendSavingsAccountAnnualSummaryRequest, *, *)
+      (connector.amendSavingsAccountAnnualSummary(_: AmendSavingsAccountAnnualSummaryRequest)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(amendSavingsAccountAnnualSummaryRequest, *, *, *)
     }
 
     def retrieveAnnualSummary(request: RetrieveSavingsAccountAnnualSummaryRequest): CallHandler[Future[RetrieveSavingsAccountAnnualSummaryConnectorOutcome]] = {
-      (connector.retrieveSavingsAccountAnnualSummary(_: RetrieveSavingsAccountAnnualSummaryRequest)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(request, *, *)
+      (connector.retrieveSavingsAccountAnnualSummary(_: RetrieveSavingsAccountAnnualSummaryRequest)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(request, *, *, *)
     }
   }
 

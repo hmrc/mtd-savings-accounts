@@ -30,7 +30,6 @@ class SavingsAccountDesConnectorSpec extends ConnectorSpec {
   lazy val baseUrl = "test-BaseUrl"
 
   val incomeSourceId = "ZZIS12345678901"
-  val correlationId = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
   val nino = "AA123456A"
   val accountName = "Main account name"
   val duplicateAccountName = "Main account name dupe"

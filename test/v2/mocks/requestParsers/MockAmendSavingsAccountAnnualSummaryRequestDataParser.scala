@@ -28,7 +28,7 @@ trait MockAmendSavingsAccountAnnualSummaryRequestDataParser extends MockFactory 
 
   object MockAmendSavingsAccountAnnualSummaryRequestDataParser {
     def parse(data: AmendSavingsAccountAnnualSummaryRawData): CallHandler[Either[ErrorWrapper, AmendSavingsAccountAnnualSummaryRequest]] = {
-      (mockAmendSavingsAccountAnnualSummaryRequestDataParser.parseRequest(_: AmendSavingsAccountAnnualSummaryRawData)).expects(data)
+      (mockAmendSavingsAccountAnnualSummaryRequestDataParser.parseRequest(_: AmendSavingsAccountAnnualSummaryRawData)(_: String)).expects(data, *)
     }
   }
 

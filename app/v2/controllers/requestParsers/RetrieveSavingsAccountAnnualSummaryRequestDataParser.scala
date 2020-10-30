@@ -17,22 +17,35 @@
 package v2.controllers.requestParsers
 
 import javax.inject.Inject
+import play.api.Logger
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.RetrieveSavingsAccountAnnualSummaryValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper}
 import v2.models.requestData.{DesTaxYear, RetrieveSavingsAccountAnnualSummaryRawData, RetrieveSavingsAccountAnnualSummaryRequest}
 
-class RetrieveSavingsAccountAnnualSummaryRequestDataParser @Inject()(validator: RetrieveSavingsAccountAnnualSummaryValidator) {
+class RetrieveSavingsAccountAnnualSummaryRequestDataParser @Inject()(validator: RetrieveSavingsAccountAnnualSummaryValidator){
 
-  def parseRequest(data: RetrieveSavingsAccountAnnualSummaryRawData): Either[ErrorWrapper, RetrieveSavingsAccountAnnualSummaryRequest] = {
+  val logger: Logger = Logger(this.getClass)
+
+  def parseRequest(data: RetrieveSavingsAccountAnnualSummaryRawData)(implicit correlationId: String):
+  Either[ErrorWrapper, RetrieveSavingsAccountAnnualSummaryRequest] = {
 
     validator.validate(data) match {
-      case Nil => Right(RetrieveSavingsAccountAnnualSummaryRequest(
+      case Nil =>
+        logger.info(message = "[RequestParser][parseRequest] " +
+          s"Validation successful for the request with correlationId : $correlationId")
+        Right(RetrieveSavingsAccountAnnualSummaryRequest(
         nino = Nino(data.nino),
         desTaxYear = DesTaxYear.fromMtd(data.taxYear),
         savingsAccountId = data.savingsAccountId))
-      case err :: Nil => Left(ErrorWrapper(None, err, None))
-      case errors => Left(ErrorWrapper(None, BadRequestError, Some(errors)))
+      case err :: Nil =>
+        logger.info(message = "[RequestParser][parseRequest] " +
+          s"Validation failed with ${err.code} error for the request with correlationId : $correlationId")
+        Left(ErrorWrapper(correlationId, err, None))
+      case errs =>
+        logger.info("[RequestParser][parseRequest] " +
+          s"Validation failed with ${errs.map(_.code).mkString(",")} error for the request with correlationId : $correlationId")
+        Left(ErrorWrapper(correlationId, BadRequestError, Some(errs)))
     }
   }
 }

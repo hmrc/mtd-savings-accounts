@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package v2.services
+package v2.mocks
 
-import play.api.http.{HeaderNames, MimeTypes, Status}
-import support.UnitSpec
-import uk.gov.hmrc.http.HeaderCarrier
+import org.scalamock.handlers.CallHandler
+import org.scalamock.scalatest.MockFactory
+import v2.utils.IdGenerator
 
-import scala.concurrent.ExecutionContext
 
-trait ServiceSpec extends UnitSpec
-  with Status
-  with MimeTypes
-  with HeaderNames {
+trait MockIdGenerator extends MockFactory {
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
-  implicit val correlationId = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
+  val mockIdGenerator: IdGenerator = mock[IdGenerator]
+
+  object MockIdGenerator {
+    def getCorrelationId: CallHandler[String] = (mockIdGenerator.getCorrelationId _).expects()
+  }
 }
