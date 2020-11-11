@@ -38,7 +38,7 @@ object StandardDesHttpParser extends HttpParser {
         val correlationId = retrieveCorrelationId(response)
 
         if (response.status != OK) {
-          logger.info("[StandardDesHttpParser][read] - " +
+          logger.warn("[StandardDesHttpParser][read] - " +
             s"Error response received from DES with status: ${response.status} and body\n" +
             s"${response.body} and correlationId: $correlationId when calling $url")
         }

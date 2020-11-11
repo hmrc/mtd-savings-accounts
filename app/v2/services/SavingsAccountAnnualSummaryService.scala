@@ -68,7 +68,7 @@ class SavingsAccountAnnualSummaryService @Inject()(connector: DesConnector) exte
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
   ).withDefault { error =>
-    logger.info(s"[SavingsAccountAnnualSummaryService] [amend] - No mapping found for error code $error")
+    logger.warn(s"[SavingsAccountAnnualSummaryService] [amend] - Unexpected DES error returned - No mapping found for error code $error")
     DownstreamError
   }
 
@@ -82,7 +82,7 @@ class SavingsAccountAnnualSummaryService @Inject()(connector: DesConnector) exte
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
   ).withDefault { error =>
-    logger.info(s"[SavingsAccountAnnualSummaryService] [retrieve] - No mapping found for error code $error")
+    logger.warn(s"[SavingsAccountAnnualSummaryService] [retrieve] - Unexpected DES error returned - No mapping found for error code $error")
     DownstreamError
   }
 }
