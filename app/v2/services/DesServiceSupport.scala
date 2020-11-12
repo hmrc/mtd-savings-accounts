@@ -85,7 +85,7 @@ trait DesServiceSupport {
   final def mapToVendorDirect[D](endpointName: String,
                                  errorMap: String => Error): DesConnectorOutcome[D] => VendorOutcome[D] =
     mapToVendor(endpointName, errorMap) {
-      desResponse => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
+      desResponse => Right(desResponse)
     }
 
 }
