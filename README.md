@@ -13,7 +13,7 @@ The MTD Savings Accounts microservice allows a developer to:
 ## Requirements
 - Scala 2.12.x
 - Java 8
-- sbt 1.3.7
+- sbt 1.3.13
 - [Service Manager](https://github.com/hmrc/service-manager)
 
 ## Development Setup
