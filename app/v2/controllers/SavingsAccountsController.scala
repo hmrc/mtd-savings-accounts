@@ -68,7 +68,7 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
         case Left(errorWrapper) =>
           val returnedCorrelationId = errorWrapper.correlationId
           val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> returnedCorrelationId)
-          logger.info(
+          logger.warn(
             s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
               s"Error response received with CorrelationId: $returnedCorrelationId")
           auditSubmission(createAuditDetails(nino, result.header.status, request.request.body, returnedCorrelationId,
@@ -78,7 +78,7 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
       case Left(errorWrapper) =>
         val returnedCorrelationId = errorWrapper.correlationId
         val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> returnedCorrelationId)
-        logger.info(
+        logger.warn(
           s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
             s"Error response received with CorrelationId: $returnedCorrelationId")
         auditSubmission(createAuditDetails(nino, result.header.status, request.request.body, returnedCorrelationId,
@@ -103,13 +103,13 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
           Ok(RetrieveAllSavingsAccountResponse.writesList.writes(desResponse.responseData))
             .withHeaders("X-CorrelationId" -> desResponse.correlationId)
         case Left(errorWrapper) =>
-          logger.info(
+          logger.warn(
             s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
               s"Error response received with CorrelationId: ${errorWrapper.correlationId}")
 
           processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId)
       }
-      case Left(errorWrapper) => logger.info(
+      case Left(errorWrapper) => logger.warn(
         s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
           s"Error response received with CorrelationId: ${errorWrapper.correlationId}")
 
@@ -133,12 +133,12 @@ class SavingsAccountsController @Inject()(val authService: EnrolmentsAuthService
             s" - Success response received with CorrelationId: ${desResponse.correlationId}")
           Ok(RetrieveSavingsAccountResponse.vendorWrites.writes(desResponse.responseData))
             .withHeaders("X-CorrelationId" -> desResponse.correlationId)
-        case Left(errorWrapper) => logger.info(
+        case Left(errorWrapper) => logger.warn(
           s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
             s"Error response received with CorrelationId: ${errorWrapper.correlationId}")
           processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId)
       }
-      case Left(errorWrapper) => logger.info(
+      case Left(errorWrapper) => logger.warn(
         s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
           s"Error response received with CorrelationId: ${errorWrapper.correlationId}")
 

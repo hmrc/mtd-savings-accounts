@@ -57,7 +57,7 @@ trait DesServiceSupport {
     case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
       val mtdErrors = errors.map(error => errorMap(error.code))
       if (mtdErrors.contains(DownstreamError)) {
-        logger.info(s"[$serviceName] [$endpointName] [CorrelationId - $correlationId]" +
+        logger.warn(s"[$serviceName] [$endpointName] [CorrelationId - $correlationId]" +
           s" - downstream returned ${errors.map(_.code).mkString(",")}. Revert to ISE")
         Left(ErrorWrapper(correlationId, DownstreamError, None))
       } else {
