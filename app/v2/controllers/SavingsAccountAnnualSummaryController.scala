@@ -71,7 +71,7 @@ class SavingsAccountAnnualSummaryController @Inject()(
             case Left(errorWrapper) =>
               val returnedCorrelationId = errorWrapper.correlationId
               val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> returnedCorrelationId)
-              logger.info(
+              logger.warn(
                 s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
                   s"Error response received with CorrelationId: $returnedCorrelationId")
               auditSubmission(details = createAuditDetails(
@@ -85,7 +85,7 @@ class SavingsAccountAnnualSummaryController @Inject()(
       case Left(errorWrapper) =>
         val returnedCorrelationId = errorWrapper.correlationId
         val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> returnedCorrelationId)
-        logger.info(
+        logger.warn(
           s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
             s"Error response received with CorrelationId: $returnedCorrelationId")
         auditSubmission(createAuditDetails(
@@ -116,12 +116,12 @@ class SavingsAccountAnnualSummaryController @Inject()(
             Ok(SavingsAccountAnnualSummary.writes.writes(desResponse.responseData))
               .withHeaders("X-CorrelationId" -> desResponse.correlationId)
 
-          case Left(errorWrapper) => logger.info(
+          case Left(errorWrapper) => logger.warn(
             s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
               s"Error response received with CorrelationId: ${errorWrapper.correlationId}")
             processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId)
         }
-      case Left(errorWrapper) => logger.info(
+      case Left(errorWrapper) => logger.warn(
         s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
           s"Error response received with CorrelationId: ${errorWrapper.correlationId}")
         Future.successful(processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId))

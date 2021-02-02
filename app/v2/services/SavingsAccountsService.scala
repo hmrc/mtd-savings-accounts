@@ -72,7 +72,7 @@ class SavingsAccountsService @Inject()(connector: DesConnector) extends DesServi
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
   ).withDefault { error =>
-    logger.info(s"[SavingsAccountsService] [create] - No mapping found for error code $error")
+    logger.warn(s"[SavingsAccountsService] [create] - No mapping found for error code $error")
     DownstreamError
   }
 
