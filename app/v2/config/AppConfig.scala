@@ -31,33 +31,21 @@ trait AppConfig {
 
   def desToken: String
 
-  def confidenceLevelConfig: ConfidenceLevelConfig
+  def authValidationCheck: Boolean
 }
 
 @Singleton
-class AppConfigImpl @Inject()(config: ServicesConfig, configuration: Configuration) extends AppConfig with FixedConfig{
-
+class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig with FixedConfig{
 
   val mtdIdBaseUrl: String = config.baseUrl("mtd-id-lookup")
   val desBaseUrl: String = config.baseUrl("des")
   val desEnv: String = config.getString("microservice.services.des.env")
   val desToken: String = config.getString("microservice.services.des.token")
-  val confidenceLevelConfig: ConfidenceLevelConfig = configuration.get[ConfidenceLevelConfig](s"api.confidence-level-check")
+  val authValidationCheck: Boolean = config.getBoolean(s"api.confidence-level-check.auth-validation.enabled")
 
 }
 
 trait FixedConfig {
   // Minimum tax year for MTD
   val minimumTaxYear = 2018
-}
-
-case class ConfidenceLevelConfig(definitionEnabled: Boolean, authValidationEnabled: Boolean)
-object ConfidenceLevelConfig {
-  implicit val configLoader: ConfigLoader[ConfidenceLevelConfig] = (rootConfig: Config, path: String) => {
-    val config = rootConfig.getConfig(path)
-    ConfidenceLevelConfig(
-      definitionEnabled = config.getBoolean("definition.enabled"),
-      authValidationEnabled = config.getBoolean("auth-validation.enabled")
-    )
-  }
 }
