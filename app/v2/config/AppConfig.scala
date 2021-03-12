@@ -28,16 +28,18 @@ trait AppConfig {
   def desEnv: String
 
   def desToken: String
+
+  def authValidationCheck: Boolean
 }
 
 @Singleton
 class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig with FixedConfig{
 
-
   val mtdIdBaseUrl: String = config.baseUrl("mtd-id-lookup")
   val desBaseUrl: String = config.baseUrl("des")
   val desEnv: String = config.getString("microservice.services.des.env")
   val desToken: String = config.getString("microservice.services.des.token")
+  val authValidationCheck: Boolean = config.getBoolean(s"api.confidence-level-check.auth-validation.enabled")
 
 }
 
