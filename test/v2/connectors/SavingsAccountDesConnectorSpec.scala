@@ -16,9 +16,8 @@
 
 package v2.connectors
 
-import uk.gov.hmrc.domain.Nino
 import v2.mocks.{MockAppConfig, MockHttpClient}
-import v2.models.domain.{CreateSavingsAccountRequest, CreateSavingsAccountResponse, RetrieveAllSavingsAccountResponse, RetrieveSavingsAccountResponse}
+import v2.models.domain._
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSavingsAccountRequest, RetrieveSavingsAccountRequest}
@@ -26,8 +25,6 @@ import v2.models.requestData.{CreateSavingsAccountRequestData, RetrieveAllSaving
 import scala.concurrent.Future
 
 class SavingsAccountDesConnectorSpec extends ConnectorSpec {
-
-  lazy val baseUrl = "test-BaseUrl"
 
   val incomeSourceId = "ZZIS12345678901"
   val nino = "AA123456A"
@@ -39,9 +36,11 @@ class SavingsAccountDesConnectorSpec extends ConnectorSpec {
       http = mockHttpClient,
       appConfig = mockAppConfig
     )
-    MockedAppConfig.desBaseUrl returns baseUrl
-    MockedAppConfig.desToken returns "des-token"
-    MockedAppConfig.desEnvironment returns "des-environment"
+    MockAppConfig.desBaseUrl returns baseUrl
+    MockAppConfig.desToken returns "des-token"
+    MockAppConfig.desEnvironment returns "des-environment"
+    MockAppConfig.desEnvironmentHeaders returns Some(allowedDesHeaders)
+
   }
 
   "Create income source" when {
@@ -51,8 +50,11 @@ class SavingsAccountDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, CreateSavingsAccountResponse(incomeSourceId))
 
         MockedHttpClient.post[CreateSavingsAccountRequest, CreateSavingsAccountConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino",
-          CreateSavingsAccountRequest(accountName)
+          url = s"$baseUrl" + s"/income-tax/income-sources/nino/$nino",
+          config = dummyDesHeaderCarrierConfig,
+          body = CreateSavingsAccountRequest(accountName),
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Right(expectedDesResponse)))
 
         val result: CreateSavingsAccountConnectorOutcome =
@@ -68,8 +70,11 @@ class SavingsAccountDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, SingleError(AccountNameDuplicateError))
 
         MockedHttpClient.post[CreateSavingsAccountRequest, CreateSavingsAccountConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino",
-          CreateSavingsAccountRequest(duplicateAccountName)
+          url = s"$baseUrl" + s"/income-tax/income-sources/nino/$nino",
+          config = dummyDesHeaderCarrierConfig,
+          body = CreateSavingsAccountRequest(duplicateAccountName),
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: CreateSavingsAccountConnectorOutcome =
@@ -85,8 +90,11 @@ class SavingsAccountDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, MultipleErrors(Seq(AccountNameDuplicateError, MaximumSavingsAccountsLimitError)))
 
         MockedHttpClient.post[CreateSavingsAccountRequest, CreateSavingsAccountConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino",
-          CreateSavingsAccountRequest(duplicateAccountName)
+          url = s"$baseUrl" + s"/income-tax/income-sources/nino/$nino",
+          config = dummyDesHeaderCarrierConfig,
+          body = CreateSavingsAccountRequest(duplicateAccountName),
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: CreateSavingsAccountConnectorOutcome =
@@ -105,7 +113,10 @@ class SavingsAccountDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, expectedResponseBody)
 
         MockedHttpClient.get[RetrieveAllSavingsAccountsConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks"
+          url = s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks",
+          config = dummyDesHeaderCarrierConfig,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Right(expectedDesResponse)))
 
         val result: RetrieveAllSavingsAccountsConnectorOutcome =
@@ -121,7 +132,10 @@ class SavingsAccountDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, SingleError(NinoFormatError))
 
         MockedHttpClient.get[RetrieveAllSavingsAccountsConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks"
+          url = s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks",
+          config = dummyDesHeaderCarrierConfig,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveAllSavingsAccountsConnectorOutcome =
@@ -134,7 +148,10 @@ class SavingsAccountDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, NotFoundError)))
 
         MockedHttpClient.get[RetrieveAllSavingsAccountsConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks"
+          url = s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks",
+          config = dummyDesHeaderCarrierConfig,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveAllSavingsAccountsConnectorOutcome =
@@ -154,7 +171,10 @@ class SavingsAccountDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, expectedResponseBody)
 
         MockedHttpClient.get[RetrieveSavingsAccountConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId"
+          url = s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId",
+          config = dummyDesHeaderCarrierConfig,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Right(expectedDesResponse)))
 
         val result: RetrieveSavingsAccountConnectorOutcome =
@@ -170,7 +190,10 @@ class SavingsAccountDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, SingleError(NinoFormatError))
 
         MockedHttpClient.get[RetrieveSavingsAccountConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId"
+          url = s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId",
+          config = dummyDesHeaderCarrierConfig,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveSavingsAccountConnectorOutcome =
@@ -185,7 +208,10 @@ class SavingsAccountDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, NotFoundError)))
 
         MockedHttpClient.get[RetrieveSavingsAccountConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId"
+          url = s"$baseUrl" + s"/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId",
+          config = dummyDesHeaderCarrierConfig,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveSavingsAccountConnectorOutcome =

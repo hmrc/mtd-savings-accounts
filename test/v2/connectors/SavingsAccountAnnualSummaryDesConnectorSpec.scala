@@ -17,10 +17,9 @@
 package v2.connectors
 
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.domain.Nino
 import v2.mocks.{MockAppConfig, MockHttpClient}
 import v2.models.des.{DesAmendSavingsAccountAnnualSummaryResponse, DesRetrieveSavingsAccountAnnualIncomeResponse, DesSavingsInterestAnnualIncome}
-import v2.models.domain._
+import v2.models.domain.{Nino, _}
 import v2.models.errors.{MultipleErrors, NinoFormatError, SingleError, TaxYearFormatError}
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{AmendSavingsAccountAnnualSummaryRequest, DesTaxYear, RetrieveSavingsAccountAnnualSummaryRequest}
@@ -28,8 +27,6 @@ import v2.models.requestData.{AmendSavingsAccountAnnualSummaryRequest, DesTaxYea
 import scala.concurrent.Future
 
 class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
-
-  lazy val baseUrl = "test-BaseUrl"
 
   val incomeSourceId = "ZZIS12345678901"
   val nino = "AA123456A"
@@ -51,9 +48,10 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
       http = mockHttpClient,
       appConfig = mockAppConfig
     )
-    MockedAppConfig.desBaseUrl returns baseUrl
-    MockedAppConfig.desToken returns "des-token"
-    MockedAppConfig.desEnvironment returns "des-environment"
+    MockAppConfig.desBaseUrl returns baseUrl
+    MockAppConfig.desToken returns "des-token"
+    MockAppConfig.desEnvironment returns "des-environment"
+    MockAppConfig.desEnvironmentHeaders returns Some(allowedDesHeaders)
   }
 
   val savingsAccountAnnualSummary: SavingsAccountAnnualSummary = SavingsAccountAnnualSummary(Some(2000.99), Some(5000.50))
@@ -68,8 +66,11 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
           DesResponse(correlationId, DesAmendSavingsAccountAnnualSummaryResponse(transactionReference))
 
         MockedHttpClient.post[DesSavingsInterestAnnualIncome, AmendSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
-          desSavingsAccountAnnualIncome
+          url = s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
+          config = dummyDesHeaderCarrierConfig,
+          body = desSavingsAccountAnnualIncome,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Right(expectedDesResponse)))
 
         val result: AmendSavingsAccountAnnualSummaryConnectorOutcome =
@@ -85,8 +86,11 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse: DesResponse[SingleError] = DesResponse(correlationId, SingleError(NinoFormatError))
 
         MockedHttpClient.post[DesSavingsInterestAnnualIncome, AmendSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
-          desSavingsAccountAnnualIncome
+          url = s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
+          config = dummyDesHeaderCarrierConfig,
+          body = desSavingsAccountAnnualIncome,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: AmendSavingsAccountAnnualSummaryConnectorOutcome =
@@ -102,8 +106,11 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse: DesResponse[MultipleErrors] = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockedHttpClient.post[DesSavingsInterestAnnualIncome, AmendSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
-          desSavingsAccountAnnualIncome
+          url = s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}",
+          config = dummyDesHeaderCarrierConfig,
+          body = desSavingsAccountAnnualIncome,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: AmendSavingsAccountAnnualSummaryConnectorOutcome =
@@ -125,7 +132,10 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
         ))
 
         MockedHttpClient.get[RetrieveSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}?incomeSourceId=$incomeSourceId"
+          url = s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}?incomeSourceId=$incomeSourceId",
+          config = dummyDesHeaderCarrierConfig,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Right(expectedDesResponse)))
 
         val result: RetrieveSavingsAccountAnnualSummaryConnectorOutcome = await(connector.retrieveSavingsAccountAnnualSummary(request))
@@ -141,7 +151,10 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse: DesResponse[SingleError] = DesResponse(correlationId, SingleError(NinoFormatError))
 
         MockedHttpClient.get[RetrieveSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}?incomeSourceId=$incomeSourceId"
+          url = s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}?incomeSourceId=$incomeSourceId",
+          config = dummyDesHeaderCarrierConfig,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveSavingsAccountAnnualSummaryConnectorOutcome = await(connector.retrieveSavingsAccountAnnualSummary(request))
@@ -154,7 +167,10 @@ class SavingsAccountAnnualSummaryDesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse: DesResponse[MultipleErrors] = DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockedHttpClient.get[RetrieveSavingsAccountAnnualSummaryConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}?incomeSourceId=$incomeSourceId"
+          url = s"$baseUrl" + s"/income-tax/nino/$nino/income-source/savings/annual/${DesTaxYear.fromMtd(taxYear)}?incomeSourceId=$incomeSourceId",
+          config = dummyDesHeaderCarrierConfig,
+          requiredHeaders = requiredDesHeaders,
+          excludedHeaders = Seq("AnotherHeader" -> "HeaderValue")
         ).returns(Future.successful(Left(expectedDesResponse)))
 
         val result: RetrieveSavingsAccountAnnualSummaryConnectorOutcome = await(connector.retrieveSavingsAccountAnnualSummary(request))

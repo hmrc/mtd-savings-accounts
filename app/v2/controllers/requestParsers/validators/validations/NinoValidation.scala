@@ -16,12 +16,12 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import v2.models.errors.{Error, NinoFormatError}
 
 object NinoValidation {
 
-  val accountNameRegex =
+  val accountNameRegex: String =
     "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|" +
       "[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D ]?$"
 

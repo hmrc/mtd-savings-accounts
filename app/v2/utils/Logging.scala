@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.utils
 
-import v2.models.domain.Nino
+import play.api.Logger
 
-case class RetrieveSavingsAccountRequest(nino: Nino, accountId: String)
+trait Logging {
+  lazy val logger: Logger = Logger(this.getClass)
+}
