@@ -56,7 +56,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
     http.POST[CreateSavingsAccountRequest,
       CreateSavingsAccountConnectorOutcome](url,
-      createSavingsAccountRequestData.createSavingsAccount)(writes, reads[CreateSavingsAccountResponse], desHeaderCarrier(), implicitly)
+      createSavingsAccountRequestData.createSavingsAccount)(writes, reads[CreateSavingsAccountResponse], desHeaderCarrier(Seq("Content-Type")), implicitly)
 
   }
 
@@ -99,7 +99,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
       DesSavingsInterestAnnualIncome.fromMtd(
         incomeSourceId,
         amendSavingsAccountAnnualSummaryRequest.savingsAccountAnnualSummary))(
-      DesSavingsInterestAnnualIncome.writes, reads[DesAmendSavingsAccountAnnualSummaryResponse], desHeaderCarrier(), implicitly)
+      DesSavingsInterestAnnualIncome.writes, reads[DesAmendSavingsAccountAnnualSummaryResponse], desHeaderCarrier(Seq("Content-Type")), implicitly)
 
   }
 

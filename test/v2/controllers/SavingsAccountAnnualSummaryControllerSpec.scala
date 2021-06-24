@@ -26,7 +26,7 @@ import v2.mocks.requestParsers._
 import v2.mocks.services.{MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService, MockSavingsAccountAnnualSummaryService}
 import v2.models.audit._
 import v2.models.des.DesAmendSavingsAccountAnnualSummaryResponse
-import v2.models.domain.{Nino, _}
+import v2.models.domain._
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData._
