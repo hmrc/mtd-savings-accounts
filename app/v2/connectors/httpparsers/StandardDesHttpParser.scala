@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package v2.httpparsers
+package v2.connectors.httpparsers
 
-import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json.Reads
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.connectors.DesConnectorOutcome
-import v2.connectors.httpparsers.HttpParser
 import v2.models.errors.{DownstreamError, OutboundError}
 import v2.models.outcomes.DesResponse
 
-
 object StandardDesHttpParser extends HttpParser {
-
-  val logger = Logger(getClass)
 
   implicit def reads[A: Reads]: HttpReads[DesConnectorOutcome[A]] =
 

@@ -22,7 +22,11 @@ import play.api.libs.json._
 case class Error(code: String, message: String)
 
 object Error {
-  implicit val writes: Writes[Error] = Json.writes[Error]
+  implicit val writes: OWrites[Error] = Json.writes[Error]
+
+  implicit def genericWrites[T <: Error]: OWrites[T] =
+    writes.contramap[T](c => c: Error)
+
   implicit val reads: Reads[Error] = (
     (__ \ "code").read[String] and
       (__ \ "reason").read[String]

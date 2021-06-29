@@ -47,7 +47,7 @@ class StandardDesHttpParserSpec extends UnitSpec  {
   val desModel = DummyModel(data)
   val desResponse = DesResponse(correlationId, desModel)
 
-  import v2.httpparsers.StandardDesHttpParser._
+  import v2.connectors.httpparsers.StandardDesHttpParser._
   val httpReads: HttpReads[DesConnectorOutcome[DummyModel]] = implicitly
 
   "read" when {

@@ -19,9 +19,8 @@ package v2.controllers.requestParsers
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
-import uk.gov.hmrc.domain.Nino
 import v2.mocks.validators.MockAmendSavingsAccountAnnualSummaryValidator
-import v2.models.domain.SavingsAccountAnnualSummary
+import v2.models.domain.{Nino, SavingsAccountAnnualSummary}
 import v2.models.errors.{AccountNameDuplicateError, BadRequestError, ErrorWrapper, NinoFormatError}
 import v2.models.requestData.{AmendSavingsAccountAnnualSummaryRawData, AmendSavingsAccountAnnualSummaryRequest, DesTaxYear}
 

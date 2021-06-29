@@ -18,8 +18,8 @@ package v2.controllers.requestParsers
 
 import javax.inject.Inject
 import play.api.Logger
-import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.RetrieveSavingsAccountValidator
+import v2.models.domain.Nino
 import v2.models.errors.{BadRequestError, ErrorWrapper}
 import v2.models.requestData.{RetrieveSavingsAccountRawData, RetrieveSavingsAccountRequest}
 

@@ -16,19 +16,22 @@
 
 package v2.mocks
 
-import v2.config.AppConfig
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
+import v2.config.AppConfig
 
 trait MockAppConfig extends MockFactory {
 
   val mockAppConfig: AppConfig = mock[AppConfig]
 
-  object MockedAppConfig {
+  object MockAppConfig {
+    def mtdIdBaseUrl: CallHandler[String] = (mockAppConfig.mtdIdBaseUrl _: () => String).expects()
+
     def desBaseUrl: CallHandler[String] = (mockAppConfig.desBaseUrl _: () => String).expects()
     def desToken: CallHandler[String] = (mockAppConfig.desToken _).expects()
     def desEnvironment: CallHandler[String] = (mockAppConfig.desEnv _).expects()
-    def mtdIdBaseUrl: CallHandler[String] = (mockAppConfig.mtdIdBaseUrl _: () => String).expects()
+    def desEnvironmentHeaders: CallHandler[Option[Seq[String]]] = (mockAppConfig.desEnvironmentHeaders _).expects()
+
     def authLevelCheck: CallHandler[Boolean] = (mockAppConfig.authValidationCheck _: () => Boolean).expects()
   }
 }

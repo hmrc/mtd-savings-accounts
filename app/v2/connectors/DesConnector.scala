@@ -17,29 +17,33 @@
 package v2.connectors
 
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import v2.config.AppConfig
-import v2.httpparsers.StandardDesHttpParser
+import v2.connectors.httpparsers.StandardDesHttpParser
 import v2.models.des.{DesAmendSavingsAccountAnnualSummaryResponse, DesRetrieveSavingsAccountAnnualIncomeResponse, DesSavingsInterestAnnualIncome}
-import v2.models.requestData._
 import v2.models.domain._
+import v2.models.requestData._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DesConnector @Inject()(http: HttpClient,
-                             appConfig: AppConfig) {
+class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
-  val logger: Logger = Logger(this.getClass)
+  import v2.connectors.httpparsers.StandardDesHttpParser._
 
-  import v2.httpparsers.StandardDesHttpParser._
-
-  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier, correlationId: String): HeaderCarrier = hc
-    .copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
-    .withExtraHeaders("Environment" -> appConfig.desEnv, "CorrelationId" -> correlationId)
+  private def desHeaderCarrier(additionalHeaders: Seq[String] = Seq.empty)(implicit hc: HeaderCarrier, correlationId: String): HeaderCarrier = {
+    HeaderCarrier(
+      extraHeaders = hc.extraHeaders ++
+        // Contract headers
+        Seq(
+          "Authorization" -> s"Bearer ${appConfig.desToken}",
+          "Environment" -> appConfig.desEnv,
+          "CorrelationId" -> correlationId
+        ) ++
+        // Other headers (i.e Gov-Test-Scenario, Content-Type)
+        hc.headers(additionalHeaders ++ appConfig.desEnvironmentHeaders.getOrElse(Seq.empty))
+    )
+  }
 
   def createSavingsAccount(createSavingsAccountRequestData: CreateSavingsAccountRequestData)
                           (implicit hc: HeaderCarrier, ec: ExecutionContext,
@@ -52,7 +56,7 @@ class DesConnector @Inject()(http: HttpClient,
 
     http.POST[CreateSavingsAccountRequest,
       CreateSavingsAccountConnectorOutcome](url,
-      createSavingsAccountRequestData.createSavingsAccount)(writes, reads[CreateSavingsAccountResponse], desHeaderCarrier, implicitly)
+      createSavingsAccountRequestData.createSavingsAccount)(writes, reads[CreateSavingsAccountResponse], desHeaderCarrier(Seq("Content-Type")), implicitly)
 
   }
 
@@ -65,7 +69,7 @@ class DesConnector @Inject()(http: HttpClient,
     val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks"
 
     http.GET[RetrieveAllSavingsAccountsConnectorOutcome](url)(
-      StandardDesHttpParser.reads[List[RetrieveAllSavingsAccountResponse]], desHeaderCarrier, implicitly)
+      StandardDesHttpParser.reads[List[RetrieveAllSavingsAccountResponse]], desHeaderCarrier(), implicitly)
   }
 
   def retrieveSavingsAccount(request: RetrieveSavingsAccountRequest)
@@ -78,7 +82,7 @@ class DesConnector @Inject()(http: HttpClient,
     val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino?incomeSourceType=interest-from-uk-banks&incomeSourceId=$incomeSourceId"
 
     http.GET[DesConnectorOutcome[List[RetrieveSavingsAccountResponse]]](url)(
-      reads[List[RetrieveSavingsAccountResponse]], desHeaderCarrier, implicitly)
+      reads[List[RetrieveSavingsAccountResponse]], desHeaderCarrier(), implicitly)
   }
 
   def amendSavingsAccountAnnualSummary(amendSavingsAccountAnnualSummaryRequest: AmendSavingsAccountAnnualSummaryRequest)
@@ -95,7 +99,7 @@ class DesConnector @Inject()(http: HttpClient,
       DesSavingsInterestAnnualIncome.fromMtd(
         incomeSourceId,
         amendSavingsAccountAnnualSummaryRequest.savingsAccountAnnualSummary))(
-      DesSavingsInterestAnnualIncome.writes, reads[DesAmendSavingsAccountAnnualSummaryResponse], desHeaderCarrier, implicitly)
+      DesSavingsInterestAnnualIncome.writes, reads[DesAmendSavingsAccountAnnualSummaryResponse], desHeaderCarrier(Seq("Content-Type")), implicitly)
 
   }
 
@@ -110,6 +114,6 @@ class DesConnector @Inject()(http: HttpClient,
     val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/savings/annual/$desTaxYear?incomeSourceId=$incomeSourceId"
 
     http.GET(url)(
-      reads[DesRetrieveSavingsAccountAnnualIncomeResponse], desHeaderCarrier, implicitly)
+      reads[DesRetrieveSavingsAccountAnnualIncomeResponse], desHeaderCarrier(), implicitly)
   }
 }

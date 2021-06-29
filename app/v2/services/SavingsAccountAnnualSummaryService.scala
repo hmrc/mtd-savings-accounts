@@ -44,8 +44,8 @@ class SavingsAccountAnnualSummaryService @Inject()(connector: DesConnector) exte
     connector.retrieveSavingsAccountAnnualSummary(request)
       .map(mapToVendor("RETRIEVE", desErrorToMtdErrorRetrieve) { desResponse =>
         desResponse.responseData match {
-          case DesRetrieveSavingsAccountAnnualIncomeResponse(x :: Nil) => Right(DesResponse(desResponse.correlationId, x.toMtd))
-          case DesRetrieveSavingsAccountAnnualIncomeResponse(Nil)      => Left(ErrorWrapper(desResponse.correlationId, NotFoundError, None))
+          case DesRetrieveSavingsAccountAnnualIncomeResponse(x) if x.length == 1 => Right(DesResponse(desResponse.correlationId, x.head.toMtd))
+          case DesRetrieveSavingsAccountAnnualIncomeResponse(x) if x.isEmpty     => Left(ErrorWrapper(desResponse.correlationId, NotFoundError, None))
           case _                                                       =>
             logger.info(s"[SavingsAccountAnnualSummaryService] [retrieve] [CorrelationId - ${desResponse.correlationId}] - " +
               "More than one matching account found")

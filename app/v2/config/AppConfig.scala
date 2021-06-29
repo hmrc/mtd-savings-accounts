@@ -17,28 +17,36 @@
 package v2.config
 
 import javax.inject.{Inject, Singleton}
+import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-
 trait AppConfig {
-  def desBaseUrl: String
-
+  // MTD ID Lookup Config
   def mtdIdBaseUrl: String
 
+  // DES Config
+  def desBaseUrl: String
   def desEnv: String
-
   def desToken: String
+  def desEnvironmentHeaders: Option[Seq[String]]
 
+  //Auth Config
   def authValidationCheck: Boolean
 }
 
 @Singleton
-class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig with FixedConfig{
+class AppConfigImpl @Inject()(config: ServicesConfig, configuration: Configuration) extends AppConfig with FixedConfig{
 
+  // MTD ID Lookup Config
   val mtdIdBaseUrl: String = config.baseUrl("mtd-id-lookup")
+
+  // DES Config
   val desBaseUrl: String = config.baseUrl("des")
   val desEnv: String = config.getString("microservice.services.des.env")
   val desToken: String = config.getString("microservice.services.des.token")
+  val desEnvironmentHeaders: Option[Seq[String]] = configuration.getOptional[Seq[String]]("microservice.services.des.environmentHeaders")
+
+  //Auth Config
   val authValidationCheck: Boolean = config.getBoolean(s"api.confidence-level-check.auth-validation.enabled")
 
 }

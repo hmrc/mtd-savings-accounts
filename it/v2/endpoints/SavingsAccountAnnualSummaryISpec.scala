@@ -47,7 +47,7 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
 
     trait AmendTest extends Test {
       val accountId = "SAVKB2UVwUTBQGJ"
-      val taxYear = "2017-18"
+      val taxYear = "2021-22"
 
       def uri = s"/2.0/ni/$nino/savings-accounts/$accountId/$taxYear"
     }
@@ -190,7 +190,7 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
 
     trait RetrieveTest extends Test {
       val accountId = "SAVKB2UVwUTBQGJ"
-      val taxYear = "2017-18"
+      val taxYear = "2021-22"
 
       def uri = s"/2.0/ni/$nino/savings-accounts/$accountId/$taxYear"
     }
@@ -215,7 +215,6 @@ class SavingsAccountAnnualSummaryISpec extends IntegrationBaseSpec {
              |{
              |  "taxedUkInterest":5000.00,
              |  "untaxedUkInterest":5000.00
-
              |}
        """.stripMargin)
       }
